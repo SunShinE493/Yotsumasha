@@ -1,0 +1,56 @@
+
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+const CHANNEL_ID = '1162776615445594122'; // チャンネルID
+
+function getTimePeriod() {
+  const hour = new Date().getHours();
+  return hour < 12 ? 'AM' : 'PM';
+}
+
+function getTodayDate() {
+  return new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+}
+
+function loadTodayTasks() {
+  const jsonData = fs.readFileSync('schedule.json', 'utf-8');
+  const records = JSON.parse(jsonData);
+
+  const today = getTodayDate();
+  const period = getTimePeriod();
+
+  return records.filter(r => r.date === today && r.time === period);
+}
+
+
+
+
+
+
+async function sendReminder(channel) {
+  const tasks = loadTodayTasks();
+  if (tasks.length === 0) {
+    await channel.send(`本日${getTimePeriod()}の予定はありません。`);
+    return;
+  }
+
+  let message = `**[${getTodayDate()} ${getTimePeriod()}の予定]**\n`;
+  for (const task of tasks) {
+    message += `・${task.task}\n`;
+  }
+  await channel.send(message);
+}
+
+  const channel = client.channels.cache.get(CHANNEL_ID);
+
+  // AM
+  cron.schedule('0 7 * * *', async () => {
+    await sendReminder(channel);
+  });
+
+// PM
+  cron.schedule('0 19 * * *', async () => {
+    await sendReminder(channel);
+  });
+});
+
