@@ -123,11 +123,6 @@ client.on("ready", async () => {
 
 
 
-cron.schedule('* * * * *', async() => {
- const channel = await client.channels.fetch('1390928894118596650'); // てるまない雑談1162776615445594122
-  await channel.send('replitで起動しています。')
-  console.log('起動しています。')
-});
 
 Notification.sync({ alter: true });
 YoutubeFeeds.sync({ alter: true });
