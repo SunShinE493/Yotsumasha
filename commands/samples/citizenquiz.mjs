@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 
 // ユーザーごとのスコアを管理するオブジェクト
-
+import {chemistry} from './koubun.mjs'
 const participants = {};
 const userSkippedQuestions = new Map();
 
@@ -223,6 +223,10 @@ export async function execute(interaction) {
                 random = genRandomInt(149);
                 tango =  Koumin7[2*random];
                 seikai = Koumin7[2*random+1];
+            } else if (hani === 10) {
+                random = genRandomInt(chemistry.length/2);
+                tango =  chemistry[2*random];
+                seikai = chemistry[2*random+1];
             }else {
                 await interaction.followUp('カテゴリが無効です。');
                 return;

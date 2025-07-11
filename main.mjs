@@ -9,7 +9,6 @@ import YoutubeNotifications from "./models/youtubeNotifications.mjs";
 import moment from 'moment-timezone';
 import { sendReminders } from "./commands/samples/Schedule.mjs"; 
 import cron from 'node-cron';
-
 import Sequelize from "sequelize";
 import Parser from 'rss-parser';
 const parser = new Parser();
@@ -18,25 +17,37 @@ import { Client as Youtubei, MusicClient } from "youtubei";
 
 const youtubei = new Youtubei();
 
-
+ 
 let postCount = 0;
 const app = express();
 app.listen(3000);
+const port = process.env.PORT || 8080;
 app.post('/', function(req, res) {
   console.log(`Received POST request.`);
-  
+ 
+    /**
+  const url = `${req.protocol}://{$req.get('host')} ${req.originalUrl}`;
+  res.send(`このぺーじのURLは${url}です。`);
+  console.log(`このぺーじのURLは${url}です。`);
+  **/
   postCount++;
   if (postCount === 2) {
     //trigger();
     //SchTrigger();
     postCount = 0;
   }
-  
   res.send('POST response by glitch');
 })
 app.get('/', function(req, res) {
   res.send('<a href="https://note.com/exteoi/n/n0ea64e258797</a> に解説があります。');
-})
+});
+
+function runWebserver(){
+  const server = createServer(app);
+  server.listen(port,'0.0.0.0',()=>{
+    console.log(`server is running on port ${port}`);
+  });
+}
 
 cron.schedule('0 14 * * * *', () => {
 
@@ -105,6 +116,17 @@ client.on("messageCreate", async (message) => {
 client.on("ready", async () => {
   await client.user.setActivity('🥔', { type: ActivityType.Custom, state: "🥔を栽培中" });
   console.log(`${client.user.tag} がログインしました！`);
+  const channel = await client.channels.fetch('1390928894118596650'); // てるまない雑談1162776615445594122
+  channel.send('replitで起動しています。')
+});
+
+
+
+
+cron.schedule('* * * * *', async() => {
+ const channel = await client.channels.fetch('1390928894118596650'); // てるまない雑談1162776615445594122
+  await channel.send('replitで起動しています。')
+  console.log('起動しています。')
 });
 
 Notification.sync({ alter: true });
@@ -113,7 +135,7 @@ YoutubeNotifications.sync({ alter: true });
 
 CommandsRegister();
 client.login(process.env.TOKEN);
-
+runWebserver();
 
 async function trigger() {
   const youtubeNofications = await YoutubeNotifications.findAll({
@@ -242,6 +264,8 @@ client.on('messageCreate', async (message) => {
 
                 console.log(`リアクションを追加しました: ${message.content}`);
 
+              runai(message,0)
+
             }
 
         } catch (error) {
@@ -344,3 +368,36 @@ client.on('messageCreate', async message => {
 
   
 });
+
+import { GoogleGenAI } from "@google/genai";
+import { createServer } from "http";
+let aisikibetsu,max;
+
+ 
+
+  const API_KEY = process.env.GOOGLE_API_KEY;
+if(API_KEY === undefined){
+  console.log("APIki-なし")
+}
+  const ai = new GoogleGenAI(API_KEY,{});
+  async function runai(message,aisikibetsu){
+    const talk = message.content;
+    if(aisikibetsu === 0){
+      max = 1000;
+    }
+  const chat = await ai.models.generateContent({
+    model : "gemini-2.5-flash",
+    contents : talk + "（##回答の内容は短く簡潔に。）",
+    config : {
+      maxOutputTokens : 1800,
+    },
+  })
+  console.log(chat.text);
+  if(chat.text !== undefined){
+    await message.channel.send(chat.text);
+  }else{
+    await message.channel.send("字数エラー");
+    console.log("字数エラー");
+  }
+    
+}
