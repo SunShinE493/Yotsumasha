@@ -20,7 +20,7 @@
     "youtubei": "^1.4.1"
   },
   "engines": {
-    "node": "16.x"
+    "node": "20.x"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/minipotato-bot-by-eoi"
@@ -31,3 +31,4 @@
     "glitch"
   ]
 }
+
