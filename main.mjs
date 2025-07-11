@@ -240,6 +240,9 @@ client.on('messageCreate', async (message) => {
 
                 await message.react('😅');
 
+                runai(message,0)
+              
+
                 console.log(`リアクションを追加しました: ${message.content}`);
 
             }
@@ -344,3 +347,41 @@ client.on('messageCreate', async message => {
 
   
 });
+
+
+
+
+
+
+import { GoogleGenAI } from "@google/genai";
+import { createServer } from "http";
+let aisikibetsu,max;
+
+ 
+
+  const API_KEY = process.env.GOOGLE_API_KEY;
+if(API_KEY === undefined){
+  console.log("APIki-なし")
+}
+  const ai = new GoogleGenAI(API_KEY,{});
+  async function runai(message,aisikibetsu){
+    const talk = message.content;
+    if(aisikibetsu === 0){
+      max = 1000;
+    }
+  const chat = await ai.models.generateContent({
+    model : "gemini-2.5-flash",
+    contents : talk + "（##回答の内容は短く簡潔に。）",
+    config : {
+      maxOutputTokens : 1800,
+    },
+  })
+  console.log(chat.text);
+  if(chat.text !== undefined){
+    await message.channel.send(chat.text);
+  }else{
+    await message.channel.send("字数エラー");
+    console.log("字数エラー");
+  }
+    
+  }
