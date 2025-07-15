@@ -249,7 +249,7 @@ try {
 
 const repliedChannel = message.channel
 
-const repliedMessage = await repliedChannel.messages. fetch(messa ge.reference.messageId);
+const repliedMessage = await repliedChannel.message.fetch(messa ge.reference.messageId);
 
 content= message.content + repliedMessage.content;
 runai(content , 1);
