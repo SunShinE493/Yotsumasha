@@ -123,11 +123,6 @@ client.on("ready", async () => {
 
 
 
-cron.schedule('* * * * *', async() => {
- const channel = await client.channels.fetch('1390928894118596650'); // てるまない雑談1162776615445594122
-  await channel.send('replitで起動しています。')
-  console.log('起動しています。')
-});
 
 Notification.sync({ alter: true });
 YoutubeFeeds.sync({ alter: true });
@@ -245,7 +240,27 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     // リプライされたメッセージか確認
+if(message.mentions.has('1187343608026771496')) {
 
+if (message.reference&&message.reference.messageId) {
+
+try {
+// リプライ元のチャンネルを取
+
+const repliedChannel = message.channel
+
+const repliedMessage = await repliedChannel.messages.fetch(message.reference.messageId);
+
+let content= message.content + repliedMessage.content;
+  console.log(content);
+runai(content, message , 1);
+}  catch (error) {
+console.error('リプライコンテントがない',error)
+}
+}else{
+  runai(message, 0)
+  }
+}
     if (message.reference) {
 
         try {
@@ -264,7 +279,7 @@ client.on('messageCreate', async (message) => {
 
                 console.log(`リアクションを追加しました: ${message.content}`);
 
-              runai(message,0)
+              runai(0,message,0)
 
             }
 
@@ -380,11 +395,11 @@ if(API_KEY === undefined){
   console.log("APIki-なし")
 }
   const ai = new GoogleGenAI(API_KEY,{});
-  async function runai(message,aisikibetsu){
+  async function runai(content,message,aisikibetsu){
     const talk = message.content;
     if(aisikibetsu === 0){
       max = 1000;
-    }
+    
   const chat = await ai.models.generateContent({
     model : "gemini-2.5-flash",
     contents : talk + "（##回答の内容は短く簡潔に。）",
@@ -399,5 +414,57 @@ if(API_KEY === undefined){
     await message.channel.send("字数エラー");
     console.log("字数エラー");
   }
-    
+    } else if(aisikibetsu === 1){
+        try {
+        let result = await ai.models.generateContentStream({
+            model: "gemini-2.5-pro", 
+            contents: content ,
+            config: { 
+                temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
+                topP: 0.9, // サンプリング時の確率閾値を調整
+                topK: 40, // サンプリング時の上位K個のトークンに限定
+            },
+        
+        })
+          let fullResponse = '';
+            let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
+
+            // ストリーム応答を逐次処理
+            for await (const chunk of result) {
+                const chunkText = chunk.text;
+                fullResponse += chunkText;
+
+              let MAX_DISCORD_MESSAGE_LENGTH = 2000;
+                // 2000文字を超えたら、または最後のチャンクで残りのテキストを送信
+                // 送信するメッセージがMAX_DISCORD_MESSAGE_LENGTHを超えた場合、または
+                // それが最後のチャンクで、かつ現在のfullResponseが空でない場合
+                if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH || chunk.done) {
+                    let remainingResponse = fullResponse;
+                    while (remainingResponse.length > 0) {
+                        const part = remainingResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
+
+                        // 以前のメッセージがあれば編集、なければ新規送信
+                        if (lastSentMessage && part === remainingResponse) { // 最後のパートでかつ以前のメッセージがある場合
+                            await lastSentMessage.edit(part);
+                        } else {
+                            lastSentMessage = await message.channel.send(part);
+                        }
+                        remainingResponse = remainingResponse.substring(MAX_DISCORD_MESSAGE_LENGTH);
+                    }
+                    fullResponse = ''; // 送信後、fullResponseをリセット
+                }
+            }
+            if (fullResponse.length > 0) {
+                if (lastSentMessage) {
+                    await lastSentMessage.edit(fullResponse);
+                } else {
+                    await message.channel.send(fullResponse);
+                }
+            }
+
+        } catch (error) {
+            console.error('Gemini APIからの応答中にエラーが発生しました:', error);
+            message.reply('Gemini APIからの応答中にエラーが発生しました。');
+        }
+        }
 }
