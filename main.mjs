@@ -251,7 +251,7 @@ const repliedChannel = message.channel
 
 const repliedMessage = await repliedChannel.messages.fetch(message.reference.messageId);
 
-let content= message.content + repliedMessage.content;
+let content= message.content +'以降は、以前のメッセージを添付しています。→→' +repliedMessage.content;
   console.log(content);
 runai(content, message , 1);
 }  catch (error) {
@@ -442,6 +442,7 @@ if(API_KEY === undefined){
                     while (remainingResponse.length > 0) {
                         const part = remainingResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
 
+                      console.log(part)
                         // 以前のメッセージがあれば編集、なければ新規送信
                         if (lastSentMessage && part === remainingResponse) { // 最後のパートでかつ以前のメッセージがある場合
                             await lastSentMessage.edit(part);
