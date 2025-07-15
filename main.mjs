@@ -240,7 +240,7 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     // リプライされたメッセージか確認
-if(message.mentions.has(client.user.id)) {
+if(message.mentions.has('1187343608026771496')) {
 
 if (message.reference &&message.reference.messageId) {
 
