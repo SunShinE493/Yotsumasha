@@ -239,25 +239,26 @@ client.on('messageCreate', async (message) => {
 
     if (message.author.bot) return;
 
-    // リプライされたメッセージか確認
 if(message.mentions.has('1187343608026771496')) {
 
-if (message.reference &&message.reference.messageId) {
+if (message.reference&&message.reference.messageId) {
 
 try {
 // リプライ元のチャンネルを取
 
 const repliedChannel = message.channel
 
-const repliedMessage = await repliedChannel.message.fetch(messa ge.reference.messageId);
+const repliedMessage = await repliedChannel.messages.fetch(message.reference.messageId);
 
-content= message.content + repliedMessage.content;
-runai(content , 1);
+let content= message.content + repliedMessage.content;
+  console.log(content);
+runai(content, message , 1);
 }  catch (error) {
-console.error('リプライコンテントがない')
-}else{
-runai(message, 0)
+console.error('リプライコンテントがない',error)
 }
+}else{
+  runai(0,message, 0)
+  }
 }
 
    else if (message.reference) {
@@ -278,7 +279,6 @@ runai(message, 0)
 
                 console.log(`リアクションを追加しました: ${message.content}`);
 
-              runai(message,0)
 
             }
 
@@ -414,18 +414,27 @@ if(API_KEY === undefined){
     await message.channel.send("字数エラー");
     console.log("字数エラー");
   }
-    }
-    if(aisikibetsu === 1){
+    }else if(aisikibetsu === 1){
         try {
-            const result = await model.generateContentStream(talk);
-            let fullResponse = '';
+        let result = await ai.models.generateContentStream({
+            model: "gemini-2.5-pro", 
+            contents: content ,
+            config: { 
+                temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
+                topP: 0.9, // サンプリング時の確率閾値を調整
+                topK: 40, // サンプリング時の上位K個のトークンに限定
+            },
+        
+        })
+          let fullResponse = '';
             let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
 
             // ストリーム応答を逐次処理
-            for await (const chunk of result.stream) {
-                const chunkText = chunk.text();
+            for await (const chunk of result) {
+                const chunkText = chunk.text;
                 fullResponse += chunkText;
 
+              let MAX_DISCORD_MESSAGE_LENGTH = 2000;
                 // 2000文字を超えたら、または最後のチャンクで残りのテキストを送信
                 // 送信するメッセージがMAX_DISCORD_MESSAGE_LENGTHを超えた場合、または
                 // それが最後のチャンクで、かつ現在のfullResponseが空でない場合
@@ -457,8 +466,4 @@ if(API_KEY === undefined){
             console.error('Gemini APIからの応答中にエラーが発生しました:', error);
             message.reply('Gemini APIからの応答中にエラーが発生しました。');
         }
-    }
-});
-
-   }
-}
+        }}
