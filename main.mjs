@@ -258,7 +258,7 @@ runai(content, message , 1);
 console.error('リプライコンテントがない',error)
 }
 }else{
-  runai(message, 0)
+  runai(0,message, 0)
   }
 }
     if (message.reference) {
@@ -279,7 +279,6 @@ console.error('リプライコンテントがない',error)
 
                 console.log(`リアクションを追加しました: ${message.content}`);
 
-              runai(0,message,0)
 
             }
 
