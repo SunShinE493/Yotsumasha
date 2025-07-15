@@ -256,7 +256,7 @@ runai(content , 1);
 }  catch (error) {
 console.error('リプライコンテントがない')
 }else{
-runai(message, 0}
+runai(message, 0)
 }
 }
 
