@@ -252,6 +252,8 @@ const repliedChannel = message.channel
 const repliedMessage = await repliedChannel.messages.fetch(message.reference.messageId);
 
 let content= message.content +'以降は、以前のメッセージを添付しています。→→' +repliedMessage.content;
+  const keyword = '<@1187343608026771496>'
+content = text.replace(new RegExp(keyword, "g"), "");
   console.log(content);
 runai(content, message , 1);
 }  catch (error) {
