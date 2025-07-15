@@ -240,8 +240,27 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     // リプライされたメッセージか確認
+if(message.mentions.has(client.user.id)) {
 
-    if (message.reference) {
+if (message.reference &&message.reference.messageId) {
+
+try {
+// リプライ元のチャンネルを取
+
+const repliedChannel = message.channel
+
+const repliedMessage = await repliedChannel.messages. fetch(messa ge.reference.messageId);
+
+content= message.content + repliedMessage.content;
+runai(content , 1);
+}  catch (error) {
+console.error('リプライコンテントがない')
+}else{
+runai(message, 0}
+}
+}
+
+   else if (message.reference) {
 
         try {
 
@@ -270,6 +289,7 @@ client.on('messageCreate', async (message) => {
         }
 
     }
+
 
 });
 client.on('messageReactionAdd', async (reaction, user) => {
@@ -379,7 +399,7 @@ if(API_KEY === undefined){
     const talk = message.content;
     if(aisikibetsu === 0){
       max = 1000;
-    }
+    
   const chat = await ai.models.generateContent({
     model : "gemini-2.5-flash",
     contents : talk + "（##回答の内容は短く簡潔に。）",
@@ -394,5 +414,51 @@ if(API_KEY === undefined){
     await message.channel.send("字数エラー");
     console.log("字数エラー");
   }
-    
+    }
+    if(aisikibetsu === 1){
+        try {
+            const result = await model.generateContentStream(talk);
+            let fullResponse = '';
+            let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
+
+            // ストリーム応答を逐次処理
+            for await (const chunk of result.stream) {
+                const chunkText = chunk.text();
+                fullResponse += chunkText;
+
+                // 2000文字を超えたら、または最後のチャンクで残りのテキストを送信
+                // 送信するメッセージがMAX_DISCORD_MESSAGE_LENGTHを超えた場合、または
+                // それが最後のチャンクで、かつ現在のfullResponseが空でない場合
+                if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH || chunk.done) {
+                    let remainingResponse = fullResponse;
+                    while (remainingResponse.length > 0) {
+                        const part = remainingResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
+
+                        // 以前のメッセージがあれば編集、なければ新規送信
+                        if (lastSentMessage && part === remainingResponse) { // 最後のパートでかつ以前のメッセージがある場合
+                            await lastSentMessage.edit(part);
+                        } else {
+                            lastSentMessage = await message.channel.send(part);
+                        }
+                        remainingResponse = remainingResponse.substring(MAX_DISCORD_MESSAGE_LENGTH);
+                    }
+                    fullResponse = ''; // 送信後、fullResponseをリセット
+                }
+            }
+            if (fullResponse.length > 0) {
+                if (lastSentMessage) {
+                    await lastSentMessage.edit(fullResponse);
+                } else {
+                    await message.channel.send(fullResponse);
+                }
+            }
+
+        } catch (error) {
+            console.error('Gemini APIからの応答中にエラーが発生しました:', error);
+            message.reply('Gemini APIからの応答中にエラーが発生しました。');
+        }
+    }
+});
+
+   }
 }
