@@ -414,57 +414,59 @@ if(API_KEY === undefined){
     console.log("字数エラー");
   }
     } else if(aisikibetsu === 1){
-        try {
+      message.channel.send('考え中です。これには数分かかる場合もあります。');
+
+      try {
+    
         let result = await ai.models.generateContentStream({
-            model: "gemini-2.5-pro", 
-            contents: content ,
-            config: { 
-                temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
-                topP: 0.9, // サンプリング時の確率閾値を調整
-                topK: 40, // サンプリング時の上位K個のトークンに限定
-            },
-        
-        })
-          let fullResponse = '';
-            let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
+        model: "gemini-2.5-pro",
+        contents: content,
+        config: { // 前回確認した通り、configで問題ないならこれでOK
+            temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
+            topP: 0.9, // サンプリング時の確率閾値を調整
+            topK: 40, // サンプリング時の上位K個のトークンに限定
+        },
+    });
 
-            // ストリーム応答を逐次処理
-            for await (const chunk of result) {
-                const chunkText = chunk.text;
-                fullResponse += chunkText;
+    let fullResponse = '';
+    let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
+    const MAX_DISCORD_MESSAGE_LENGTH = 2000; // Discordのメッセージ最大文字数
 
-              let MAX_DISCORD_MESSAGE_LENGTH = 2000;
-                // 2000文字を超えたら、または最後のチャンクで残りのテキストを送信
-                // 送信するメッセージがMAX_DISCORD_MESSAGE_LENGTHを超えた場合、または
-                // それが最後のチャンクで、かつ現在のfullResponseが空でない場合
-                if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH || chunk.done) {
-                    let remainingResponse = fullResponse;
-                    while (remainingResponse.length > 0) {
-                        const part = remainingResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
+    // ストリーム応答を逐次処理
+    for await (const chunk of result) {
+        const chunkText = chunk.text;
+        fullResponse += chunkText;
 
-                      console.log(part)
-                        // 以前のメッセージがあれば編集、なければ新規送信
-                        if (lastSentMessage && part === remainingResponse) { // 最後のパートでかつ以前のメッセージがある場合
-                            await lastSentMessage.edit(part);
-                        } else {
-                            lastSentMessage = await message.channel.send(part);
-                        }
-                        remainingResponse = remainingResponse.substring(MAX_DISCORD_MESSAGE_LENGTH);
-                    }
-                    fullResponse = ''; // 送信後、fullResponseをリセット
-                }
-            }
-            if (fullResponse.length > 0) {
-                if (lastSentMessage) {
-                    await lastSentMessage.edit(fullResponse);
-                } else {
-                    await message.channel.send(fullResponse);
-                }
-            }
-
-        } catch (error) {
-            console.error('Gemini APIからの応答中にエラーが発生しました:', error);
-            message.reply('Gemini APIからの応答中にエラーが発生しました。');
+        // 2000文字を超えたら、その部分を送信し、fullResponseをクリア
+        // ただし、最後のチャンクでない限り、既存メッセージの編集は行わない
+        if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH) {
+            const partToSend = fullResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
+            
+            // 2000文字に達したら常に新しいメッセージとして送信
+            // lastSentMessage = null の場合でも新規送信になる
+            lastSentMessage = await message.channel.send(partToSend); 
+            
+            fullResponse = fullResponse.substring(MAX_DISCORD_MESSAGE_LENGTH); // 送信した部分をfullResponseから削除
         }
+    }
+
+    // ストリームが完全に終了した後、fullResponseに残っているテキストを処理
+    if (fullResponse.length > 0) {
+        // 残りがある場合、まだ送信されたメッセージがなければ新規で、
+        // 既にメッセージが送信されていれば、それが最後の部分なのでそのメッセージを編集
+        if (lastSentMessage) {
+            // 最後のメッセージが存在する場合、そのメッセージに追記する形で編集
+            // ただし、Discord APIの文字数制限があるので、実際には新しいメッセージとして送る方が安全
+            // ここは新規メッセージとして送るロジックに統一します
+            await message.channel.send(fullResponse);
+        } else {
+            // まだメッセージが一つも送信されていない（応答が2000文字未満だった）場合
+            await message.channel.send(fullResponse);
         }
+    }
+} catch (error) {
+    console.error('Gemini APIからの応答中にエラーが発生しました:', error);
+    message.reply('Gemini APIからの応答中にエラーが発生しました。');
 }
+}
+  }
