@@ -49,7 +49,7 @@ function runWebserver(){
   });
 }
 
-cron.schedule('0 14 * * * *', () => {
+cron.schedule('0 30 * * * *', () => {
 
   const now = moment().tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
 
@@ -117,7 +117,7 @@ client.on("ready", async () => {
   await client.user.setActivity('🥔', { type: ActivityType.Custom, state: "🥔を栽培中" });
   console.log(`${client.user.tag} がログインしました！`);
   const channel = await client.channels.fetch('1201294753040453642')//'1390928894118596650'); // てるまない雑談1162776615445594122
-  channel.send('ごみしね \n https://cdn.discordapp.com/attachments/1390928894118596650/1398474379339497533/Screenshot_20250726-101743.jpg?ex=68857e42&is=68842cc2&hm=35738605bbd04b5e721e388fec91cf91c753e79c7ba5d525c5f7107df240c216&　ごみしね')
+  channel.send('replit')
 });
 
 
@@ -228,7 +228,7 @@ console.log('課題確認トリガー'+now+hour)
     sendReminders(channel, period);
 
   }else if (hour === 7){
-    const channel2 = await client.channels.fetch('838468033789558848'); //一般
+    const channel2 = await client.channels.fetch('838468033789558848'); //一般'838468033789558848
 dailyTrigger(channel2)
     console.log('積分');
   }
