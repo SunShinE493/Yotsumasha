@@ -6,9 +6,9 @@ export function dailyTrigger(channel) {
   const day = String(today.getDate());
   let aNum = aNumlist[day]
   // コンソールに出力
-  channel.send(sekiQ[day])
+  channel.send('### ⚠️BeMathの時間です!⚠️\n2分以内に答案を投稿しないと他の友達の 投稿が見れません! '+sekiQ[day]+'<@&1400920949586399343>')
 setTimeout(function() {
-  channel.send(sekiA[aNum])
+  channel.send('||'+sekiA[aNum]+'||')
 }, 60000);
 
 }
