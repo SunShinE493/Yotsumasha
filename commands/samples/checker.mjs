@@ -42,6 +42,9 @@ let ChiriQ5 = ['石炭・石油・水力など、そのままのかたちで利�
 
 
 
+import {sekiQ,sekiA,aNumlist} from  './daymath.mjs';
+
+
 import { SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
@@ -63,12 +66,16 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
 
 let mondainum =  interaction.options.getInteger('questions');
-
+ 
+  let q = sekiQ[mondainum]
+  let aNum = aNumlist[mondainum]
+  let a = sekiA[aNum]
+  /***
  let q = Koumin7[2*mondainum-2]
 
 let a = Koumin7[2*mondainum-1]
-
-interaction.channel.send(q+a)
+***/
+interaction.channel.send(q+' '+a)
 
 }
 
