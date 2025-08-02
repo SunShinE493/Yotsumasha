@@ -227,7 +227,7 @@ console.log('課題確認トリガー'+now+hour)
 
     sendReminders(channel, period);
 
-  }else if (hour === 7){
+  }else if (hour === 4){
     const channel2 = await client.channels.fetch('838468033789558848'); //一般'838468033789558848
 dailyTrigger(channel2)
     console.log('積分');
