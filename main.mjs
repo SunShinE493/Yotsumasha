@@ -14,6 +14,8 @@ import Parser from 'rss-parser';
 const parser = new Parser();
 
 import { Client as Youtubei, MusicClient } from "youtubei";
+import axios from 'axios'
+
 
 const youtubei = new Youtubei();
 
@@ -248,21 +250,63 @@ if(message.mentions.has('1187343608026771496')) {
 
 if (message.reference&&message.reference.messageId) {
 
-try {
-// リプライ元のチャンネルを取
+  const repliedChannel = message.channel; 
+  const repliedMessageId = message.reference.messageId;
 
-const repliedChannel = message.channel
+  // 返信元のメッセージを取得
 
-const repliedMessage = await repliedChannel.messages.fetch(message.reference.messageId);
+  const repliedMessage = await repliedChannel.messages.fetch(repliedMessageId);
+  
+    const attachment = repliedMessage.attachments.first();
+    if (!attachment || !attachment.contentType.startsWith('image')) {
+      //画像なし
 
-let content= message.content +'以降は、以前のメッセージを添付しています。→→' +repliedMessage.content;
-  const keyword = '<@1187343608026771496>'
-content = content.replace(new RegExp(keyword, "g"), "");
-  console.log(content);
-runai(content, message , 1);
-}  catch (error) {
-console.error('リプライコンテントがない',error)
-}
+  try {
+  // リプライ元のチャンネルを取
+
+  let content= message.content +'以降は、以前のメッセージを添付しています。→→' +repliedMessage.content;
+    const keyword = '<@1187343608026771496>'
+  content = content.replace(new RegExp(keyword, "g"), "");
+    console.log(content);
+  runai(content, message , 1);
+  } catch (error) {
+  console.error('リプライコンテントがない',error)
+  }
+  return;
+    }
+
+    try {
+  //urlからデータ
+      const response = await axios.get(attachment.url, {
+        responseType: 'arraybuffer',
+      });
+      const imageData = response.data;
+      const mimeType = attachment.contentType;
+
+      // 画像データをBase64にエンコード
+      const base64Image = Buffer.from(imageData).toString('base64');
+
+
+      // Gemini APIに送信するコンテンツを準備
+      let promptText = message.content.replace(`<@${client.user.id}>`, '').trim();
+     
+      console.log(promptText)
+      const parts = [
+        { text: promptText },
+        {
+          inlineData: {
+            data: base64Image,
+            mimeType: mimeType,
+          },
+        },
+      ];
+
+      // まずは「考え中...」のメッセージを送信
+      
+  runai(parts,message,1);
+    } catch (error) {
+    console.error('画像リプライコンテントがない',error)
+    }
 }else{
   runai(0,message, 0)
   }
@@ -355,10 +399,10 @@ client.on('messageCreate', async message => {
         await message.channel.send('ぶりっ💩'); // メッセージ送信
         await message.react('💩'); // 💩リアクションを追加
     }
-    if (/？？？|ふちる|る？|？る/.test(message.content)) {
+    if (/？？？|ふちる|？る/.test(message.content)) {
         await message.channel.send('そんなコマンドないで');
       }
-    if (/る？/.test(message.content)) {
+    if (/？る？/.test(message.content)) {
         await message.channel.send('る？は田美子やで');
       }
     if (/shiny|いろち|色|shundo/.test(message.content)) {
@@ -474,5 +518,22 @@ if(API_KEY === undefined){
     console.error('Gemini APIからの応答中にエラーが発生しました:', error);
     message.reply('Gemini APIからの応答中にエラーが発生しました。');
 }
+}else if (aisikibetsu === 2){
+
+
+
+    // Gemini APIにストリーミングリクエストを送信
+    const result = await model.generateContentStream({ contents: [{ role: 'user', parts }] });
+
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      fullText += chunkText;
+
+      // 最初のメッセージを編集して、回答を追記
+      await message.edit(fullText);
+    }
+      
+      
 }
   }
