@@ -114,7 +114,9 @@ export async function execute(interaction) {
                         }
                     } else {
                         // 初めての文字の場合は通常の絵文字を使用
+                        
 
+                        await targetMessage.react(alphabetToEmoji[char]);
                         reactedChars.add(char); // リアクションした文字を記録
                     }
                 }
