@@ -33,6 +33,8 @@ export const data = new SlashCommandBuilder()
 
 
 export async function execute(interaction) {
+  const channel = interaction.channel;
+  dailyTrigger(channel)
 }
 
 
