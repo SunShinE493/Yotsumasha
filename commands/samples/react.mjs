@@ -114,11 +114,6 @@ export async function execute(interaction) {
                         }
                     } else {
                         // 初めての文字の場合は通常の絵文字を使用
-                        await targetMessage.react(alphabetToEmoji[char]);
-        await interaction.reply({
-            content: 'リアクションをしました！',
-            ephemeral: true,
-        });
 
                         reactedChars.add(char); // リアクションした文字を記録
                     }
@@ -127,14 +122,13 @@ export async function execute(interaction) {
         // react_contentオプションが指定されている場合の処理
         } else if (reactContent) {
             // react_contentが数字として解釈できる場合
-            if (!isNaN(reactContent) && reactContent >= 0 && reactContent < emoji.length) {
-                await targetMessage.react(emoji[parseInt(reactContent, 10)]);
-            // react_contentが通常の絵文字文字列の場合
-            } else {
                 await targetMessage.react(reactContent);
-            }
-        // どちらのオプションも指定されていない場合
-        } else {
+        await interaction.reply({
+            content: 'リアクションをしました！',
+            ephemeral: true,
+        });
+            
+    }else{
             await interaction.reply({
                 content: 'リアクションする内容が指定されていません。\n`react_content`または`word`オプションを指定してください。',
                 ephemeral: true,
