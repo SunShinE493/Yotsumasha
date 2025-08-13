@@ -79,7 +79,7 @@ export const data = new SlashCommandBuilder()
 ))
     
     .addStringOption(option =>
-    option.setName('react_content2')
+    option.setName('react_content3')
           .setDescription('リアクションする絵文字を選択')
           .setRequired(false)
           .addChoices(
