@@ -59,8 +59,40 @@ export const data = new SlashCommandBuilder()
                   { name: 'FrontofFace: <:FrontofFace:1349592789578547302>', value: '<:FrontofFace:1349592789578547302>' },
                   { name: 'Imara2: <:Imara2:1349592796935491584>', value: '<:Imara2:1349592796935491584>' },
                   { name: 'Obake: <:Obake:1349592808964755467>', value: '<:Obake:1349592808964755467>' },
-                  { name: 'BeautifulSummer: <:BeautifulSummer:1349592817722327122>', value: '<:BeautifulSummer:1349592817722327122>' }
+                  { name: 'BeautifulSummer: <:BeautifulSummer:1349592817722327122>', value: '<:BeautifulSummer:1349592817722327122>' },              { name: 'Gekiita', value: '<:Gekiita:1349952380937965598>' },
+              { name: 'Zecchi', value: '<:Zecchi:1349952390723403847>' },
+              { name: 'Calling', value: '<:Calling:1349953298937024572>' },
+              { name: 'Kirin', value: '<:Kirin:1349953307564576812>' },
+              { name: 'Childhood', value: '<:Childhood:1349953315747794945>' },
+              { name: 'Bodhisattva', value: '<:Bodhisattva:1349971173991125093>' },
+              { name: 'serve', value: '<a:serve:1352267714974060644>' },
+              { name: 'Enamorus', value: '<:Enamorus:1352270510414893186>' },
+              { name: 'Kogao', value: '<:Kogao:1404987761672454266>' },
+              { name: 'Shita', value: '<:Shita:1352270531218640926>' },
+              { name: 'Agonai', value: '<:Agonai:1352270571336892509>' },
+              { name: 'Kids', value: '<:Kids:1352270597152964660>' },
+              { name: 'Happiness', value: '<:Happiness:1352270614672576532>' },
+              { name: 'VirtualSex', value: '<:VirtualSex:1352270635266736200>' },
+              { name: 'StreatSnap', value: '<:StreatSnap:1352270665574514698>' },
+              { name: 'Sensei', value: '<:Sensei:1352270696268697658>' },
+
 ))
+    
+    .addStringOption(option =>
+    option.setName('react_content2')
+          .setDescription('リアクションする絵文字を選択')
+          .setRequired(false)
+          .addChoices(
+                            { name: 'Imara3', value: '<:Imara3:1352270719278518292>' },
+              { name: 'Hurousha', value: '<:Hurousha:1352270745455034420>' },
+              { name: 'Kyomu', value: '<:Kyomu:1352270768179908658>' },
+              { name: 'Vlog', value: '<:Vlog:1352270788060774470>' },
+              { name: 'Kyouhaku', value: '<:Kyouhaku:1352270809661706250>' },
+              { name: 'Peace', value: '<:Peace:1352270824245297242>' },
+              { name: 'suikyou', value: '<:suikyou:1352270838443016344>' },
+              { name: 'Hengao', value: '<:Hengao:1352270861683654747>' },
+              { name: 'GCGGarrettTurbo', value: '<:GCGGarrettTurbo:1352270869170225233>' }
+              ))
     .addStringOption(option =>
         option.setName('word')
               .setDescription('リアクションする文字列')
@@ -74,9 +106,36 @@ const alphabetToEmoji = {
 
 // 2回目以降の文字に使う絵文字リスト（例: a2, b2, ...）
 // 実際の絵文字名に置き換えてください
+// アルファベットをカスタム絵文字に変換するマップ
 const alphabetToEmoji2 = {
-    'a': 'a2', 'b': 'b2', 'c': 'c2', 'd': 'd2', 'e': 'e2', 'f': 'f2', 'g': 'g2', 'h': 'h2', 'i': 'i2', 'j': 'j2', 'k': 'k2', 'l': 'l2', 'm': 'm2', 'n': 'n2', 'o': 'o2', 'p': 'p2', 'q': 'q2', 'r': 'r2', 's': 's2', 't': 't2', 'u': 'u2', 'v': 'v2', 'w': 'w2', 'x': 'x2', 'y': 'y2', 'z': 'z2'
+    'a': '<:A_:1404991142050795661>',
+    'b': '<:B_:1404991165186441286>',
+    'c': '<:C_:1404991182408515646>',
+    'd': '<:D_:1404991199043125342>',
+    'e': '<:E_:1404991216583442552>',
+    'f': '<:F_:1404991230512992256>',
+    'g': '<:G_:1404991243070476328>',
+    'h': '<:H_:1404991253489254400>',
+    'i': '<:I_:1404991265749336166>',
+    'j': '<:J_:1404991275647893514>',
+    'k': '<:K_:1404991294832513075>',
+    'l': '<:L_:1404991310028603502>',
+    'm': '<:M_:1404991324276392017>',
+    'n': '<:N_:1404991335756333134>',
+    'o': '<:O_:1404991345981919394>',
+    'p': '<:P_:1404991356899819520>',
+    'q': '<:Q__:1404991382506049609>',
+    'r': '<:R_:1404991393239400458>',
+    's': '<:S_:1404991402391240824>',
+    't': '<:T_:1404991408921776219>',
+    'u': '<:U_:1404991415460823151>',
+    'v': '<:V_:1404991421466939414>',
+    'w': '<:W_:1404991429729587363>',
+    'x': '<:X_:1404991435995877508>',
+    'y': '<:Y_:1404991443898204301>',
+    'z': '<:Z_:1404991449891737671>'
 };
+
 
 export async function execute(interaction) {
     const messageId = interaction.options.getString('message_id');
