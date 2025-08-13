@@ -17,7 +17,7 @@ export const data = new SlashCommandBuilder()
               .setRequired(false)
               .addChoices(
                                      
-                  { name: 'Flapper: <:Flapper:1288693937770467409>', value: '<:Flapper:1288693937770467409>' },
+                  { name: 'Flapper', value: '<:Flapper:1288693937770467409>' },
                   { name: 'Keshitetekusa: <:Keshitetekusa:1315640091787395113>', value: '<:Keshitetekusa:1315640091787395113>' },
                   { name: 'GoodGay: <a:GoodGay:1339928519731445852>', value: '<a:GoodGay:1339928519731445852>' },
                   { name: 'Gorouri: <a:Gorouri:1339929066249392221>', value: '<a:Gorouri:1339929066249392221>' },
@@ -50,16 +50,16 @@ export const data = new SlashCommandBuilder()
           .setDescription('リアクションする絵文字を選択')
           .setRequired(false)
           .addChoices(
-              { name: 'chobun: <:1000006731:1349586583807852655>', value: '<:1000006731:1349586583807852655>' },
-                  { name: 'chobunchobun: <:1000006733:1349586874515324989>', value: '<:1000006733:1349586874515324989>' },
-                  { name: 'Imara: <:Imara:1349592318897815622>', value: '<:Imara:1349592318897815622>' },
-                  { name: 'Comfortable: <:Comfortable:1349592333175488532>', value: '<:Comfortable:1349592333175488532>' },
-                  { name: 'MasterofBilliards: <:MasterofBilliards:1349592653288701994>', value: '<:MasterofBilliards:1349592653288701994>' },
-                  { name: 'FeelAsleep: <:FeelAsleep:1349592778639802551>', value: '<:FeelAsleep:1349592778639802551>' },
-                  { name: 'FrontofFace: <:FrontofFace:1349592789578547302>', value: '<:FrontofFace:1349592789578547302>' },
-                  { name: 'Imara2: <:Imara2:1349592796935491584>', value: '<:Imara2:1349592796935491584>' },
-                  { name: 'Obake: <:Obake:1349592808964755467>', value: '<:Obake:1349592808964755467>' },
-                  { name: 'BeautifulSummer: <:BeautifulSummer:1349592817722327122>', value: '<:BeautifulSummer:1349592817722327122>' },              { name: 'Gekiita', value: '<:Gekiita:1349952380937965598>' },
+              { name: 'chobun', value: '<:1000006731:1349586583807852655>' },
+                  { name: 'chobunchobun', value: '<:1000006733:1349586874515324989>' },
+                  { name: 'Imara', value: '<:Imara:1349592318897815622>' },
+                  { name: 'Comfortable', value: '<:Comfortable:1349592333175488532>' },
+                  { name: 'MasterofBilliards', value: '<:MasterofBilliards:1349592653288701994>' },
+                  { name: 'FeelAsleep', value: '<:FeelAsleep:1349592778639802551>' },
+                  { name: 'FrontofFace', value: '<:FrontofFace:1349592789578547302>' },
+                  { name: 'Imara2', value: '<:Imara2:1349592796935491584>' },
+                  { name: 'Obake', value: '<:Obake:1349592808964755467>' },
+                  { name: 'BeautifulSummer', value: '<:BeautifulSummer:1349592817722327122>' },              { name: 'Gekiita', value: '<:Gekiita:1349952380937965598>' },
               { name: 'Zecchi', value: '<:Zecchi:1349952390723403847>' },
               { name: 'Calling', value: '<:Calling:1349953298937024572>' },
               { name: 'Kirin', value: '<:Kirin:1349953307564576812>' },
@@ -73,9 +73,8 @@ export const data = new SlashCommandBuilder()
               { name: 'Kids', value: '<:Kids:1352270597152964660>' },
               { name: 'Happiness', value: '<:Happiness:1352270614672576532>' },
               { name: 'VirtualSex', value: '<:VirtualSex:1352270635266736200>' },
-              { name: 'StreatSnap', value: '<:StreatSnap:1352270665574514698>' },
-              { name: 'Sensei', value: '<:Sensei:1352270696268697658>' },
-
+              { name: 'StreatSnap', value: '<:StreatSnap:1352270665574514698>' }
+              
 ))
     
     .addStringOption(option =>
@@ -83,6 +82,7 @@ export const data = new SlashCommandBuilder()
           .setDescription('リアクションする絵文字を選択')
           .setRequired(false)
           .addChoices(
+              { name: 'Sensei', value: '<:Sensei:1352270696268697658>' },
                             { name: 'Imara3', value: '<:Imara3:1352270719278518292>' },
               { name: 'Hurousha', value: '<:Hurousha:1352270745455034420>' },
               { name: 'Kyomu', value: '<:Kyomu:1352270768179908658>' },
