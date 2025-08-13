@@ -18,29 +18,29 @@ export const data = new SlashCommandBuilder()
               .addChoices(
                                      
                   { name: 'Flapper', value: '<:Flapper:1288693937770467409>' },
-                  { name: 'Keshitetekusa: <:Keshitetekusa:1315640091787395113>', value: '<:Keshitetekusa:1315640091787395113>' },
-                  { name: 'GoodGay: <a:GoodGay:1339928519731445852>', value: '<a:GoodGay:1339928519731445852>' },
-                  { name: 'Gorouri: <a:Gorouri:1339929066249392221>', value: '<a:Gorouri:1339929066249392221>' },
-                  { name: 'Caeru: <a:Caeru:1339929082615435347>', value: '<a:Caeru:1339929082615435347>' },
-                  { name: 'Shrek: <a:Shrek:1339929094145703946>', value: '<a:Shrek:1339929094145703946>' },
-                  { name: 'Tamazarashi: <:Tamazarashi:1340318651227832370>', value: '<:Tamazarashi:1340318651227832370>' },
+                  { name: 'Keshitetekusa', value: '<:Keshitetekusa:1315640091787395113>' },
+                  { name: 'GoodGay', value: '<a:GoodGay:1339928519731445852>' },
+                  { name: 'Gorouri', value: '<a:Gorouri:1339929066249392221>' },
+                  { name: 'Caeru', value: '<a:Caeru:1339929082615435347>' },
+                  { name: 'Shrek', value: '<a:Shrek:1339929094145703946>' },
+                  { name: 'Tamazarashi', value: '<:Tamazarashi:1340318651227832370>' },
                   { name: 'TNT: <a:TNT:1344272756241334385>', value: '<a:TNT:1344272756241334385>' },
-                  { name: 'Kire_gay: <:Kire_gay:1345682703818690650>', value: '<:Kire_gay:1345682703818690650>' },
-                  { name: 'Kitsu: <:Kitsu:1346466382283280485>', value: '<:Kitsu:1346466382283280485>' },
-                  { name: 'NoMB: <a:NoMB:1346470590697050194>', value: '<a:NoMB:1346470590697050194>' },
-                  { name: 'Shine: <:Shine:1348294242862235680>', value: '<:Shine:1348294242862235680>' },
-                  { name: 'Fashionmodel: <:Fashionmodel:1348294448777396355>', value: '<:Fashionmodel:1348294448777396355>' },
-                  { name: 'WhoIsHe: <:WhoIsHe:1348294771982078015>', value: '<:WhoIsHe:1348294771982078015>' },
-                  { name: 'Reasoning: <:Reasoning:1348294788574875699>', value: '<:Reasoning:1348294788574875699>' },
-                  { name: 'herpointofview: <:herpointofview:1348294797600751727>', value: '<:herpointofview:1348294797600751727>' },
-                  { name: 'Furicaeru: <a:Furicaeru:1348901406215634995>', value: '<a:Furicaeru:1348901406215634995>' },
-                  { name: 'Foreverlove: <:Foreverlove:1349555062246215680>', value: '<:Foreverlove:1349555062246215680>' },
-                  { name: 'Aiseki: <:Aiseki:1349555074774339584>', value: '<:Aiseki:1349555074774339584>' },
-                  { name: 'CoolRider: <:CoolRider:1349555084417171456>', value: '<:CoolRider:1349555084417171456>' },
-                  { name: 'GayActor: <:GayActor:1349555116797198388>', value: '<:GayActor:1349555116797198388>' },
-                  { name: 'philosophical: <:philosophical:1349555227732475994>', value: '<:philosophical:1349555227732475994>' },
-                  { name: 'Genkoku: <:Genkoku:1349583835733426226>', value: '<:Genkoku:1349583835733426226>' },
-                  { name: 'Hikoku: <:Hikoku:1349583835733426226>', value: '<:Hikoku:1349583835733426226>' },
+                  { name: 'Kire_gay', value: '<:Kire_gay:1345682703818690650>' },
+                  { name: 'Kitsu', value: '<:Kitsu:1346466382283280485>' },
+                  { name: 'NoMB', value: '<a:NoMB:1346470590697050194>' },
+                  { name: 'Shine', value: '<:Shine:1348294242862235680>' },
+                  { name: 'Fashionmodel', value: '<:Fashionmodel:1348294448777396355>' },
+                  { name: 'WhoIsHe', value: '<:WhoIsHe:1348294771982078015>' },
+                  { name: 'Reasoning', value: '<:Reasoning:1348294788574875699>' },
+                  { name: 'herpointofview', value: '<:herpointofview:1348294797600751727>' },
+                  { name: 'Furicaeru', value: '<a:Furicaeru:1348901406215634995>' },
+                  { name: 'Foreverlove', value: '<:Foreverlove:1349555062246215680>' },
+                  { name: 'Aiseki', value: '<:Aiseki:1349555074774339584>' },
+                  { name: 'CoolRider', value: '<:CoolRider:1349555084417171456>' },
+                  { name: 'GayActor', value: '<:GayActor:1349555116797198388>' },
+                  { name: 'philosophical', value: '<:philosophical:1349555227732475994>' },
+                  { name: 'Genkoku', value: '<:Genkoku:1349583835733426226>' },
+                  { name: 'Hikoku', value: '<:Hikoku:1349583835733426226>' },
                   
                   
                   // 以下、絵文字リストに合わせて追加してください
@@ -140,6 +140,14 @@ const alphabetToEmoji2 = {
     'z': '<:Z_:1404991449891737671>'
 };
 
+const alphabetToEmoji3 = {
+    'a':'<:A__:1405049482307174420>',
+    'i':'<:I__:1405049496060166176>',
+    'u':'<:U__:1405049507229466685>',
+    'e':'<:E__:1405049521397829663>',
+    'o':'<:O__:1405049534836379749>'
+
+};
 
 export async function execute(interaction) {
     const messageId = interaction.options.getString('message_id');
@@ -168,14 +176,21 @@ export async function execute(interaction) {
 
             const lowerCaseWord = word.toLowerCase();
             const reactedChars = new Set(); // すでにリアクションした文字を記録するSet
+            const reactedChars2 = new Set();
 
             for (const char of lowerCaseWord) {
                 if (alphabetToEmoji[char]) {
                     // すでにリアクション済みかチェック
                     if (reactedChars.has(char)) {
                         // 2回目以降の場合は別の絵文字を使用
-                        if (alphabetToEmoji2[char]) {
+                        if(reactedChars2.has(char)) {
+
+                            if (alphabetToEmoji3[char]) {
+                                await targetMessage.react(alphabetToEmoji3[char]);
+                            }
+                        }else if (alphabetToEmoji2[char]) {
                             await targetMessage.react(alphabetToEmoji2[char]);
+                            reactedChars2.add(char);
                         }
                     } else {
                         // 初めての文字の場合は通常の絵文字を使用
