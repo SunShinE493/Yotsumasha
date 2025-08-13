@@ -145,7 +145,7 @@ export async function execute(interaction) {
     const messageId = interaction.options.getString('message_id');
     const reactContent = interaction.options.getString('react_content');
     const word = interaction.options.getString('word');
-    const emojiId = interaction.options.getString('emojiId');
+    const emojiId = interaction.options.getString('emojiid');
 
     
     try {
