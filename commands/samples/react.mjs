@@ -94,6 +94,10 @@ export const data = new SlashCommandBuilder()
               { name: 'GCGGarrettTurbo', value: '<:GCGGarrettTurbo:1352270869170225233>' }
               ))
     .addStringOption(option =>
+        option.setName('emojiId')
+              .setDescription('リアクションする文字列')
+              .setRequired(false))
+    .addStringOption(option =>
         option.setName('word')
               .setDescription('リアクションする文字列')
               .setRequired(false));
@@ -141,7 +145,9 @@ export async function execute(interaction) {
     const messageId = interaction.options.getString('message_id');
     const reactContent = interaction.options.getString('react_content');
     const word = interaction.options.getString('word');
+    const emojiId = interaction.options.getString('emojiId');
 
+    
     try {
         const targetMessage = await interaction.channel.messages.fetch(messageId);
 
@@ -189,6 +195,13 @@ export async function execute(interaction) {
             ephemeral: true,
         });
             
+    }else if (emojiId){
+            await targetMessage.react(emojiId);
+            await interaction.reply({
+                content: 'リアクションをしました！',
+                ephemeral: true,
+            });
+
     }else{
             await interaction.reply({
                 content: 'リアクションする内容が指定されていません。\n`react_content`または`word`オプションを指定してください。',
