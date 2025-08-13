@@ -94,8 +94,8 @@ export const data = new SlashCommandBuilder()
               { name: 'GCGGarrettTurbo', value: '<:GCGGarrettTurbo:1352270869170225233>' }
               ))
     .addStringOption(option =>
-        option.setName('emojiId')
-              .setDescription('リアクションする文字列')
+        option.setName('emojiid')
+              .setDescription('絵文字Id')
               .setRequired(false))
     .addStringOption(option =>
         option.setName('word')
