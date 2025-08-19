@@ -202,6 +202,10 @@ export async function execute(interaction) {
 
   if (subcommand === "quiz") {
     const number = interaction.options.getInteger("number");
+    interaction.reply({
+      content: `英単語 #${number}　の問題を出題します。 `,
+      ephemeral: true
+    })
     const channelId = interaction.channelId;
     const client = interaction.client;
     // 新しい関数を呼び出す
