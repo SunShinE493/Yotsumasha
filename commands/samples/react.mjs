@@ -151,10 +151,15 @@ const alphabetToEmoji3 = {
 
 export async function execute(interaction) {
     const messageId = interaction.options.getString('message_id');
-    const reactContent = interaction.options.getString('react_content');
+    let reactContent = interaction.options.getString('react_content');
     const word = interaction.options.getString('word');
     const emojiId = interaction.options.getString('emojiid');
 
+    if(reactContent2){
+         reactContent = interaction.options.getString('react_content2');
+    }else if(reactContent3){
+         reactContent = interaction.options.getString('react_content3');
+    }
     
     try {
         const targetMessage = await interaction.channel.messages.fetch(messageId);

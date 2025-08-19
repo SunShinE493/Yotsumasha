@@ -15,7 +15,7 @@ const __filename = fileURLToPath(
 const __dirname = path.dirname(__filename);
 const wordListPath = path.join(__dirname, "wordlist.json");
 
-// wordlist.jsonの読み込み関数は変更なし
+// wordlist.jsonの読み込み関数
 async function readWordList() {
   try {
     const data = await fs.readFile(
@@ -29,7 +29,7 @@ async function readWordList() {
   }
 }
 
-
+// wordlist.jsonへの保存関数
 async function saveWordList(list) {
   try {
     await fs.writeFile(
@@ -40,8 +40,6 @@ async function saveWordList(list) {
     console.error("Failed to save wordlist.json:", error);
   }
 }
-
-
 
 // ---------------------------------------------------
 // 修正版 askQuiz 関数
@@ -65,12 +63,21 @@ export async function askQuiz(client, channelId, number) {
     .setTitle(`今日の英単語 #${number}`)
     .setDescription(`この英単語の意味を答えてください:\n\n**${selectedWord.word}**`);
 
-  const button = new ButtonBuilder()
+  // 答えを見るボタンと覚えたボタンを追加
+  const showAnswerButton = new ButtonBuilder()
     .setCustomId(`show_meaning_${number}`)
     .setLabel("答えを見る")
     .setStyle(ButtonStyle.Primary);
 
-  const row = new ActionRowBuilder().addComponents(button);
+  const learnedButton = new ButtonBuilder()
+    .setCustomId(`learned_word_${number}`)
+    .setLabel("覚えた")
+    .setStyle(ButtonStyle.Success);
+
+  const row = new ActionRowBuilder().addComponents(
+    showAnswerButton,
+    learnedButton
+  );
 
   // interaction.reply()の代わりに channel.send() を使う
   const message = await channel.send({
@@ -80,7 +87,7 @@ export async function askQuiz(client, channelId, number) {
 
   // メッセージにコレクターを付ける
   const collector = message.createMessageComponentCollector({
-    time: 3600000, // 24時間有効
+    time: 3600000, // 1時間有効
   });
 
   collector.on("collect", async (i) => {
@@ -95,18 +102,52 @@ export async function askQuiz(client, channelId, number) {
         embeds: [answerEmbed],
         ephemeral: true,
       });
+      // collector.stop(); は削除。覚えたボタンも押せるようにするため。
+    }
+    // 覚えたボタンが押されたときの処理
+    else if (i.customId === `learned_word_${number}`) {
+      const currentWords = await readWordList();
+      const wordToDelete = currentWords[number - 1];
+
+      // フィルターを使って削除
+      const updatedWords = currentWords.filter(
+        (word) => word.word !== wordToDelete.word
+      );
+
+      await saveWordList(updatedWords);
+      await i.reply({
+        content: `英単語「${wordToDelete.word}」をリストから削除しました。これで完璧に覚えましたね！`,
+        ephemeral: false,
+      });
+
+      // コレクターを停止し、メッセージのボタンを無効化
       collector.stop();
+      message.edit({
+        components: [
+          new ActionRowBuilder().addComponents(
+            showAnswerButton.setDisabled(true),
+            learnedButton.setDisabled(true)
+          ),
+        ],
+      });
     }
   });
 
   collector.on("end", (collected) => {
+    // コレクターが時間切れで終了した場合、ボタンを無効化する
+    if (collected.size === 0) {
+      message.edit({
+        components: [
+          new ActionRowBuilder().addComponents(
+            showAnswerButton.setDisabled(true),
+            learnedButton.setDisabled(true)
+          ),
+        ],
+      });
+    }
     console.log(`コレクターが終了しました。回答数: ${collected.size}`);
   });
 }
-
-
-
-
 
 // ---------------------------------------------------
 // スラッシュコマンドの定義
@@ -141,6 +182,17 @@ export const data = new SlashCommandBuilder()
           .setDescription("英単語の意味")
           .setRequired(true)
       )
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName("training")
+      .setDescription("今日の英単語の練習ができます")
+      .addIntegerOption((option) =>
+        option
+          .setName("questions")
+          .setDescription("問題数")
+          .setRequired(true)
+      )
   );
 
 export async function execute(interaction) {
@@ -148,11 +200,8 @@ export async function execute(interaction) {
 
   if (subcommand === "quiz") {
     const number = interaction.options.getInteger("number");
-    const channelId =
-
-interaction.channelId;
-
-const client = interaction.client;
+    const channelId = interaction.channelId;
+    const client = interaction.client;
     // 新しい関数を呼び出す
     await askQuiz(client, channelId, number);
   } else if (subcommand === "add") {
@@ -169,5 +218,18 @@ const client = interaction.client;
       content: `新しい英単語「${word}」と意味「${meaning}」を追加しました。`,
       ephemeral: true,
     });
+  }else if (subcommand === "training") {
+
+    const questions = interaction.options.getInteger("questions");
+    let words = await readWordList();
+    
+    const channelId = interaction.channelId;
+    const client = interaction.client;
+    // 新しい関数を呼び出す
+    for(let i=0;i<questions;i++){
+    let number = Math.floor(Math.random()*words.length+1)
+    await askQuiz(client, channelId, number);
+  }
   }
 }
+
