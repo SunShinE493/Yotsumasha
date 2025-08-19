@@ -46,14 +46,16 @@ async function saveWordList(list) {
 // ---------------------------------------------------
 export async function askQuiz(client, channelId, number) {
   const words = await readWordList();
-  if (number <= 0 || number > words.length) {
-    console.error("無効な番号が指定されました。", number);
-    return;
-  }
 
   const channel = client.channels.cache.get(channelId);
   if (!channel) {
     console.error(`指定されたチャンネルIDが見つかりません: ${channelId}`);
+    return;
+  }
+
+    if (number <= 0 || number > words.length) {
+    console.error("無効な番号が指定されました。", number);
+      channel.send("無効な番号が指定されました。", number )
     return;
   }
 
