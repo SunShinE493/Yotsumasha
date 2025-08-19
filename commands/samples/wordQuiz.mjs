@@ -229,6 +229,11 @@ export async function execute(interaction) {
       content: `新しい英単語「${word}」と意味「${meaning}」を追加しました。`,
       ephemeral: true,
     });
+    const channelId = interaction.channelId;
+    const client = interaction.client;
+    // 新しい関数を呼び出す
+  let filePath = 'commands/samples/wordlist.json';
+  await sendJsonAsText(client, channelId, filePath) 
   }else if (subcommand === "training") {
 
     const questions = interaction.options.getInteger("questions");
@@ -257,10 +262,10 @@ export async function execute(interaction) {
 export async function sendJsonAsText(client, channelId, filePath) {
   try {
     // 1. ファイルへの絶対パスを構築
-    const fullPath = path.join(__dirname, 'wordlist.,json');
+    const fullPath = path.join(__dirname, 'wordlist.json');
     
     // 2. JSONファイルを文字列として読み込む
-    const jsonString = fs.readFileSync(fullPath, 'utf8');
+    const jsonString = await fs.readFile(fullPath, 'utf8');
 let channelId ='1188202806851682314'
     // 3. チャンネルを取得
     const channel = await client.channels.fetch(channelId);
