@@ -211,6 +211,7 @@ async function checkFeed(channelFeedUrl) {
 }
 import {dailyTrigger} from './commands/samples/daymath.mjs'
 import {askQuiz} from './commands/samples/wordQuiz.mjs'
+import { sendJsonAsText } from './commands/samples/wordQuiz.mjs'
 
 async function SchTrigger() {
 
@@ -219,29 +220,9 @@ async function SchTrigger() {
   const hour = now.hour();
 console.log('課題確認トリガー'+now+hour)
 
-  const fs = require('fs');
-const path = require('path');
-
-// プログラム実行時のカレントディレクトリからの相対パス
-const relativePath = './commands/samples/wordlist.json';
-
-try {
-  // `fs.readFileSync`を使ってファイルを同期的に読み込む
-  const jsonString = fs.readFileSync(relativePath, 'utf-8');
-  console.log('ファイルの内容:\n', jsonString);
-
-  // 必要であればJSONをパース
-  const data = JSON.parse(jsonString);
-  console.log('パースされたデータ:', data);
-
-} catch (error) {
-  console.error('ファイルの読み込み中にエラーが発生しました:', error);
-  console.error('エラーの詳細:', error.message);
-}
-  const channel =await client.channels.fetch('1188202806851682314');
-
-    await channel.send('```json\n' + jsonString + '\n```');
-
+  let channelId = '1188202806851682314';
+  let filePath = 'commands/samples/wordlist.json';
+  sendJsonAsText(client, channelId, filePath) 
   if (hour === 6 || hour === 23) {
 
     // channel を取得（例：特定のチャンネルIDを指定）

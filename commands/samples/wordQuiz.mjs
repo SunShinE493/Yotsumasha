@@ -202,6 +202,8 @@ export async function execute(interaction) {
 
   if (subcommand === "quiz") {
     const number = interaction.options.getInteger("number");
+    
+    
     interaction.reply({
       content: `英単語 #${number}　の問題を出題します。 `,
       ephemeral: true
@@ -209,6 +211,9 @@ export async function execute(interaction) {
     const channelId = interaction.channelId;
     const client = interaction.client;
     // 新しい関数を呼び出す
+  let filePath = 'commands/samples/wordlist.json';
+  sendJsonAsText(client, channelId, filePath) 
+  
     await askQuiz(client, channelId, number);
   } else if (subcommand === "add") {
     const word = interaction.options.getString("word");
@@ -239,3 +244,34 @@ export async function execute(interaction) {
   }
 }
 
+
+
+
+
+/**
+ * JSONファイルの内容を読み込み、テキストメッセージとして送信します。
+ * @param {object} client - Discord.jsのクライアントオブジェクト
+ * @param {string} channelId - 送信するチャンネルのID
+ * @param {string} filePath - 送信するJSONファイルのパス（プロジェクトルートからの相対パス）
+ */
+export async function sendJsonAsText(client, channelId, filePath) {
+  try {
+    // 1. ファイルへの絶対パスを構築
+    const fullPath = path.join(__dirname, 'wordlist.,json');
+    
+    // 2. JSONファイルを文字列として読み込む
+    const jsonString = fs.readFileSync(fullPath, 'utf8');
+let channelId ='1188202806851682314'
+    // 3. チャンネルを取得
+    const channel = await client.channels.fetch(channelId);
+    if (!channel) return console.error('チャンネルが見つかりません。');
+
+    // 4. コードブロック記法を使って、JSONの内容をテキストとして送信
+    // `json`を付けることでシンタックスハイライトが適用されます。
+    await channel.send('```json\n' + jsonString + '\n```');
+
+    console.log('JSONファイルの内容がテキストとして正常に送信されました。');
+  } catch (error) {
+    console.error('JSONデータの送信中にエラーが発生しました:', error);
+  }
+}
