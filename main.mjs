@@ -238,6 +238,7 @@ try {
   console.error('ファイルの読み込み中にエラーが発生しました:', error);
   console.error('エラーの詳細:', error.message);
 }
+  const channel =await client.channels.fetch('1188202806851682314');
 
     await channel.send('```json\n' + jsonString + '\n```');
 
