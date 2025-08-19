@@ -154,11 +154,12 @@ export async function execute(interaction) {
     let reactContent = interaction.options.getString('react_content');
     const word = interaction.options.getString('word');
     const emojiId = interaction.options.getString('emojiid');
-
+    const reactContent2 = interaction.options.getString('react_content2');
+    const reactContent3 = interaction.options.getString('react_content3');
     if(reactContent2){
-         reactContent = interaction.options.getString('react_content2');
+         reactContent = reactContent2
     }else if(reactContent3){
-         reactContent = interaction.options.getString('react_content3');
+         reactContent = reactContent3
     }
     
     try {
