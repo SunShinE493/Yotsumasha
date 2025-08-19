@@ -76,7 +76,6 @@ export const data = new SlashCommandBuilder()
               { name: 'StreatSnap', value: '<:StreatSnap:1352270665574514698>' }
               
 ))
-    
     .addStringOption(option =>
     option.setName('react_content3')
           .setDescription('リアクションする絵文字を選択')
@@ -91,8 +90,43 @@ export const data = new SlashCommandBuilder()
               { name: 'Peace', value: '<:Peace:1352270824245297242>' },
               { name: 'suikyou', value: '<:suikyou:1352270838443016344>' },
               { name: 'Hengao', value: '<:Hengao:1352270861683654747>' },
-              { name: 'GCGGarrettTurbo', value: '<:GCGGarrettTurbo:1352270869170225233>' }
+              { name: 'GCGGarrettTurbo', value: '<:GCGGarrettTurbo:1352270869170225233>' },
+              { name: 'Joshitoire', value: '<:Joshitoire:1407245978481852458>' },
+              { name: 'FRKWPeace', value: '<:FRKWPeace:1407245999679737968>' },
+              { name: 'Bure', value: '<:Bure:1407246016259952741>' },
+              { name: 'Noppo', value: '<:Noppo:1407246032244310058>' },
+              { name: 'TVkenta', value: '<:TVkenta:1407246047541198918>' },
+              { name: 'Gatikoikaiho', value: '<:Gatikoikaiho:1407246066411245598>' },
+              { name: 'Hosuto', value: '<:Hosuto:1407246114620575796>' },
+              { name: 'LovelyFRKW', value: '<:LovelyFRKW:1407246145641644082>' },
+              { name: 'Ice', value: '<:Ice:1407246159847755866>' },
+              { name: 'Buppage', value: '<:Buppage:1407246172455702638>' },
+              { name: 'NRTteiou', value: '<:NRTteiou:1407247076655501373>' },
+              { name: 'Omae', value: '<:Omae:1407247095810752594>' },
+              { name: 'Fxxk', value: '<:Fxxk:1407247110633422999>' },
+              { name: 'Farewellparty', value: '<:Farewellparty:1407247143873282099>' },
+              { name: 'Skkrsrjknsi', value: '<:Skkrsrjknsi:1407247160629530654>' }
+              
               ))
+    .addStringOption(option =>
+        option.setName('react_content4')
+              .setDescription('リアクションする絵文字を選択')
+              .setRequired(false)
+              .addChoices(
+                  
+              { name: 'Nawa1', value: '<:Nawa1:1407246250297786449>' },
+              { name: 'Nawa2', value: '<:Nawa2:1407246265665851484>' },
+              { name: 'Nawa3', value: '<:Nawa3:1407246278181519391>' },
+              { name: 'Nawa4', value: '<:Nawa4:1407246305335574639>' },
+              { name: 'Nawa5', value: '<:Nawa5:1407246316995870740>' },
+              { name: 'Nawa6', value: '<:Nawa6:1407246329310347275>' },
+              { name: 'Nawa7', value: '<:Nawa7:1407246340735500299>' },
+              { name: 'Nawa8', value: '<:Nawa8:1407246353347641364>' },
+              { name: 'Nawa9', value: '<:Nawa9:1407246365272182806>' },
+              { name: 'Nawa10', value: '<:Nawa10:1407246381311332383>' }
+                  
+))
+    
     .addStringOption(option =>
         option.setName('emojiid')
               .setDescription('絵文字Id')
