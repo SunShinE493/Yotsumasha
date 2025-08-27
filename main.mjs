@@ -17,6 +17,7 @@ import { Client as Youtubei, MusicClient } from "youtubei";
 import axios from 'axios'
 
 
+
 const youtubei = new Youtubei();
 
  
@@ -121,9 +122,6 @@ client.on("ready", async () => {
   const channel = await client.channels.fetch('1201294753040453642')//'1390928894118596650'); // てるまない雑談1162776615445594122
   channel.send('replit')
 });
-
-
-
 
 
 Notification.sync({ alter: true });
