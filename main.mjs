@@ -241,7 +241,7 @@ dailyTrigger(channel2)
     const today = new Date(); // 日付を番号に変換する例 (例: 8月19日なら19
      const dayNumber = today.getDate();
     
-    askQuiz(client, channelId, dayNumber-16)
+    askQuiz(client, channelId, dayNumber)
   }
 
 }
