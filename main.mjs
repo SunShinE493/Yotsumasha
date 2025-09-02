@@ -210,7 +210,7 @@ async function checkFeed(channelFeedUrl) {
 import {dailyTrigger} from './commands/samples/daymath.mjs'
 import {askQuiz} from './commands/samples/wordQuiz.mjs'
 import { sendJsonAsText } from './commands/samples/wordQuiz.mjs'
-
+let wcount = 1;
 async function SchTrigger() {
 
   const now = moment().tz("Asia/Tokyo");
@@ -236,12 +236,12 @@ console.log('課題確認トリガー'+now+hour)
     const channel2 = await client.channels.fetch('838468033789558848'); //一般'838468033789558848
 dailyTrigger(channel2)
     console.log('積分');
-  }else if(4 < hour < 22) {
+  }else if(hour > 4 && hour < 23) {
     const channelId = '838468033789558848';
     const today = new Date(); // 日付を番号に変換する例 (例: 8月19日なら19
      const dayNumber = today.getDate();
-    
-    askQuiz(client, channelId, dayNumber)
+     wcount++;
+    askQuiz(client, channelId, wcount)
   }
 
 }

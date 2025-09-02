@@ -273,7 +273,7 @@ let channelId ='1188202806851682314'
 
     // 4. コードブロック記法を使って、JSONの内容をテキストとして送信
     // `json`を付けることでシンタックスハイライトが適用されます。
-    await channel.send('```json\n' + jsonString + '\n```');
+    console.log( jsonString);
 
     console.log('JSONファイルの内容がテキストとして正常に送信されました。');
   } catch (error) {
