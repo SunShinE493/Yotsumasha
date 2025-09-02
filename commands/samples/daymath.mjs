@@ -3,7 +3,7 @@ export function dailyTrigger(channel) {
   const today = new Date();
 
   // 日付の部分のみを取得
-  const day = String(today.getDate());
+  const day = String(today.getDate()) +38;
   let aNum = aNumlist[day]
   // コンソールに出力
   channel.send('### ⚠️BeMathの時間です!⚠️\n2分以内に答案を投稿しないと他の友達の 投稿が見れません! '+sekiQ[day]+'<@&1400920949586399343>')
