@@ -236,7 +236,7 @@ console.log('課題確認トリガー'+now+hour)
     const channel2 = await client.channels.fetch('838468033789558848'); //一般'838468033789558848
 dailyTrigger(channel2)
     console.log('積分');
-  }else if(hour === 8) {
+  }else if(4 < hour < 22) {
     const channelId = '838468033789558848';
     const today = new Date(); // 日付を番号に変換する例 (例: 8月19日なら19
      const dayNumber = today.getDate();
