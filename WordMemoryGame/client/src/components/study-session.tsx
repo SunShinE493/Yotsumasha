@@ -8,8 +8,6 @@ import { VocabularyCard } from "./vocabulary-card";
 import { useStudySession } from "@/hooks/use-study-session";
 import type { StudySession as StudySessionType, VocabularyWord } from "@shared/schema";
 
-const [fontSizeClass, setFontSizeClass] = useState('text-3xl');
-
 
 
 interface StudySessionProps {
@@ -19,6 +17,7 @@ interface StudySessionProps {
 }
 
 export function StudySession({ session, onComplete, onBack }: StudySessionProps) {
+  const [fontSizeClass, setFontSizeClass] = useState('text-3xl');
   // isFlipped の代わりに rotationCount を使用
   const [rotationCount, setRotationCount] = useState(0); 
   const [hasCompleted, setHasCompleted] = useState(false);
