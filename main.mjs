@@ -436,11 +436,11 @@ client.on('messageCreate', async message => {
         await message.react('<:uwa:1337797911156887635>');
       }
   if (/ちょんす/.test(message.content)) {
-    await message.react('REGIONAL_INDICATOR_C:');
-    await message.react('REGIONAL_INDICATOR_H:');
-    await message.react('REGIONAL_INDICATOR_O:');
-    await message.react('REGIONAL_INDICATOR_N:');
-    await message.react('REGIONAL_INDICATOR_S:');
+    await message.react('🇨');
+    await message.react('🇭');
+    await message.react('🇴');
+    await message.react('🇳');
+    await message.react('🇸');
   }
   if (/<@838466692299882518>あたま|<@838466692299882518> あたま|<@1236945333511258165>あたま/.test(message.content)) {
         await message.channel.send('<@1163105759492571156>あたま');
