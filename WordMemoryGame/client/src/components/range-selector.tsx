@@ -69,9 +69,9 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
     }
 
     const config: StudyConfig = {
-      startRange,
-      endRange,
-      questionCount: questionCount === -1 ? endRange - startRange + 1 : questionCount,
+      startRange: Number(startRange),
+      endRange: Number(endRange),
+      questionCount: questionCount === -1 ? Number(endRange) - Number(startRange) + 1 : Number(questionCount),
       order,
       reviewOnly,
     };
@@ -148,8 +148,8 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
             <p className="text-sm font-medium text-foreground mb-2">クイック設定</p>
             <div className="grid grid-cols-2 gap-2">
               {/* 修正箇所：動的にプリセットボタンを生成 */}
-              {selectedJson?.presets.length > 0 ? (
-                selectedJson.presets.map((preset, index) => (
+              {selectedJson?.presets && selectedJson.presets.length > 0 ? (
+                selectedJson?.presets?.map((preset, index) => (
                   <Button
                     key={index}
                     variant="secondary"

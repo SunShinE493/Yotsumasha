@@ -71,19 +71,13 @@ export default function Home() {
     }
     const reviewSession: StudySessionType = {
       id: `review-${Date.now()}`,
-      config: {
-        startRange: 1,
-        endRange: reviewWords.length,
-        questionCount: reviewWords.length,
-        order: "random",
-        reviewOnly: true,
-      },
-      words: reviewWords,
+      createdAt: new Date(),
+      startRange: 1,
+      endRange: reviewWords.length,
+      totalWords: reviewWords.length,
       correctCount: 0,
       incorrectCount: 0,
       isCompleted: false,
-      startTime: new Date(),
-      endTime: null,
     };
     handleStartSession(reviewSession);
   };
