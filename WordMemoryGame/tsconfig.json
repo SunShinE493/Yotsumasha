@@ -5,16 +5,12 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
+    "noEmit": true,
 
-    /* Linting */
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
@@ -24,7 +20,8 @@
     "paths": {
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"]
-    }
+    },
+    "moduleResolution": "bundler"
   },
   "include": ["client/src", "server", "shared"]
 }
