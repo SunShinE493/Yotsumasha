@@ -4,6 +4,7 @@
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
+    "outDir": "dist", // この行を追加
     "module": "ESNext",
     "strict": true,
     "lib": ["esnext", "dom", "dom.iterable"],
@@ -19,3 +20,4 @@
     }
   }
 }
+

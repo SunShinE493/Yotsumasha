@@ -17,6 +17,7 @@ RUN npm run build
 
 # デバッグ用コマンド：ビルド後のdistディレクトリの中身を確認
 RUN ls -l dist/
+RUN ls -l dist/public/
 
 # アプリケーションを起動
 CMD ["/bin/sh", "-c", "node /app/main.mjs & node /app/WordMemoryGame/dist/server/index.js"]
