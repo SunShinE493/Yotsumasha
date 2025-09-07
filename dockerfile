@@ -7,15 +7,12 @@ COPY . /app
 # Discordボットの依存関係をインストール
 WORKDIR /app
 RUN npm install
-
-# Word Memory Gameの依存関係をインストール
-WORKDIR /app/WordMemoryGame
-RUN npm install
-
+# ... (前の行は省略)
 # Word Memory Gameのビルドを実行
-# これにより、dist/server/index.js が生成されることを期待
 RUN npm run build
-RUN 1s - 1 dist / # ビルド後のdist ディレクトリ の中身を確認
+
+# デバッグ用コマンド：ビルド後のdistディレクトリの中身を確認
+RUN ls -l dist/
 
 # アプリケーションを起動
 # /app と /app/WordMemoryGame を正しいパスで指定

@@ -10,7 +10,6 @@
     "jsx": "preserve",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    // "allowImportingTsExtensions": true, // この行を削除
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "types": ["node", "vite/client"],
