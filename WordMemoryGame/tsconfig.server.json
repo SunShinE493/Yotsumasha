@@ -7,13 +7,17 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "baseUrl": "./", // <-- この行を追加
+    "baseUrl": "./",
     "paths": {
-      "@shared/*": ["./shared/*"] // <-- この行を追加
+      "@shared/*": ["./shared/*"]
     }
   },
   "include": [
     "server", 
     "shared"
+  ],
+  "exclude": [
+    "server/vite.ts",
+    "vite.config.ts"
   ]
 }
