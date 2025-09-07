@@ -1,22 +1,19 @@
 # ベースイメージを指定
 FROM node:20-alpine
 
+# リポジトリ全体をコンテナの /app ディレクトリにコピー
+COPY . /app
+
 # Discordボットの依存関係をインストール
 WORKDIR /app
-COPY package.json package-lock.json ./
 RUN npm install
 
 # Word Memory Gameの依存関係をインストール
 WORKDIR /app/WordMemoryGame
-COPY ./WordMemoryGame/package.json ./WordMemoryGame/package-lock.json ./
 RUN npm install
 
 # Word Memory Gameのビルドを実行
-# `package.json`で定義されたビルドスクリプトを実行します。
-RUN npm run build --prefix ./WordMemoryGame
-
-# アプリケーションのコードをコピー
-COPY . /app
+RUN npm run build
 
 # 複数のプロセスを同時に起動
 CMD ["/bin/sh", "-c", "node /app/main.mjs & node /app/WordMemoryGame/dist/server/index.js"]
