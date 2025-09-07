@@ -15,6 +15,7 @@ RUN npm install
 # Word Memory Gameのビルドを実行
 # これにより、dist/server/index.js が生成されることを期待
 RUN npm run build
+RUN 1s - 1 dist / # ビルド後のdist ディレクトリ の中身を確認
 
 # アプリケーションを起動
 # /app と /app/WordMemoryGame を正しいパスで指定
