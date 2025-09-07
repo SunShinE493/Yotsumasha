@@ -18,7 +18,7 @@ export default function Home() {
   const [completedSession, setCompletedSession] = useState<StudySessionType | null>(null);
   const { toast } = useToast();
 
-  const { data: reviewWords = [] } = useQuery<VocabularyWord[]>({
+  const { data: reviewWords = [] } = useQuery<any[]>({
     queryKey: ["/api/vocabulary/review"],
   });
 
@@ -62,7 +62,7 @@ export default function Home() {
   };
 
   const handleStartReview = () => {
-    if (reviewWords.length === 0) {
+    if (!reviewWords || reviewWords.length === 0) {
       toast({
         title: "復習単語なし",
         description: "現在、復習すべき単語はありません。",
@@ -73,8 +73,8 @@ export default function Home() {
       id: `review-${Date.now()}`,
       createdAt: new Date(),
       startRange: 1,
-      endRange: reviewWords.length,
-      totalWords: reviewWords.length,
+      endRange: reviewWords?.length || 0,
+      totalWords: reviewWords?.length || 0,
       correctCount: 0,
       incorrectCount: 0,
       isCompleted: false,
