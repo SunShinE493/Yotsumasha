@@ -27,6 +27,6 @@
     }
   },
   "include": ["client/src", "server", "shared"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.json" }]
 }
 
