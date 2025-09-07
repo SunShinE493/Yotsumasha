@@ -126,7 +126,7 @@ YoutubeNotifications.sync({ alter: true });
 
 CommandsRegister();
 client.login(process.env.TOKEN);
-runWebserver();
+//runWebserver();
 
 async function trigger() {
   const youtubeNofications = await YoutubeNotifications.findAll({
