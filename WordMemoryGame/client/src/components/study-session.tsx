@@ -72,21 +72,9 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
         queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
         onComplete(completedSessionData);
       } else {
-        // 通常セッションの場合、サーバーを更新
-        updateSessionMutation.mutate({
-          correctCount,
-          incorrectCount,
-          isCompleted: true,
-        }, {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
-            onComplete();
-          },
-          onError: () => {
-            // エラーの場合でも完了処理を実行
-            onComplete(completedSessionData);
-          }
-        });
+        queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
+        onComplete(completedSessionData);
+        
       }
     }
   }, [isComplete, hasCompleted]);
@@ -137,6 +125,9 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
         queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
         onComplete(completedSessionData);
       } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
+        onComplete(completedSessionData);
+        /*
         updateSessionMutation.mutate({
           correctCount,
           incorrectCount,
@@ -151,6 +142,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
             onComplete(completedSessionData);
           }
         });
+        */
       }
     }
   };
