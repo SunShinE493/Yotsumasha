@@ -11,6 +11,10 @@ WORKDIR /app/WordMemoryGame
 COPY ./WordMemoryGame/package.json ./WordMemoryGame/package-lock.json ./
 RUN npm install
 
+# Word Memory Gameのビルドを実行
+# `package.json`で定義されたビルドスクリプトを実行します。
+RUN npm run build --prefix ./WordMemoryGame
+
 # アプリケーションのコードをコピー
 COPY . /app
 
