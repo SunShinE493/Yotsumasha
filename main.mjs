@@ -23,8 +23,7 @@ const youtubei = new Youtubei();
  
 let postCount = 0;
 const app = express();
-app.listen(3000);
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 5050;
 app.post('/', function(req, res) {
   console.log(`Received POST request.`);
  
