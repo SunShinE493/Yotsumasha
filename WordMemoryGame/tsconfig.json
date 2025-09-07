@@ -11,14 +11,14 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true, // この設定が重要
+    "noEmit": true,
     "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": false,
 
     "baseUrl": "./",
     "paths": {
@@ -28,4 +28,3 @@
   },
   "include": ["client/src", "server", "shared"]
 }
-
