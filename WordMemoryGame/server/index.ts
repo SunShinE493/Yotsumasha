@@ -1,9 +1,10 @@
 // WordMemoryGame/server/index.ts
 
-import express, { type Request, Response, NextFunction } from "express";
+import express, { type Request, Response, NextFunction, Application } from "express"; // Application を明示的にインポート
 import { registerRoutes } from "./routes";
+import { Server, IncomingMessage, ServerResponse } from "http"; // Server, IncomingMessage, ServerResponse をインポート
 
-const app = express();
+const app: Application = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -42,8 +43,8 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
-  const server = await registerRoutes(app);
+  (async () => {
+    const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -54,35 +55,32 @@ app.use((req, res, next) => {
   });
 
   // Vite関連の関数を動的にインポートするためのプレースホルダー
-  let setupVite: (app: express.Application, server: any) => Promise<void>;
-  let serveStatic: (app: express.Application) => boolean;
-  let appLog: (message: string) => void;
+    let setupVite: (app: Application, server: Server<typeof IncomingMessage, typeof ServerResponse>) => Promise<void>; // 型を修正
+    let serveStatic: (app: Application) => boolean; // 型を修正
+    let appLog: (message: string) => void;
 
   // `process.env.BUILD_TARGET` が存在しない、または 'server' 以外の場合にVite関連のモジュールをロード
   // これは主に開発環境 (tsx) での実行時、または通常のNode.js実行時にVite関連を有効にするため
   const isServerBuild = process.env.BUILD_TARGET === 'server';
   const isProduction = process.env.NODE_ENV === "production";
 
-  if (!isServerBuild) {
-    try {
-      const viteModule = await import("./vite");
-      setupVite = viteModule.setupVite;
-      serveStatic = viteModule.serveStatic;
-      appLog = viteModule.log;
-    } catch (error) {
-      console.error("Failed to load Vite module:", error);
-      // Viteモジュールのロードに失敗した場合のフォールバック
-      // 例: 開発モードでも静的ファイルのみを配信する、またはエラーで終了
-      setupVite = async (app, server) => { /* no-op */ }; // 何もしない関数で置き換え
-      serveStatic = (app) => { console.error("Vite serveStatic not loaded."); return false; };
-      appLog = (message) => console.log(`[FALLBACK LOG] ${message}`);
+    if (!isServerBuild) {
+      try {
+        const viteModule = await import("./vite");
+        setupVite = viteModule.setupVite as (app: Application, server: Server<typeof IncomingMessage, typeof ServerResponse>) => Promise<void>; // 型アサーションを追加
+        serveStatic = viteModule.serveStatic as (app: Application) => boolean; // 型アサーションを追加
+        appLog = viteModule.log;
+      } catch (error) {
+        console.error("Failed to load Vite module:", error);
+        setupVite = async (app: Application, server: Server<typeof IncomingMessage, typeof ServerResponse>) => { /* no-op */ }; // 型を修正
+        serveStatic = (app: Application) => { console.error("Vite serveStatic not loaded."); return false; }; // 型を修正
+        appLog = (message) => console.log(`[FALLBACK LOG] ${message}`);
+      }
+    } else {
+      setupVite = async (app: Application, server: Server<typeof IncomingMessage, typeof ServerResponse>) => { /* no-op */ }; // 型を修正
+      serveStatic = (app: Application) => { console.error("Vite serveStatic not loaded. Serving static files directly."); return false; }; // 型を修正
+      appLog = (message) => console.log(`[SERVER BUILD LOG] ${message}`);
     }
-  } else {
-    // サーバービルド時、またはVite関連機能が不要な場合はダミー関数を設定
-    setupVite = async (app, server) => { /* no-op */ };
-    serveStatic = (app) => { console.error("Vite serveStatic not loaded. Serving static files directly."); return false; };
-    appLog = (message) => console.log(`[SERVER BUILD LOG] ${message}`);
-  }
 
   // ログ関数をグローバルスコープに設定し、ミドルウェアからアクセス可能にする
   globalThis.appLog = appLog;
