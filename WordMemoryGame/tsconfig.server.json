@@ -2,10 +2,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext", // CommonJS から NodeNext に変更
+    "module": "NodeNext",
     "lib": ["ES2022", "DOM"],
-    "outDir": "../../dist/server", // WordMemoryGame ディレクトリの外に出力
-    "rootDir": ".",               // WordMemoryGame ディレクトリをルートにする
+    "outDir": "../../dist/server",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -15,7 +15,7 @@
     "paths": {
       "@shared/*": ["./shared/*"]
     },
-    "moduleResolution": "bundler", // Node.jsのモジュール解決戦略
+    "moduleResolution": "NodeNext", // ここを "NodeNext" に変更
     "noEmit": false
   },
   "include": [
@@ -26,6 +26,6 @@
     "node_modules",
     "dist",
     "client",
-    "vite.config.ts" // ルートのvite.config.tsは除外
+    "vite.config.ts"
   ]
 }
