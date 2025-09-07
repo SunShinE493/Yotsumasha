@@ -16,4 +16,4 @@ RUN npm install
 RUN npm run build
 
 # 複数のプロセスを同時に起動
-CMD ["/bin/sh", "-c", "node /app/main.mjs & node /app/WordMemoryGame/server/index.ts"]
+CMD ["/bin/sh", "-c", "node /app/main.mjs & node /app/WordMemoryGame/dist/server/index.js"]
