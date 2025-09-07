@@ -13,8 +13,8 @@
     }
   },
   "include": [
-    "server", 
-    "shared"
+    "server/**/*.ts",
+    "shared/**/*.ts"
   ],
   "exclude": [
     "server/vite.ts",
