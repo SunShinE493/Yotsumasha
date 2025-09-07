@@ -16,5 +16,5 @@ RUN npm install
 # アプリケーションのコードをコピー
 COPY . /app
 
-# 複数のプロセスを同時に起動
-CMD ["/bin/sh", "-c", "node /app/discord-bot/main.mjs & node /app/word-memory-game/dist/server/index.js"]
+# /bin/sh -c "node /app/main.mjs & node /app/WordMemoryGame/dist/server/index.js"
+CMD ["/bin/sh", "-c", "node /app/main.mjs & node /app/WordMemoryGame/dist/server/index.js"]
