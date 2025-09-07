@@ -13,8 +13,10 @@
     }
   },
   "include": [
-    "server/**/*.ts",
-    "shared/**/*.ts"
+    "server/index.ts",
+    "server/routes.ts",
+    "server/storage.ts",
+    "shared"
   ],
   "exclude": [
     "server/vite.ts",
