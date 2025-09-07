@@ -7,9 +7,13 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": false
+    "baseUrl": "./", // <-- この行を追加
+    "paths": {
+      "@shared/*": ["./shared/*"] // <-- この行を追加
+    }
   },
-  "include": ["server", "shared"]
+  "include": [
+    "server", 
+    "shared"
+  ]
 }
