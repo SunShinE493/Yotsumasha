@@ -20,7 +20,7 @@ import axios from 'axios'
 
 const youtubei = new Youtubei();
 
- 
+ /*
 let postCount = 0;
 const app = express();
 app.listen(3000);
@@ -28,11 +28,6 @@ const port = process.env.PORT || 8080;
 app.post('/', function(req, res) {
   console.log(`Received POST request.`);
  
-    /**
-  const url = `${req.protocol}://{$req.get('host')} ${req.originalUrl}`;
-  res.send(`このぺーじのURLは${url}です。`);
-  console.log(`このぺーじのURLは${url}です。`);
-  **/
   postCount++;
   if (postCount === 2) {
     //trigger();
@@ -51,6 +46,7 @@ function runWebserver(){
     console.log(`server is running on port ${port}`);
   });
 }
+*/
 
 cron.schedule('0 30 * * * *', () => {
 

@@ -140,6 +140,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+   let postCount = 0;
+
+  app.post('/', function(req, res) {
+  console.log(`Received POST request.`);
+
+  postCount++;
+    if (postCount === 2) {
+      //trigger();
+      //SchTrigger();
+      postCount = 0;
+  }
+  res.send('POST response by glitch');
+  })
+
+
+
+
+
+
+  
+
   const httpServer = createServer(app);
   return httpServer;
 }
+
+
