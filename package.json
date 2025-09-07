@@ -32,10 +32,6 @@
     "glitch"
   ],
   "devDependencies": {
-    "tsconfig-paths": "^4.2.0",
-    "cross-env": "^7.0.3", // 追加
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.2",
-    "vite": "^7.1.4"
+    "tsconfig-paths": "^4.2.0"
   }
 }
