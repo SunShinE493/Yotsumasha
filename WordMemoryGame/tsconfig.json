@@ -9,7 +9,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "noEmit": true,
+    "noEmit": false, // ここを`false`に変更
+    "outDir": "dist/server", // この行を追加
 
     "strict": true,
     "noUnusedLocals": false,
