@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "NODE_ENV=production vite build && tsc --build",
+    "build": "vite build && tsc --build && tsconfig-paths",
     "start": "NODE_ENV=production node dist/server/index.js",
     "build:server": "tsc --build",
     "build:client": "vite build",
