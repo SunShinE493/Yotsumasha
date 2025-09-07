@@ -1,25 +1,32 @@
+// WordMemoryGame/tsconfig.server.json
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
+    "target": "ES2022",           // Node.jsのバージョンに合わせて調整 (例: Node 18 -> ES2022)
+    "module": "CommonJS",         // Node.jsランタイムに合ったモジュール形式
+    "lib": ["ES2022", "DOM"],     // DOMはExpressのRequest/Responseなどで必要になる可能性
     "outDir": "dist/server",
-    "esModuleInterop": true,
+    "rootDir": "./server",        // serverディレクトリをルートとしてコンパイル
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "baseUrl": "./",
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
     "paths": {
-      "@shared/*": ["./shared/*"]
-    }
+      "@shared/*": ["./shared/*"] // sharedディレクトリへのパス
+    },
+    "moduleResolution": "node",   // Node.jsのモジュール解決戦略
+    "noEmit": false
   },
   "include": [
-    "server/index.ts",
-    "server/routes.ts",
-    "server/storage.ts",
-    "shared"
+    "server/**/*.ts",             // serverディレクトリ内のすべてのTypeScriptファイル
+    "shared/**/*.ts"              // sharedディレクトリ内のすべてのTypeScriptファイル
   ],
   "exclude": [
-    "server/vite.ts",
-    "vite.config.ts"
+    "node_modules",
+    "dist",                       // ビルド成果物ディレクトリ
+    "client",                     // クライアントサイドのコードは除外
+    "server/vite.ts",             // 明示的にvite関連ファイルをサーバービルドから除外
+    "vite.config.ts"              // vite.config.tsも除外
   ]
 }

@@ -1,6 +1,7 @@
+// WordMemoryGame/server/index.ts
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
@@ -29,7 +30,12 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      // log関数が利用可能であればそれを使用
+      if (typeof globalThis.appLog === 'function') { // グローバルに定義されたログ関数を想定
+          globalThis.appLog(logLine);
+      } else {
+          console.log(logLine);
+      }
     }
   });
 
@@ -47,18 +53,85 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Vite関連の関数を動的にインポートするためのプレースホルダー
+  let setupVite: (app: express.Application, server: any) => Promise<void>;
+  let serveStatic: (app: express.Application) => boolean;
+  let appLog: (message: string) => void;
+
+  // `process.env.BUILD_TARGET` が存在しない、または 'server' 以外の場合にVite関連のモジュールをロード
+  // これは主に開発環境 (tsx) での実行時、または通常のNode.js実行時にVite関連を有効にするため
+  const isServerBuild = process.env.BUILD_TARGET === 'server';
+  const isProduction = process.env.NODE_ENV === "production";
+
+  if (!isServerBuild) {
+    try {
+      const viteModule = await import("./vite");
+      setupVite = viteModule.setupVite;
+      serveStatic = viteModule.serveStatic;
+      appLog = viteModule.log;
+    } catch (error) {
+      console.error("Failed to load Vite module:", error);
+      // Viteモジュールのロードに失敗した場合のフォールバック
+      // 例: 開発モードでも静的ファイルのみを配信する、またはエラーで終了
+      setupVite = async (app, server) => { /* no-op */ }; // 何もしない関数で置き換え
+      serveStatic = (app) => { console.error("Vite serveStatic not loaded."); return false; };
+      appLog = (message) => console.log(`[FALLBACK LOG] ${message}`);
+    }
+  } else {
+    // サーバービルド時、またはVite関連機能が不要な場合はダミー関数を設定
+    setupVite = async (app, server) => { /* no-op */ };
+    serveStatic = (app) => { console.error("Vite serveStatic not loaded. Serving static files directly."); return false; };
+    appLog = (message) => console.log(`[SERVER BUILD LOG] ${message}`);
+  }
+
+  // ログ関数をグローバルスコープに設定し、ミドルウェアからアクセス可能にする
+  globalThis.appLog = appLog;
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  const isProduction = process.env.NODE_ENV === "production";
-  
+
   if (!isProduction || process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
+    // 開発環境または明示的に開発モードの場合
+    // 動的インポートされたsetupViteを使用
+    if (!isServerBuild && setupVite) { // setupViteがロードされていることを確認
+        await setupVite(app, server);
+        appLog("Vite development server enabled.");
+    } else if (isServerBuild) {
+        // tscによるサーバービルドで実行される場合、Vite関連のセットアップはスキップ
+        appLog("Skipping Vite setup in server build mode.");
+    } else {
+        appLog("Falling back to static serving (Vite setup failed or skipped).");
+        // setupViteがロードされていない場合のフォールバック（例: 静的ファイル配信のみ）
+        app.use(express.static('client/dist'));
+        app.get("*", (req, res) => {
+            res.sendFile("client/dist/index.html", { root: process.cwd() });
+        });
+    }
   } else {
-    const served = serveStatic(app);
+    // 本番環境の場合
+    // 動的インポートされたserveStaticを使用
+    let served = false;
+    if (!isServerBuild && serveStatic) { // serveStaticがロードされていることを確認
+        served = serveStatic(app);
+    } else {
+        // serveStaticがロードされていない場合、直接静的ファイルを配信
+        app.use(express.static('client/dist'));
+        app.get("*", (req, res) => {
+            res.sendFile("client/dist/index.html", { root: process.cwd() });
+        });
+        served = true; // 静的ファイル配信を試みたのでtrue
+    }
+
     if (!served) {
-      log("Falling back to development mode due to missing build");
-      await setupVite(app, server);
+      appLog("Falling back to development mode due to missing build (or Vite module not loaded)");
+      if (!isServerBuild && setupVite) {
+          await setupVite(app, server);
+      } else {
+          appLog("Cannot fallback to Vite dev mode (Vite module not loaded).");
+      }
+    } else {
+        appLog("Serving static files for production.");
     }
   }
 
@@ -72,8 +145,6 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    appLog(`serving on port ${port}`);
   });
 })();
-
-//aa
