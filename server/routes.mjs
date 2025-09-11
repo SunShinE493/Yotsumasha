@@ -1,6 +1,7 @@
 import { createServer } from "http";
+import { randomUUID } from "crypto";
 import { storage } from "./storage.mjs";
-import { setupAuth, isAuthenticated } from "./replitAuth.mjs";
+import { setupAuth, isAuthenticated, optionalAuthentication } from "./auth.mjs";
 import { 
   vocabularyFileSchema, 
   studyConfigSchema, 
@@ -9,25 +10,41 @@ import {
 
 export async function registerRoutes(app) {
   // Setup authentication middleware
-  await setupAuth(app);
+  setupAuth(app);
 
-  // Auth routes - Referenced from javascript_log_in_with_replit integration
-  app.get('/api/auth/user', isAuthenticated, async (req, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+  // Guest access route - allows users to continue without login
+  app.post('/api/guest/continue', app.locals.validateCSRF, (req, res) => {
+    // Generate unique guest ID per session
+    if (!req.session.guestId) {
+      req.session.guestId = `guest_${randomUUID()}`;
     }
+    
+    res.json({ 
+      id: req.session.guestId,
+      username: 'ゲストユーザー',
+      isGuest: true,
+      message: 'ゲストとしてアクセス中です' 
+    });
+  });
+  
+  // Guest logout/clear route - clears guest session data
+  app.post('/api/guest/logout', app.locals.validateCSRF, (req, res) => {
+    if (req.session.guestId) {
+      // Clear guest data from storage
+      storage.clearGuestData(req.session.guestId);
+      
+      // Clear guest ID from session
+      delete req.session.guestId;
+    }
+    
+    res.json({ message: 'ゲストデータをクリアしました' });
   });
   
   // Upload vocabulary JSON file
-  app.post("/api/vocabulary/upload", isAuthenticated, async (req, res) => {
+  app.post("/api/vocabulary/upload", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
     try {
       const { words } = vocabularyFileSchema.parse(req.body);
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       
       // Clear existing words and upload new ones for this user
       await storage.clearVocabularyWords(userId);
@@ -47,9 +64,9 @@ export async function registerRoutes(app) {
   });
 
   // Get all vocabulary words
-  app.get("/api/vocabulary", isAuthenticated, async (req, res) => {
+  app.get("/api/vocabulary", optionalAuthentication, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const words = await storage.getVocabularyWords(userId);
       res.json(words);
     } catch (error) {
@@ -58,11 +75,11 @@ export async function registerRoutes(app) {
   });
 
   // Get vocabulary words in range
-  app.get("/api/vocabulary/range/:start/:end", isAuthenticated, async (req, res) => {
+  app.get("/api/vocabulary/range/:start/:end", optionalAuthentication, async (req, res) => {
     try {
       const start = parseInt(req.params.start);
       const end = parseInt(req.params.end);
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       
       if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
         return res.status(400).json({ message: "Invalid range parameters" });
@@ -76,10 +93,10 @@ export async function registerRoutes(app) {
   });
 
   // Create study session
-  app.post("/api/study/session", isAuthenticated, async (req, res) => {
+  app.post("/api/study/session", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
     try {
       const config = studyConfigSchema.parse(req.body);
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       
       const session = await storage.createStudySession(userId, {
         startRange: config.startRange,
@@ -97,9 +114,9 @@ export async function registerRoutes(app) {
   });
 
   // Get study session
-  app.get("/api/study/session/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/study/session/:id", optionalAuthentication, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const session = await storage.getStudySession(userId, req.params.id);
       if (!session) {
         return res.status(404).json({ message: "Study session not found" });
@@ -111,10 +128,10 @@ export async function registerRoutes(app) {
   });
 
   // Update study session
-  app.patch("/api/study/session/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/study/session/:id", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
     try {
       const updates = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const session = await storage.updateStudySession(userId, req.params.id, updates);
       if (!session) {
         return res.status(404).json({ message: "Study session not found" });
@@ -126,10 +143,10 @@ export async function registerRoutes(app) {
   });
 
   // Record word progress
-  app.post("/api/study/progress", isAuthenticated, async (req, res) => {
+  app.post("/api/study/progress", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
     try {
       const progressData = insertWordProgressSchema.parse(req.body);
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const progress = await storage.createWordProgress(userId, progressData);
       res.json(progress);
     } catch (error) {
@@ -141,9 +158,9 @@ export async function registerRoutes(app) {
   });
 
   // Get session progress
-  app.get("/api/study/progress/:sessionId", isAuthenticated, async (req, res) => {
+  app.get("/api/study/progress/:sessionId", optionalAuthentication, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const progress = await storage.getWordProgressBySession(userId, req.params.sessionId);
       res.json(progress);
     } catch (error) {
@@ -152,9 +169,9 @@ export async function registerRoutes(app) {
   });
 
   // Get review words
-  app.get("/api/vocabulary/review", isAuthenticated, async (req, res) => {
+  app.get("/api/vocabulary/review", optionalAuthentication, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.userId;
       const reviewWords = await storage.getReviewWords(userId);
       res.json(reviewWords);
     } catch (error) {

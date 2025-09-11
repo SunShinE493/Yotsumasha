@@ -1,4 +1,8 @@
 import { randomUUID } from "crypto";
+import createMemoryStore from "memorystore";
+import session from "express-session";
+
+const MemoryStore = createMemoryStore(session);
 
 export class MemStorage {
   constructor() {
@@ -8,11 +12,54 @@ export class MemStorage {
     this.studySessions = new Map(); // userId -> Map<sessionId, session>
     this.wordProgress = new Map(); // userId -> Map<progressId, progress>
     this.nextWordIndex = new Map(); // userId -> nextIndex
+    
+    // Session store for authentication
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000, // 24 hours
+    });
   }
 
-  // User operations - Referenced from javascript_log_in_with_replit integration
+  // User operations - Referenced from blueprint:javascript_auth_all_persistance integration
   async getUser(id) {
     return this.users.get(id);
+  }
+
+  async getUserByUsername(username) {
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async createUser(userData) {
+    const id = randomUUID();
+    const user = {
+      id,
+      username: userData.username,
+      password: userData.password,
+      isGuest: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  // Guest user helper
+  isGuestUser(userId) {
+    return userId && userId.startsWith('guest_');
+  }
+
+  // Clear all data for a specific guest user
+  clearGuestData(guestId) {
+    if (this.isGuestUser(guestId)) {
+      this.vocabularyWords.delete(guestId);
+      this.studySessions.delete(guestId);
+      this.wordProgress.delete(guestId);
+      this.nextWordIndex.delete(guestId);
+    }
   }
 
   async upsertUser(userData) {
@@ -20,10 +67,12 @@ export class MemStorage {
     const user = {
       ...userData,
       id: userData.id,
+      username: userData.username || userData.email || null,
       email: userData.email || null,
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
       profileImageUrl: userData.profileImageUrl || null,
+      isGuest: userData.isGuest || false,
       createdAt: existingUser?.createdAt || new Date(),
       updatedAt: new Date(),
     };
@@ -150,8 +199,11 @@ export class MemStorage {
     return result;
   }
 
-  async updateWordProgress(id, updates) {
-    const progress = this.wordProgress.get(id);
+  async updateWordProgress(userId, progressId, updates) {
+    const userProgress = this.wordProgress.get(userId);
+    if (!userProgress) return undefined;
+    
+    const progress = userProgress.get(progressId);
     if (!progress) return undefined;
     
     const updatedProgress = { 
@@ -159,7 +211,7 @@ export class MemStorage {
       ...updates,
       lastStudied: new Date()
     };
-    this.wordProgress.set(id, updatedProgress);
+    userProgress.set(progressId, updatedProgress);
     return updatedProgress;
   }
 }

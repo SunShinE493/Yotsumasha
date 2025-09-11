@@ -3,6 +3,10 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import bcrypt from "bcrypt";
+import rateLimit from "express-rate-limit";
+import { randomUUID } from "crypto";
+import tinyCsrf from "tiny-csrf";
+const { createCSRF } = tinyCsrf;
 import { storage } from "./storage.mjs";
 import { insertUserSchema, loginUserSchema } from "../shared/schema.mjs";
 
@@ -34,21 +38,47 @@ passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await storage.getUser(id);
+    if (!user) {
+      // User not found, clear session
+      return done(null, false);
+    }
     done(null, user);
   } catch (error) {
-    done(error);
+    console.error('User deserialization error:', error);
+    done(null, false);
   }
 });
 
 export function setupAuth(app) {
-  // Session configuration
+  // Require SESSION_SECRET in production
+  if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required in production');
+  }
+
+  // Rate limiting for auth endpoints
+  const authRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
+    message: { message: 'Too many authentication attempts, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  // CSRF protection setup
+  const csrf = createCSRF({
+    prng: Math.random,
+    secret: process.env.CSRF_SECRET || process.env.SESSION_SECRET || "dev-csrf-secret-key",
+  });
+
+  // Session configuration with enhanced security
   const sessionSettings = {
     secret: process.env.SESSION_SECRET || "dev-secret-key-for-development-only",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     },
     store: storage.sessionStore,
@@ -59,8 +89,26 @@ export function setupAuth(app) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Registration endpoint
-  app.post("/api/register", async (req, res, next) => {
+  // CSRF token endpoint
+  app.get("/api/csrf", (req, res) => {
+    const token = csrf.create(req.session);
+    res.json({ csrfToken: token });
+  });
+
+  // CSRF validation middleware
+  const validateCSRF = (req, res, next) => {
+    const token = req.headers['x-csrf-token'] || req.body._csrf;
+    if (!csrf.verify(req.session, token)) {
+      return res.status(403).json({ message: "CSRF トークンが無効です" });
+    }
+    next();
+  };
+
+  // Export CSRF middleware for use in other route files
+  app.locals.validateCSRF = validateCSRF;
+
+  // Registration endpoint with rate limiting and CSRF protection
+  app.post("/api/register", authRateLimit, validateCSRF, async (req, res, next) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       
@@ -80,11 +128,21 @@ export function setupAuth(app) {
         password: hashedPassword,
       });
 
-      // Log the user in automatically after registration
-      req.login(user, (err) => {
-        if (err) return next(err);
-        const { password, ...userWithoutPassword } = user;
-        res.status(201).json(userWithoutPassword);
+      // Regenerate session for security and log the user in
+      req.session.regenerate((regenerateErr) => {
+        if (regenerateErr) {
+          console.error('Session regeneration error:', regenerateErr);
+          return res.status(500).json({ message: 'セッション作成に失敗しました' });
+        }
+        
+        req.login(user, (err) => {
+          if (err) {
+            console.error('Auto-login after registration error:', err);
+            return next(err);
+          }
+          const { password, ...userWithoutPassword } = user;
+          res.status(201).json(userWithoutPassword);
+        });
       });
     } catch (error) {
       if (error.name === 'ZodError') {
@@ -98,8 +156,8 @@ export function setupAuth(app) {
     }
   });
 
-  // Login endpoint
-  app.post("/api/login", (req, res, next) => {
+  // Login endpoint with rate limiting and CSRF protection
+  app.post("/api/login", authRateLimit, validateCSRF, (req, res, next) => {
     try {
       const loginData = loginUserSchema.parse(req.body);
       
@@ -113,14 +171,22 @@ export function setupAuth(app) {
           return res.status(401).json({ message: "メールアドレスまたはパスワードが間違っています" });
         }
 
-        req.login(user, (err) => {
-          if (err) {
-            console.error("Session creation error:", err);
-            return res.status(500).json({ message: "セッション作成に失敗しました" });
+        // Regenerate session for security
+        req.session.regenerate((regenerateErr) => {
+          if (regenerateErr) {
+            console.error('Session regeneration error:', regenerateErr);
+            return res.status(500).json({ message: 'セッション作成に失敗しました' });
           }
           
-          const { password, ...userWithoutPassword } = user;
-          res.json(userWithoutPassword);
+          req.login(user, (err) => {
+            if (err) {
+              console.error("Session creation error:", err);
+              return res.status(500).json({ message: "セッション作成に失敗しました" });
+            }
+            
+            const { password, ...userWithoutPassword } = user;
+            res.json(userWithoutPassword);
+          });
         });
       })(req, res, next);
     } catch (error) {
@@ -134,22 +200,44 @@ export function setupAuth(app) {
     }
   });
 
-  // Logout endpoint
-  app.post("/api/logout", (req, res, next) => {
+  // Logout endpoint with session destruction and CSRF protection
+  app.post("/api/logout", validateCSRF, (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
-      res.json({ message: "ログアウトしました" });
+      
+      // Clear guest data if it was a guest session
+      if (req.session.guestId) {
+        storage.clearGuestData(req.session.guestId);
+      }
+      
+      // Destroy the session completely
+      req.session.destroy((destroyErr) => {
+        if (destroyErr) {
+          console.error('Session destroy error:', destroyErr);
+          return res.status(500).json({ message: 'ログアウトに失敗しました' });
+        }
+        res.json({ message: "ログアウトしました" });
+      });
     });
   });
 
-  // Get current user
+  // Get current user (supports both authenticated users and guests)
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) {
+    if (req.isAuthenticated()) {
+      // Authenticated user
+      const { password, ...userWithoutPassword } = req.user;
+      res.json(userWithoutPassword);
+    } else if (req.session.guestId) {
+      // Guest user with existing session
+      res.json({
+        id: req.session.guestId,
+        username: 'ゲストユーザー',
+        isGuest: true
+      });
+    } else {
+      // No session at all
       return res.status(401).json({ message: "認証が必要です" });
     }
-    
-    const { password, ...userWithoutPassword } = req.user;
-    res.json(userWithoutPassword);
   });
 }
 
@@ -159,4 +247,21 @@ export function isAuthenticated(req, res, next) {
     return next();
   }
   res.status(401).json({ message: "認証が必要です" });
+}
+
+// Optional authentication - allows both authenticated users and guests
+export function optionalAuthentication(req, res, next) {
+  if (req.isAuthenticated()) {
+    // Authenticated user
+    req.userId = req.user.id;
+    req.isGuest = false;
+  } else {
+    // Guest user - generate unique guest ID per session
+    if (!req.session.guestId) {
+      req.session.guestId = `guest_${randomUUID()}`;
+    }
+    req.userId = req.session.guestId;
+    req.isGuest = true;
+  }
+  next();
 }

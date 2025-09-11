@@ -1,11 +1,13 @@
-// Referenced from javascript_log_in_with_replit integration
+// Referenced from blueprint:javascript_auth_all_persistance integration
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAuth } from './hooks/useAuth';
+import { Route, Switch } from 'wouter';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import { Toaster } from "@/components/ui/toaster";
 import Home from './pages/home';
-import Landing from './pages/landing';
-import NotFound from './pages/not-found';
+import AuthPage from './pages/auth-page';
+import TestPage from './pages/test';
+import { Loader2 } from 'lucide-react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,13 +19,13 @@ const queryClient = new QueryClient({
 });
 
 function AppRouter() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <Loader2 className="h-8 w-8 animate-spin text-border mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -31,27 +33,35 @@ function AppRouter() {
   }
 
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          {isAuthenticated ? (
-            <>
-              <Route path="/" element={<Home />} />
-            </>
-          ) : (
-            <Route path="/" element={<Landing />} />
-          )}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
-    </Router>
+    <Switch>
+      <Route path="/auth" component={AuthPage} />
+      {user ? (
+        <>
+          <Route path="/" component={Home} />
+          <Route path="/test" component={TestPage} />
+        </>
+      ) : (
+        <Route path="/">{() => { window.location.href = '/auth'; return null; }}</Route>
+      )}
+      <Route>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">404 - ページが見つかりません</h1>
+            <p className="text-muted-foreground">お探しのページは存在しません。</p>
+          </div>
+        </div>
+      </Route>
+    </Switch>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppRouter />
+      <AuthProvider>
+        <AppRouter />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
