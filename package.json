@@ -9,7 +9,7 @@
     "dev": "npm run build && npm start"
   },
   "dependencies": {
-    "@gonetone/get-youtube-id-by-url": "^1.0.1",
+    "@gonetone/get-youtube-id-by-url": "^2.0.0",
     "@google/genai": "^1.8.0",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",

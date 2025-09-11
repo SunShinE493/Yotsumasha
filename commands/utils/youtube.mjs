@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 
 import Sequelize from "sequelize";
-import YoutubeIdResolver from '@gonetone/get-youtube-id-by-url';
+import * as YoutubeIdResolver from '@gonetone/get-youtube-id-by-url';
 import Parser from 'rss-parser';
 
 import YoutubeFeeds from "../../models/youtubeFeeds.mjs";
@@ -131,7 +131,7 @@ export async function execute(interaction) {
         const channels = channelsArr.join("\n");
 
         return new EmbedBuilder()
-	        .setColor(0x0099ff)
+                .setColor(0x0099ff)
           .setTitle(`<#${n.textChannelId}> に通知を送信する YouTube チャンネル`)
           .setDescription(channels);
       })
@@ -156,19 +156,19 @@ export async function execute(interaction) {
     );
     
     const select = new StringSelectMenuBuilder()
-			.setCustomId('youtube-delete')
-			.setPlaceholder('削除する通知設定')
-			.addOptions(notificationSelectMenuOptions)
-			.setMinValues(1)
-			.setMaxValues(notifications.length);
+                        .setCustomId('youtube-delete')
+                        .setPlaceholder('削除する通知設定')
+                        .addOptions(notificationSelectMenuOptions)
+                        .setMinValues(1)
+                        .setMaxValues(notifications.length);
     
-		const row = new ActionRowBuilder()
-			.addComponents(select);
+                const row = new ActionRowBuilder()
+                        .addComponents(select);
     
     const response = await interaction.reply({
-			content: '削除する通知設定を選択してください。',
-			components: [row],
-		});
+                        content: '削除する通知設定を選択してください。',
+                        components: [row],
+                });
 
     const collectorFilter = (i) => i.customId === "youtube-delete" && i.user.id === interaction.user.id;
 

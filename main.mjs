@@ -24,7 +24,14 @@ const youtubei = new Youtubei();
 let postCount = 0;
 const app = express();
 const port = 5000;
-app.post('/', function(req, res) {
+
+// Serve static files from dist directory (built React app) - BEFORE any routes
+const distDir = path.join(process.cwd(), 'dist');
+app.use(express.static(distDir));
+
+// Serve React app for non-API routes (SPA fallback) - BEFORE any routes
+app.get(/^\/(?!api).*$/, (req, res) => res.sendFile(path.join(distDir, 'index.html')));
+app.post('/api', function(req, res) {
   console.log(`Received POST request.`);
  
     /**
@@ -44,8 +51,7 @@ app.get('/', function(req, res) {
   res.send('<a href="https://note.com/exteoi/n/n0ea64e258797</a> に解説があります。');
 });
 
-// Serve static files from dist directory (built React app)
-app.use(express.static('dist'));
+// Static and SPA fallback moved above to take precedence over legacy routes
 
 function runWebserver(){
   const server = createServer(app);
