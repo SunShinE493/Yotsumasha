@@ -88,7 +88,7 @@ export function setupAuth(app) {
   
   // Setup CSRF protection (requires 32-character secret)
   const csrfSecret = process.env.CSRF_SECRET || "12345678901234567890123456789012"; // 32 chars
-  app.use(csurf(csrfSecret));
+  app.use(csurf(csrfSecret, ["POST", "PUT", "PATCH", "DELETE"]));
 
   // CSRF token endpoint
   app.get("/api/csrf", (req, res) => {
@@ -96,19 +96,13 @@ export function setupAuth(app) {
     res.json({ csrfToken: token });
   });
 
-  // CSRF validation middleware - tiny-csrf handles validation automatically
-  // We just need to ensure the token is passed correctly
-  const validateCSRF = (req, res, next) => {
-    // tiny-csrf automatically validates, so we just proceed
-    // It expects _csrf in body or x-csrf-token in headers
-    next();
-  };
+  // CSRF is handled automatically by tiny-csrf middleware
+  // No need for custom validation middleware
 
-  // Export CSRF middleware for use in other route files
-  app.locals.validateCSRF = validateCSRF;
+  // CSRF is handled automatically by tiny-csrf middleware
 
   // Registration endpoint with rate limiting and CSRF protection
-  app.post("/api/register", authRateLimit, validateCSRF, async (req, res, next) => {
+  app.post("/api/register", authRateLimit, async (req, res, next) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       
@@ -157,7 +151,7 @@ export function setupAuth(app) {
   });
 
   // Login endpoint with rate limiting and CSRF protection
-  app.post("/api/login", authRateLimit, validateCSRF, (req, res, next) => {
+  app.post("/api/login", authRateLimit, (req, res, next) => {
     try {
       const loginData = loginUserSchema.parse(req.body);
       
@@ -201,7 +195,7 @@ export function setupAuth(app) {
   });
 
   // Logout endpoint with session destruction and CSRF protection
-  app.post("/api/logout", validateCSRF, (req, res, next) => {
+  app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
       

@@ -37,13 +37,41 @@ type AuthContextType = {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Helper function for API requests
+// Helper function to fetch CSRF token
+async function getCsrfToken(): Promise<string> {
+  const response = await fetch('/api/csrf', {
+    method: 'GET',
+    credentials: 'include',
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch CSRF token');
+  }
+  
+  const data = await response.json();
+  return data.csrfToken;
+}
+
+// Helper function for API requests with CSRF token support
 async function apiRequest(method: string, url: string, data?: any) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  // Add CSRF token for state-changing requests
+  if (method !== 'GET') {
+    try {
+      const csrfToken = await getCsrfToken();
+      headers['x-csrf-token'] = csrfToken;
+    } catch (error) {
+      console.warn('Failed to get CSRF token:', error);
+      // Continue without CSRF for development/fallback
+    }
+  }
+  
   const response = await fetch(url, {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     credentials: 'include', // Important for session cookies
     body: data ? JSON.stringify(data) : undefined,
   });

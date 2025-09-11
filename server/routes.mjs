@@ -13,7 +13,7 @@ export async function registerRoutes(app) {
   setupAuth(app);
 
   // Guest access route - allows users to continue without login
-  app.post('/api/guest/continue', app.locals.validateCSRF, (req, res) => {
+  app.post('/api/guest/continue', (req, res) => {
     // Generate unique guest ID per session
     if (!req.session.guestId) {
       req.session.guestId = `guest_${randomUUID()}`;
@@ -28,7 +28,7 @@ export async function registerRoutes(app) {
   });
   
   // Guest logout/clear route - clears guest session data
-  app.post('/api/guest/logout', app.locals.validateCSRF, (req, res) => {
+  app.post('/api/guest/logout', (req, res) => {
     if (req.session.guestId) {
       // Clear guest data from storage
       storage.clearGuestData(req.session.guestId);
@@ -41,7 +41,7 @@ export async function registerRoutes(app) {
   });
   
   // Upload vocabulary JSON file
-  app.post("/api/vocabulary/upload", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
+  app.post("/api/vocabulary/upload", optionalAuthentication, async (req, res) => {
     try {
       const { words } = vocabularyFileSchema.parse(req.body);
       const userId = req.userId;
@@ -93,7 +93,7 @@ export async function registerRoutes(app) {
   });
 
   // Create study session
-  app.post("/api/study/session", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
+  app.post("/api/study/session", optionalAuthentication, async (req, res) => {
     try {
       const config = studyConfigSchema.parse(req.body);
       const userId = req.userId;
@@ -128,7 +128,7 @@ export async function registerRoutes(app) {
   });
 
   // Update study session
-  app.patch("/api/study/session/:id", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
+  app.patch("/api/study/session/:id", optionalAuthentication, async (req, res) => {
     try {
       const updates = req.body;
       const userId = req.userId;
@@ -143,7 +143,7 @@ export async function registerRoutes(app) {
   });
 
   // Record word progress
-  app.post("/api/study/progress", app.locals.validateCSRF, optionalAuthentication, async (req, res) => {
+  app.post("/api/study/progress", optionalAuthentication, async (req, res) => {
     try {
       const progressData = insertWordProgressSchema.parse(req.body);
       const userId = req.userId;
