@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import express from "express";
 import { Client, Collection, Events, GatewayIntentBits, ActivityType, EmbedBuilder, Partials } from "discord.js";
+import { createServer } from "http";
 import CommandsRegister from "./regist-commands.mjs";
 import Notification from "./models/notification.mjs";
 import YoutubeFeeds from "./models/youtubeFeeds.mjs";
@@ -14,7 +15,10 @@ import Parser from 'rss-parser';
 const parser = new Parser();
 
 import { Client as Youtubei, MusicClient } from "youtubei";
-import axios from 'axios'
+import axios from 'axios';
+
+// Import routes
+import { registerRoutes } from './server/routes.mjs';
 
 
 
@@ -53,7 +57,19 @@ app.get('/', function(req, res) {
 
 // Static and SPA fallback moved above to take precedence over legacy routes
 
-function runWebserver(){
+async function runWebserver(){
+  // Set up Express middleware for JSON parsing
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  
+  // Register routes with auth system
+  try {
+    await registerRoutes(app);
+    console.log("Routes registered successfully");
+  } catch (error) {
+    console.error("Failed to register routes:", error);
+  }
+  
   const server = createServer(app);
   server.listen(port,'0.0.0.0',()=>{
     console.log(`server is running on port ${port}`);
@@ -458,7 +474,6 @@ client.on('messageCreate', async message => {
 });
 
 import { GoogleGenAI } from "@google/genai";
-import { createServer } from "http";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 let aisikibetsu,max;

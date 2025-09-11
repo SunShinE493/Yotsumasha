@@ -1,14 +1,27 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { createServer } from "http";
+import { storage } from "./storage.mjs";
+import { setupAuth, isAuthenticated } from "./replitAuth.mjs";
 import { 
   vocabularyFileSchema, 
   studyConfigSchema, 
   insertWordProgressSchema 
-} from "@shared/schema";
-import { z } from "zod";
+} from "../shared/schema.mjs";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app) {
+  // Setup authentication middleware
+  await setupAuth(app);
+
+  // Auth routes - Referenced from javascript_log_in_with_replit integration
+  app.get('/api/auth/user', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
   
   // Upload vocabulary JSON file
   app.post("/api/vocabulary/upload", async (req, res) => {
