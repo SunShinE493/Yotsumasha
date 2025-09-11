@@ -1,6 +1,17 @@
 import { z } from "zod";
 
-// Zod schemas for server use
+// User authentication schemas
+export const insertUserSchema = z.object({
+  username: z.string().email("有効なメールアドレスを入力してください"),
+  password: z.string().min(8, "パスワードは8文字以上で入力してください"),
+});
+
+export const loginUserSchema = z.object({
+  username: z.string().email("有効なメールアドレスを入力してください"),
+  password: z.string().min(1, "パスワードを入力してください"),
+});
+
+// Vocabulary schemas
 export const vocabularyFileSchema = z.object({
   words: z.array(z.object({
     word: z.string(),
