@@ -57,73 +57,87 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-32 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-indigo-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-gradient-to-tr from-purple-400/20 to-pink-600/20 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center relative z-10">
         
         {/* Left side - Authentication Forms */}
         <div className="w-full max-w-md mx-auto">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4 shadow-lg">
+              <span className="text-2xl">🥔</span>
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">
               MiniPotato Bot へようこそ
             </h1>
-            <p className="text-gray-600">
-              単語クイズで楽しく学習しましょう
+            <p className="text-gray-600 text-lg">
+              単語クイズで楽しく学習しましょう ✨
             </p>
           </div>
 
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">ログイン</TabsTrigger>
-              <TabsTrigger value="register">新規登録</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100/80 backdrop-blur-sm p-1 rounded-xl">
+              <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200">ログイン</TabsTrigger>
+              <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200">新規登録</TabsTrigger>
             </TabsList>
             
             {/* Login Form */}
-            <TabsContent value="login">
-              <Card>
-                <CardHeader>
-                  <CardTitle>ログイン</CardTitle>
-                  <CardDescription>
+            <TabsContent value="login" className="mt-6">
+              <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+                <CardHeader className="text-center pb-6">
+                  <CardTitle className="text-2xl font-bold text-gray-900">ログイン</CardTitle>
+                  <CardDescription className="text-gray-600 text-base">
                     メールアドレスとパスワードでログインしてください
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleLogin} className="space-y-4">
+                <CardContent className="px-6 pb-6">
+                  <form onSubmit={handleLogin} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="login-email">メールアドレス</Label>
+                      <Label htmlFor="login-email" className="text-sm font-medium text-gray-700">メールアドレス</Label>
                       <Input
                         id="login-email"
                         type="email"
                         placeholder="example@email.com"
                         value={loginData.username}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoginData(prev => ({ ...prev, username: e.target.value }))}
+                        className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="login-password">パスワード</Label>
+                      <Label htmlFor="login-password" className="text-sm font-medium text-gray-700">パスワード</Label>
                       <Input
                         id="login-password"
                         type="password"
                         placeholder="パスワードを入力"
                         value={loginData.password}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                        className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
                         required
                       />
                     </div>
                     {loginMutation.error && (
-                      <p className="text-sm text-red-600">
-                        {loginMutation.error.message}
-                      </p>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2 duration-300">
+                        <p className="text-sm text-red-700 flex items-center">
+                          <span className="mr-2">⚠️</span>
+                          {loginMutation.error.message}
+                        </p>
+                      </div>
                     )}
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       )}
-                      ログイン
+                      {loginMutation.isPending ? 'ログイン中...' : 'ログイン'}
                     </Button>
                   </form>
                 </CardContent>
@@ -131,56 +145,61 @@ export default function AuthPage() {
             </TabsContent>
 
             {/* Register Form */}
-            <TabsContent value="register">
-              <Card>
-                <CardHeader>
-                  <CardTitle>新規登録</CardTitle>
-                  <CardDescription>
+            <TabsContent value="register" className="mt-6">
+              <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+                <CardHeader className="text-center pb-6">
+                  <CardTitle className="text-2xl font-bold text-gray-900">新規登録</CardTitle>
+                  <CardDescription className="text-gray-600 text-base">
                     新しいアカウントを作成してください
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleRegister} className="space-y-4">
+                <CardContent className="px-6 pb-6">
+                  <form onSubmit={handleRegister} className="space-y-5">
                     <div className="space-y-2">
-                      <Label htmlFor="register-email">メールアドレス</Label>
+                      <Label htmlFor="register-email" className="text-sm font-medium text-gray-700">メールアドレス</Label>
                       <Input
                         id="register-email"
                         type="email"
                         placeholder="example@email.com"
                         value={registerData.username}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRegisterData(prev => ({ ...prev, username: e.target.value }))}
+                        className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-password">パスワード</Label>
+                      <Label htmlFor="register-password" className="text-sm font-medium text-gray-700">パスワード</Label>
                       <Input
                         id="register-password"
                         type="password"
                         placeholder="8文字以上で入力"
                         value={registerData.password}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
+                        className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200"
                         required
                         minLength={8}
                       />
-                      <p className="text-xs text-gray-500">
-                        パスワードは8文字以上で設定してください
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <span>🔒</span> パスワードは8文字以上で設定してください
                       </p>
                     </div>
                     {registerMutation.error && (
-                      <p className="text-sm text-red-600">
-                        {registerMutation.error.message}
-                      </p>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2 duration-300">
+                        <p className="text-sm text-red-700 flex items-center">
+                          <span className="mr-2">⚠️</span>
+                          {registerMutation.error.message}
+                        </p>
+                      </div>
                     )}
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       )}
-                      アカウント作成
+                      {registerMutation.isPending ? 'アカウント作成中...' : 'アカウント作成 ✨'}
                     </Button>
                   </form>
                 </CardContent>
@@ -189,31 +208,36 @@ export default function AuthPage() {
           </Tabs>
 
           {/* Guest Access Button */}
-          <div className="mt-6">
-            <Card className="border-dashed">
+          <div className="mt-8">
+            <Card className="border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50/50 to-white/50 backdrop-blur-sm hover:border-gray-400 transition-all duration-200">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900">試してみる</h3>
-                    <p className="text-sm text-gray-600">
+                    <h3 className="font-bold text-gray-900 text-lg flex items-center justify-center gap-2">
+                      <span>🎮</span> 試してみる
+                    </h3>
+                    <p className="text-gray-600 text-base">
                       ログインせずにアプリを体験できます
                     </p>
                   </div>
                   <Button
                     variant="outline"
                     onClick={handleGuestAccess}
-                    className="w-full"
+                    className="w-full h-12 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
                     disabled={continueAsGuestMutation.isPending}
                   >
                     {continueAsGuestMutation.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    ログインせずに続ける
+                    {continueAsGuestMutation.isPending ? 'アクセス中...' : 'ログインせずに続ける'}
                   </Button>
                   {continueAsGuestMutation.error && (
-                    <p className="text-sm text-red-600">
-                      {continueAsGuestMutation.error.message}
-                    </p>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2 duration-300">
+                      <p className="text-sm text-red-700 flex items-center">
+                        <span className="mr-2">⚠️</span>
+                        {continueAsGuestMutation.error.message}
+                      </p>
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -223,49 +247,49 @@ export default function AuthPage() {
 
         {/* Right side - App Description */}
         <div className="lg:pl-8">
-          <div className="text-center lg:text-left space-y-6">
+          <div className="text-center lg:text-left space-y-8">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              <h2 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6 leading-tight">
                 効率的な単語学習
               </h2>
-              <p className="text-xl text-gray-600">
-                MiniPotato Botで楽しく語彙力を向上させましょう
+              <p className="text-xl text-gray-600 leading-relaxed">
+                MiniPotato Botで楽しく語彙力を向上させましょう 🚀
               </p>
             </div>
 
-            <div className="grid gap-6">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-blue-600" />
+            <div className="grid gap-8">
+              <div className="flex items-start space-x-5 group">
+                <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <BookOpen className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">カスタム単語リスト</h3>
-                  <p className="text-gray-600">
-                    自分だけの単語リストを作成して、効率的に学習できます
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">カスタム単語リスト</h3>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    自分だけの単語リストを作成して、効率的に学習できます 📚
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Brain className="w-6 h-6 text-green-600" />
+              <div className="flex items-start space-x-5 group">
+                <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <Brain className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">スマート復習</h3>
-                  <p className="text-gray-600">
-                    間違えた単語を自動で復習リストに追加し、記憶定着をサポート
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">スマート復習</h3>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    間違えた単語を自動で復習リストに追加し、記憶定着をサポート 🧠
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-600" />
+              <div className="flex items-start space-x-5 group">
+                <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <Users className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">個人データ管理</h3>
-                  <p className="text-gray-600">
-                    ユーザーごとに学習データを安全に管理・同期
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">個人データ管理</h3>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    ユーザーごとに学習データを安全に管理・同期 🔒
                   </p>
                 </div>
               </div>
