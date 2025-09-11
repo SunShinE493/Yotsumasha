@@ -3,10 +3,11 @@ import { randomUUID } from "crypto";
 export class MemStorage {
   constructor() {
     this.users = new Map();
-    this.vocabularyWords = new Map();
-    this.studySessions = new Map();
-    this.wordProgress = new Map();
-    this.nextWordIndex = 1;
+    // User-specific data maps: userId -> Map<id, data>
+    this.vocabularyWords = new Map(); // userId -> Map<wordId, word>
+    this.studySessions = new Map(); // userId -> Map<sessionId, session>
+    this.wordProgress = new Map(); // userId -> Map<progressId, progress>
+    this.nextWordIndex = new Map(); // userId -> nextIndex
   }
 
   // User operations - Referenced from javascript_log_in_with_replit integration
@@ -30,16 +31,18 @@ export class MemStorage {
     return user;
   }
 
-  async getVocabularyWords() {
-    return Array.from(this.vocabularyWords.values()).sort((a, b) => a.word.localeCompare(b.word));
+  async getVocabularyWords(userId) {
+    const userWords = this.vocabularyWords.get(userId) || new Map();
+    return Array.from(userWords.values()).sort((a, b) => a.word.localeCompare(b.word));
   }
 
-  async getVocabularyWordsInRange(start, end) {
-    const allWords = Array.from(this.vocabularyWords.values()).sort((a, b) => a.word.localeCompare(b.word));
+  async getVocabularyWordsInRange(userId, start, end) {
+    const userWords = this.vocabularyWords.get(userId) || new Map();
+    const allWords = Array.from(userWords.values()).sort((a, b) => a.word.localeCompare(b.word));
     return allWords.slice(start - 1, end);
   }
 
-  async createVocabularyWord(insertWord) {
+  async createVocabularyWord(userId, insertWord) {
     const id = randomUUID();
     const word = {
       ...insertWord,
@@ -49,25 +52,31 @@ export class MemStorage {
       difficulty: insertWord.difficulty || null,
       createdAt: new Date(),
     };
-    this.vocabularyWords.set(id, word);
+    
+    if (!this.vocabularyWords.has(userId)) {
+      this.vocabularyWords.set(userId, new Map());
+    }
+    this.vocabularyWords.get(userId).set(id, word);
     return word;
   }
 
-  async createVocabularyWords(insertWords) {
+  async createVocabularyWords(userId, insertWords) {
     const words = [];
     for (const insertWord of insertWords) {
-      const word = await this.createVocabularyWord(insertWord);
+      const word = await this.createVocabularyWord(userId, insertWord);
       words.push(word);
     }
     return words;
   }
 
-  async clearVocabularyWords() {
-    this.vocabularyWords.clear();
-    this.nextWordIndex = 1;
+  async clearVocabularyWords(userId) {
+    if (this.vocabularyWords.has(userId)) {
+      this.vocabularyWords.get(userId).clear();
+    }
+    this.nextWordIndex.set(userId, 1);
   }
 
-  async createStudySession(insertSession) {
+  async createStudySession(userId, insertSession) {
     const id = randomUUID();
     const session = {
       ...insertSession,
@@ -77,24 +86,30 @@ export class MemStorage {
       isCompleted: false,
       createdAt: new Date(),
     };
-    this.studySessions.set(id, session);
+    
+    if (!this.studySessions.has(userId)) {
+      this.studySessions.set(userId, new Map());
+    }
+    this.studySessions.get(userId).set(id, session);
     return session;
   }
 
-  async getStudySession(id) {
-    return this.studySessions.get(id);
+  async getStudySession(userId, id) {
+    const userSessions = this.studySessions.get(userId) || new Map();
+    return userSessions.get(id);
   }
 
-  async updateStudySession(id, updates) {
-    const session = this.studySessions.get(id);
+  async updateStudySession(userId, id, updates) {
+    const userSessions = this.studySessions.get(userId) || new Map();
+    const session = userSessions.get(id);
     if (!session) return undefined;
     
     const updatedSession = { ...session, ...updates };
-    this.studySessions.set(id, updatedSession);
+    userSessions.set(id, updatedSession);
     return updatedSession;
   }
 
-  async createWordProgress(insertProgress) {
+  async createWordProgress(userId, insertProgress) {
     const id = randomUUID();
     const progress = {
       ...insertProgress,
@@ -104,22 +119,30 @@ export class MemStorage {
       attempts: insertProgress.attempts || 1,
       lastStudied: new Date(),
     };
-    this.wordProgress.set(id, progress);
+    
+    if (!this.wordProgress.has(userId)) {
+      this.wordProgress.set(userId, new Map());
+    }
+    this.wordProgress.get(userId).set(id, progress);
     return progress;
   }
 
-  async getWordProgressBySession(sessionId) {
-    return Array.from(this.wordProgress.values()).filter(p => p.sessionId === sessionId);
+  async getWordProgressBySession(userId, sessionId) {
+    const userProgress = this.wordProgress.get(userId) || new Map();
+    return Array.from(userProgress.values()).filter(p => p.sessionId === sessionId);
   }
 
-  async getReviewWords() {
-    const reviewProgress = Array.from(this.wordProgress.values())
+  async getReviewWords(userId) {
+    const userProgress = this.wordProgress.get(userId) || new Map();
+    const userWords = this.vocabularyWords.get(userId) || new Map();
+    
+    const reviewProgress = Array.from(userProgress.values())
       .filter(p => !p.isRemembered)
       .sort((a, b) => (b.attempts || 0) - (a.attempts || 0));
     
     const result = [];
     for (const progress of reviewProgress) {
-      const word = this.vocabularyWords.get(progress.wordId);
+      const word = userWords.get(progress.wordId);
       if (word) {
         result.push({ ...progress, word });
       }
