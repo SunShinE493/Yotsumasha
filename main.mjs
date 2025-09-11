@@ -23,8 +23,7 @@ const youtubei = new Youtubei();
  
 let postCount = 0;
 const app = express();
-app.listen(3000);
-const port = process.env.PORT || 8080;
+const port = 5000;
 app.post('/', function(req, res) {
   console.log(`Received POST request.`);
  
@@ -44,6 +43,9 @@ app.post('/', function(req, res) {
 app.get('/', function(req, res) {
   res.send('<a href="https://note.com/exteoi/n/n0ea64e258797</a> に解説があります。');
 });
+
+// Serve static files from dist directory (built React app)
+app.use(express.static('dist'));
 
 function runWebserver(){
   const server = createServer(app);
@@ -451,6 +453,8 @@ client.on('messageCreate', async message => {
 
 import { GoogleGenAI } from "@google/genai";
 import { createServer } from "http";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 let aisikibetsu,max;
 
  

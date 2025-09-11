@@ -4,7 +4,9 @@
   "description": "MiniPotato Bot by EOi",
   "main": "main.mjs",
   "scripts": {
-    "start": "node main.mjs"
+    "start": "node main.mjs",
+    "build": "vite build",
+    "dev": "npm run build && npm start"
   },
   "dependencies": {
     "@gonetone/get-youtube-id-by-url": "^1.0.1",
@@ -13,6 +15,7 @@
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
+    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.0.2",
     "axios": "^1.11.0",
     "discord.js": "^14.14.1",
@@ -21,6 +24,7 @@
     "node-cron": "^3.0.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.2",
     "rss-parser": "^3.13.0",
     "sequelize": "^6.37.3",
     "sequelize-cli": "^6.6.2",
