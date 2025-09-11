@@ -5,8 +5,8 @@ import session from "express-session";
 import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
 import { randomUUID } from "crypto";
-import tinyCsrf from "tiny-csrf";
-const { createCSRF } = tinyCsrf;
+import csurf from "tiny-csrf";
+import cookieParser from "cookie-parser";
 import { storage } from "./storage.mjs";
 import { insertUserSchema, loginUserSchema } from "../shared/schema.mjs";
 
@@ -64,11 +64,8 @@ export function setupAuth(app) {
     legacyHeaders: false,
   });
 
-  // CSRF protection setup
-  const csrf = createCSRF({
-    prng: Math.random,
-    secret: process.env.CSRF_SECRET || process.env.SESSION_SECRET || "dev-csrf-secret-key",
-  });
+  // Cookie parser middleware (required for tiny-csrf)
+  app.use(cookieParser("cookie-parser-secret"));
 
   // Session configuration with enhanced security
   const sessionSettings = {
@@ -88,19 +85,22 @@ export function setupAuth(app) {
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
+  
+  // Setup CSRF protection (requires 32-character secret)
+  const csrfSecret = process.env.CSRF_SECRET || "12345678901234567890123456789012"; // 32 chars
+  app.use(csurf(csrfSecret));
 
   // CSRF token endpoint
   app.get("/api/csrf", (req, res) => {
-    const token = csrf.create(req.session);
+    const token = req.csrfToken();
     res.json({ csrfToken: token });
   });
 
-  // CSRF validation middleware
+  // CSRF validation middleware - tiny-csrf handles validation automatically
+  // We just need to ensure the token is passed correctly
   const validateCSRF = (req, res, next) => {
-    const token = req.headers['x-csrf-token'] || req.body._csrf;
-    if (!csrf.verify(req.session, token)) {
-      return res.status(403).json({ message: "CSRF トークンが無効です" });
-    }
+    // tiny-csrf automatically validates, so we just proceed
+    // It expects _csrf in body or x-csrf-token in headers
     next();
   };
 
