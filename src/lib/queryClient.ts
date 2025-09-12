@@ -9,24 +9,50 @@ export const queryClient = new QueryClient({
   },
 });
 
+// Helper function to fetch CSRF token
+async function getCsrfToken(): Promise<string> {
+  const response = await fetch('/api/csrf', {
+    method: 'GET',
+    credentials: 'include',
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch CSRF token');
+  }
+  
+  const data = await response.json();
+  return data.csrfToken;
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   body?: any,
   userId?: string
 ): Promise<Response> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(userId ? { 'X-User-ID': userId } : {}),
+  };
+  
+  let requestBody = body;
+  
+  // Add CSRF token for state-changing requests
+  if (method !== 'GET') {
+    const csrfToken = await getCsrfToken();
+    // Add CSRF token to request body (tiny-csrf expects it in body._csrf)
+    requestBody = {
+      ...body,
+      _csrf: csrfToken
+    };
+  }
+
   const options: RequestInit = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(userId ? { 'X-User-ID': userId } : {}),
-    },
+    headers,
     credentials: 'include',
+    body: requestBody ? JSON.stringify(requestBody) : undefined,
   };
-
-  if (body && method !== 'GET') {
-    options.body = JSON.stringify(body);
-  }
 
   const response = await fetch(url, options);
   

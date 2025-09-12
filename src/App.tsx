@@ -41,7 +41,7 @@ function AppRouter() {
           <Route path="/test" component={TestPage} />
         </>
       ) : (
-        <Route path="/">{() => { window.location.href = '/auth'; return null; }}</Route>
+        <Route path="/" component={AuthPage} />
       )}
       <Route>
         <div className="min-h-screen bg-background flex items-center justify-center">
