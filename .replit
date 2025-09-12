@@ -8,12 +8,14 @@ channel = "stable-24_05"
 run = ["sh", "-c", "npm run start"]
 
 [[ports]]
+localPort = 3000
+
+[[ports]]
 localPort = 5000
 externalPort = 5000
 
 [[ports]]
 localPort = 8080
-externalPort = 8099
 
 [[ports]]
 localPort = 38433
@@ -22,7 +24,6 @@ externalPort = 3001
 [[ports]]
 localPort = 41735
 externalPort = 80
-
 
 [agent]
 expertMode = true
