@@ -58,22 +58,23 @@ async function apiRequest(method: string, url: string, data?: any) {
     'Content-Type': 'application/json',
   };
   
+  let requestBody = data;
+  
   // Add CSRF token for state-changing requests
   if (method !== 'GET') {
-    try {
-      const csrfToken = await getCsrfToken();
-      headers['x-csrf-token'] = csrfToken;
-    } catch (error) {
-      console.warn('Failed to get CSRF token:', error);
-      // Continue without CSRF for development/fallback
-    }
+    const csrfToken = await getCsrfToken();
+    // Add CSRF token to request body (tiny-csrf expects it in body._csrf)
+    requestBody = {
+      ...data,
+      _csrf: csrfToken
+    };
   }
   
   const response = await fetch(url, {
     method,
     headers,
     credentials: 'include', // Important for session cookies
-    body: data ? JSON.stringify(data) : undefined,
+    body: requestBody ? JSON.stringify(requestBody) : undefined,
   });
 
   if (!response.ok) {
