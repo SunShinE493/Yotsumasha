@@ -18,12 +18,12 @@ externalPort = 5000
 localPort = 8080
 
 [[ports]]
-localPort = 41735
-externalPort = 80
+localPort = 38433
+externalPort = 3001
 
 [[ports]]
-localPort = 46275
-externalPort = 3000
+localPort = 41735
+externalPort = 80
 
 [agent]
 expertMode = true

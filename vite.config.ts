@@ -19,11 +19,6 @@ export default defineConfig({
     outDir: 'dist'
   },
   css: {
-    postcss: './postcss.config.js',
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@import "src/index.css";`
-      }
-    }
+    postcss: './postcss.config.js'
   }
 })
