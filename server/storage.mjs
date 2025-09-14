@@ -92,14 +92,14 @@ export class MemStorage {
   }
 
   async createVocabularyWord(userId, insertWord) {
-    const id = randomUUID();
+    const id = insertWord.id || randomUUID();
     const word = {
       ...insertWord,
       id,
       category: insertWord.category || null,
       example: insertWord.example || null,
       difficulty: insertWord.difficulty || null,
-      createdAt: new Date(),
+      createdAt: insertWord.createdAt || new Date(),
     };
 
     if (!this.vocabularyWords.has(userId)) {
@@ -154,24 +154,42 @@ export class MemStorage {
     const session = userSessions.get(id);
     if (!session) return undefined;
 
+    console.log(`[DEBUG] updateStudySession called for user ${userId}, session ${id}`);
+    console.log(`[DEBUG] Updates:`, JSON.stringify(updates, null, 2));
+
     const updatedSession = { ...session, ...updates };
     
     // If the session is being completed and has incorrect words, create word progress entries
     if (updates.isCompleted && updates.incorrectWords && Array.isArray(updates.incorrectWords)) {
+      console.log(`[DEBUG] Session completed with ${updates.incorrectWords.length} incorrect words`);
       for (const word of updates.incorrectWords) {
+        console.log(`[DEBUG] Processing incorrect word: ${word.id} - ${word.word}`);
+        
+        // Ensure the word exists in vocabularyWords first
+        const userWords = this.vocabularyWords.get(userId) || new Map();
+        if (!userWords.has(word.id)) {
+          console.log(`[DEBUG] Word ${word.id} not found in vocabularyWords, creating it`);
+          await this.createVocabularyWord(userId, word);
+        }
+        
         // Only create progress entry if this word hasn't been recorded for this session yet
         const existingProgress = await this.getWordProgressBySession(userId, id);
         const alreadyRecorded = existingProgress.some(p => p.wordId === word.id);
         
         if (!alreadyRecorded) {
+          console.log(`[DEBUG] Creating word progress for word ${word.id}`);
           await this.createWordProgress(userId, {
             wordId: word.id,
             sessionId: id,
             isRemembered: false,
             attempts: 1
           });
+        } else {
+          console.log(`[DEBUG] Word ${word.id} already has progress entry`);
         }
       }
+    } else {
+      console.log(`[DEBUG] Session not completed or no incorrect words. isCompleted: ${updates.isCompleted}, incorrectWords length: ${updates.incorrectWords?.length || 0}`);
     }
     
     userSessions.set(id, updatedSession);
@@ -202,20 +220,30 @@ export class MemStorage {
   }
 
   async getReviewWords(userId) {
+    console.log(`[DEBUG] getReviewWords called for user ${userId}`);
     const userProgress = this.wordProgress.get(userId) || new Map();
     const userWords = this.vocabularyWords.get(userId) || new Map();
+
+    console.log(`[DEBUG] User has ${userProgress.size} progress entries`);
+    console.log(`[DEBUG] User has ${userWords.size} vocabulary words`);
 
     const reviewProgress = Array.from(userProgress.values())
       .filter(p => !p.isRemembered)
       .sort((a, b) => (b.attempts || 0) - (a.attempts || 0));
+
+    console.log(`[DEBUG] Found ${reviewProgress.length} words needing review`);
 
     const result = [];
     for (const progress of reviewProgress) {
       const word = userWords.get(progress.wordId);
       if (word) {
         result.push({ ...progress, word });
+        console.log(`[DEBUG] Added review word: ${word.word}`);
+      } else {
+        console.log(`[DEBUG] Warning: No word found for progress wordId ${progress.wordId}`);
       }
     }
+    console.log(`[DEBUG] Returning ${result.length} review words`);
     return result;
   }
 

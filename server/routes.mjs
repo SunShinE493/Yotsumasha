@@ -143,6 +143,18 @@ export async function registerRoutes(app) {
       // Limit to questionCount
       words = words.slice(0, config.questionCount);
 
+      // Store words in vocabularyWords for review functionality
+      if (config.sourceFile && words.length > 0) {
+        for (const word of words) {
+          // Only create if the word doesn't already exist for this user
+          const userWords = storage.vocabularyWords.get(userId) || new Map();
+          const existingWord = Array.from(userWords.values()).find(w => w.word === word.word);
+          if (!existingWord) {
+            await storage.createVocabularyWord(userId, word);
+          }
+        }
+      }
+
       // Include words in the session response
       const sessionWithWords = {
         ...session,

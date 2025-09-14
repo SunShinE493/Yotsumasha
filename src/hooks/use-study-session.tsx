@@ -35,12 +35,7 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
 
   useEffect(() => {
     // initialSession.wordsがnullまたはundefinedの場合に備え、空の配列で初期化する
-    let words = initialSession.words || [];
-
-    // 復習セッションの場合、wordプロパティを抽出
-    if (initialSession.id.startsWith('review-')) {
-      words = words.map(item => (item as any).word || item);
-    }
+    const words = initialSession.words || [];
 
     const filteredWords = words.filter(word => word != null);
     setStudyWords(filteredWords);
