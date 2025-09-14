@@ -155,6 +155,25 @@ export class MemStorage {
     if (!session) return undefined;
 
     const updatedSession = { ...session, ...updates };
+    
+    // If the session is being completed and has incorrect words, create word progress entries
+    if (updates.isCompleted && updates.incorrectWords && Array.isArray(updates.incorrectWords)) {
+      for (const word of updates.incorrectWords) {
+        // Only create progress entry if this word hasn't been recorded for this session yet
+        const existingProgress = await this.getWordProgressBySession(userId, id);
+        const alreadyRecorded = existingProgress.some(p => p.wordId === word.id);
+        
+        if (!alreadyRecorded) {
+          await this.createWordProgress(userId, {
+            wordId: word.id,
+            sessionId: id,
+            isRemembered: false,
+            attempts: 1
+          });
+        }
+      }
+    }
+    
     userSessions.set(id, updatedSession);
     return updatedSession;
   }
