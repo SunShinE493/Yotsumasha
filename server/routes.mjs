@@ -189,6 +189,21 @@ export async function registerRoutes(app) {
     }
   });
 
+  // Update study session (PUT method for frontend compatibility)
+  app.put("/api/study/session/:id", optionalAuthentication, async (req, res) => {
+    try {
+      const updates = req.body;
+      const userId = req.userId;
+      const session = await storage.updateStudySession(userId, req.params.id, updates);
+      if (!session) {
+        return res.status(404).json({ message: "Study session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update study session" });
+    }
+  });
+
   // Record word progress
   app.post("/api/study/progress", optionalAuthentication, async (req, res) => {
     try {
