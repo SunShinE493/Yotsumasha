@@ -39,37 +39,44 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 // Helper function to fetch CSRF token
 async function getCsrfToken(): Promise<string> {
+  console.log("Attempting to fetch CSRF token from /api/csrf");
   const response = await fetch('/api/csrf', {
     method: 'GET',
     credentials: 'include',
   });
-  
+
   if (!response.ok) {
+    console.error("Failed to fetch CSRF token, status:", response.status);
     throw new Error('Failed to fetch CSRF token');
   }
-  
+
   const data = await response.json();
+  console.log("CSRF token response data:", data);
   return data.csrfToken;
 }
 
 // Helper function for API requests with CSRF token support
-async function apiRequest(method: string, url: string, data?: any) {
+export async function apiRequest(method: string, url: string, data?: any) {
+  console.log(`API Request: ${method} ${url}`, data);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  
+
   let requestBody = data;
-  
+
   // Add CSRF token for state-changing requests
   if (method !== 'GET') {
+    console.log("Fetching CSRF token...");
     const csrfToken = await getCsrfToken();
+    console.log("CSRF token obtained.", csrfToken);
     // Add CSRF token to request body (tiny-csrf expects it in body._csrf)
     requestBody = {
       ...data,
       _csrf: csrfToken
     };
   }
-  
+
+  console.log("Sending fetch request with body:", requestBody);
   const response = await fetch(url, {
     method,
     headers,
@@ -78,7 +85,8 @@ async function apiRequest(method: string, url: string, data?: any) {
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    const errorData = await response.json().catch(() => ({ message: `Unknown error (Status: ${response.status})` }));
+    console.error(`API Error: ${method} ${url} - Status: ${response.status}`, errorData);
     throw new Error(errorData.message || `Request failed: ${response.status}`);
   }
 

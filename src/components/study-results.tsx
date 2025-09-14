@@ -1,18 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { StudySession } from "@shared/schema";
+import type { StudySession, VocabularyWord } from "@shared/schema";
 
 interface StudyResultsProps {
   session: StudySession;
   onNewSession: () => void;
-  onReview: () => void;
+  onReview: (incorrectWords: VocabularyWord[]) => void;
 }
-//aaa
-//aaaaaa
 
 export function StudyResults({ session, onNewSession, onReview }: StudyResultsProps) {
   const answeredWords = (session.correctCount || 0) + (session.incorrectCount || 0);
-  const accuracy = answeredWords > 0 
+  const accuracy = answeredWords > 0
     ? Math.round(((session.correctCount || 0) / answeredWords) * 100)
     : 0;
 
@@ -47,7 +45,7 @@ export function StudyResults({ session, onNewSession, onReview }: StudyResultsPr
               <div className="text-2xl font-bold text-warning" data-testid="text-incorrect-words">
                 {session.incorrectCount || 0}
               </div>
-              <div className="text-xs text-muted-foreground">復習必要</div>
+              <div className="text-xs text-muted-foreground">不正解</div>
             </div>
             <div className="bg-primary/10 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-primary" data-testid="text-accuracy">
@@ -56,40 +54,29 @@ export function StudyResults({ session, onNewSession, onReview }: StudyResultsPr
               <div className="text-xs text-muted-foreground">正答率</div>
             </div>
           </div>
+        </div>
 
-          {/* Performance Message */}
-          <div className="text-center">
-            {accuracy >= 80 && (
-              <p className="text-success font-medium">素晴らしい成績です！</p>
-            )}
-            {accuracy >= 60 && accuracy < 80 && (
-              <p className="text-primary font-medium">よく頑張りました！</p>
-            )}
-            {accuracy < 60 && (
-              <p className="text-warning font-medium">もう少し復習が必要です。</p>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-            {(session.incorrectCount || 0) > 0 && (
-              <Button
-                variant="destructive"
-                onClick={onReview}
-                data-testid="button-review"
-              >
-                <i className="fas fa-redo mr-2"></i>
-                復習する ({session.incorrectCount || 0}問)
-              </Button>
-            )}
-            <Button
-              onClick={onNewSession}
-              data-testid="button-new-session"
-            >
-              <i className="fas fa-play mr-2"></i>
-              ホームに戻る
-            </Button>
-          </div>
+        {/* Buttons */}
+        <div className="mt-8 space-y-4">
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={() => onReview(session.incorrectWords || [])}
+            data-testid="button-review"
+          >
+            <i className="fas fa-redo-alt mr-2"></i>
+            間違えた単語を復習
+          </Button>
+          <Button
+            className="w-full"
+            variant="outline"
+            size="lg"
+            onClick={onNewSession}
+            data-testid="button-new-session"
+          >
+            <i className="fas fa-book-open mr-2"></i>
+            新しい学習セッションを開始
+          </Button>
         </div>
       </CardContent>
     </Card>

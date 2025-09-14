@@ -34,7 +34,7 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
 
 
 
-  
+
   useEffect(() => {
     if (selectedJson && selectedJson.wordCount > 0) {
       // selectedJson が有効な値になったときに範囲を更新
@@ -51,7 +51,7 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
 
 
 
-  
+
   const createSessionMutation = useMutation({
     mutationFn: async (config: StudyConfig) => {
       const response = await apiRequest("POST", "/api/study/session", config);
@@ -94,6 +94,7 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
       questionCount: questionCount === -1 ? endRange - startRange + 1 : questionCount,
       order,
       reviewOnly,
+      sourceFile: selectedJson.name,
     };
 
     createSessionMutation.mutate(config);

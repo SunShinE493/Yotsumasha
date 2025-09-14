@@ -1,7 +1,8 @@
 // Referenced from blueprint:javascript_auth_all_persistance integration
 import React, { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, apiRequest } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,41 +18,86 @@ export default function AuthPage() {
     continueAsGuestMutation 
   } = useAuth();
   const [, setLocation] = useLocation();
-  
+
   const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [registerData, setRegisterData] = useState({ username: "", password: "" });
 
   // Redirect if already authenticated
   if (user) {
-    setLocation("/");
+    window.location.href = "/";
     return null;
   }
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("handleLogin called. Login data:", loginData);
     try {
       await loginMutation.mutateAsync(loginData);
-      setLocation("/");
+      const fetchedUserAfterLogin = await queryClient.fetchQuery({ 
+        queryKey: ["/api/user"],
+        queryFn: async () => {
+          try {
+            const res = await apiRequest("GET", "/api/user");
+            return await res.json();
+          } catch (error) {
+            return null;
+          }
+        },
+      });
+      console.log("Login successful - fetched user after login:", fetchedUserAfterLogin);
+      console.log("Login successful, redirecting to /");
+      window.location.href = "/";
     } catch (error) {
+      console.error("Login mutation failed in AuthPage:", error);
       // Error is handled by the mutation
     }
   };
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("handleRegister called. Register data:", registerData);
     try {
       await registerMutation.mutateAsync(registerData);
-      setLocation("/");
+      const fetchedUserAfterRegister = await queryClient.fetchQuery({ 
+        queryKey: ["/api/user"],
+        queryFn: async () => {
+          try {
+            const res = await apiRequest("GET", "/api/user");
+            return await res.json();
+          } catch (error) {
+            return null;
+          }
+        },
+      });
+      console.log("Registration successful - fetched user after register:", fetchedUserAfterRegister);
+      console.log("Registration successful, redirecting to /");
+      window.location.href = "/";
     } catch (error) {
+      console.error("Register mutation failed in AuthPage:", error);
       // Error is handled by the mutation
     }
   };
 
   const handleGuestAccess = async () => {
+    console.log("handleGuestAccess called.");
     try {
       await continueAsGuestMutation.mutateAsync();
-      setLocation("/");
+      const fetchedUserAfterGuest = await queryClient.fetchQuery({ 
+        queryKey: ["/api/user"],
+        queryFn: async () => {
+          try {
+            const res = await apiRequest("GET", "/api/user");
+            return await res.json();
+          } catch (error) {
+            return null;
+          }
+        },
+      });
+      console.log("Guest access successful - fetched user after guest:", fetchedUserAfterGuest);
+      console.log("Guest access successful, redirecting to /");
+      window.location.href = "/";
     } catch (error) {
+      console.error("Guest access mutation failed in AuthPage:", error);
       // Error is handled by the mutation
     }
   };
@@ -63,9 +109,9 @@ export default function AuthPage() {
         <div className="absolute -top-40 -right-32 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-indigo-600/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-gradient-to-tr from-purple-400/20 to-pink-600/20 rounded-full blur-3xl"></div>
       </div>
-      
+
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center relative z-10">
-        
+
         {/* Left side - Authentication Forms */}
         <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-8">
@@ -85,7 +131,7 @@ export default function AuthPage() {
               <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200">ログイン</TabsTrigger>
               <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200">新規登録</TabsTrigger>
             </TabsList>
-            
+
             {/* Login Form */}
             <TabsContent value="login" className="mt-6">
               <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">

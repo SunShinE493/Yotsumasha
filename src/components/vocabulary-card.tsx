@@ -3,7 +3,6 @@ import type { VocabularyWord } from "@shared/schema";
 
 interface VocabularyCardProps {
   word: VocabularyWord;
-  // isFlipped の代わりに rotationCount を受け取る
   rotationCount: number;
   onFlip: () => void;
   fontSizeClass: string;

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,15 @@ import { VocabularyCard } from "./vocabulary-card";
 import { useStudySession } from "@/hooks/use-study-session";
 import { useUserId } from "@/hooks/use-user-id";
 import type { StudySession as StudySessionType, VocabularyWord } from "@shared/schema";
-
-
-
+import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./ui/dialog";
 
 interface StudySessionProps {
   session: StudySessionType;
@@ -20,16 +26,22 @@ interface StudySessionProps {
 
 export function StudySession({ session, onComplete, onBack }: StudySessionProps) {
   const [fontSizeClass, setFontSizeClass] = useState('text-3xl');
-
-  // isFlipped の代わりに rotationCount を使用
-  const [rotationCount, setRotationCount] = useState(0); 
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [rotationCount, setRotationCount] = useState(0);
+  const [isEarlyFinishDialogOpen, setIsEarlyFinishDialogOpen] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const userId = useUserId();
 
   if (!userId) {
-    return <div>Loading user...</div>; // Or a loading spinner
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <div className="space-y-4">
+            <i className="fas fa-spinner fa-spin text-4xl text-primary"></i>
+            <p className="text-muted-foreground">ユーザーを読み込み中...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   const {
@@ -38,108 +50,77 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     correctCount,
     incorrectCount,
     studyWords,
-    nextWord,
     markWord,
-    isComplete
-  } = useStudySession(session);
+    isComplete,
+    isLoading,
+    isError,
+    error,
+    incorrectWords,
+    handleEarlyFinish: hookHandleEarlyFinish
+  } = useStudySession({
+    initialSession: session,
+    onComplete: (data) => {
+      // useStudySession内でonCompleteが呼ばれたときに、このコンポーネントのonCompleteを呼び出す
+      onComplete(data);
+    }
+  });
+
+  // Debugging: Monitor currentWord changes and log them
+  useEffect(() => {
+    console.log("DEBUG: Current word changed. Current word:", currentWord);
+    console.log("DEBUG: Current word ID:", currentWord?.id);
+    console.log("DEBUG: Current word title:", currentWord?.title);
+  }, [currentWord]);
 
   const recordProgressMutation = useMutation({
     mutationFn: async ({ wordId, isRemembered }: { wordId: string; isRemembered: boolean }) => {
-      const response = await apiRequest("POST", "/api/study/progress", {
+      await apiRequest("POST", "/api/study/progress", {
         wordId,
         sessionId: session.id,
         isRemembered,
         attempts: 1,
       }, userId);
-      return response.json();
     },
   });
 
-  const updateSessionMutation = useMutation({
-    mutationFn: async (updates: Partial<StudySessionType>) => {
-      const response = await apiRequest("PATCH", `/api/study/session/${session.id}`, updates);
-      return response.json();
-    },
-  });
-
-  useEffect(() => {
-    if (isComplete && !hasCompleted) {
-      setHasCompleted(true);
-      const isReviewSession = session.id.startsWith('review-');
-
-      // 完了時のセッションデータを作成
-      const completedSessionData = {
-        ...session,
-        correctCount,
-        incorrectCount,
-        isCompleted: true
-      };
-
-      if (isReviewSession) {
-        // 復習セッションの場合、サーバー更新をスキップして直接完了処理
-        queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
-        onComplete(completedSessionData);
-      } else {
-
-        queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
-      onComplete(completedSessionData);
-      }
-    }
-  }, [isComplete, hasCompleted]);
-
-  // カードをタップしたときに、回転数を1増やす
   const handleFlip = () => {
     setRotationCount(prevCount => prevCount + 1);
   };
 
-  // 覚えた/覚えてないボタンを押したときに、回転数を1増やし、0.3秒後に次の単語に進む
   const handleMarkWord = (isRemembered: boolean) => {
-    if (!currentWord) return;
+    markWord(isRemembered);
 
-    // 回転数を1増やすことで、合計360度回転させる
-    setRotationCount(prevCount => prevCount + 1);
+    if (!currentWord) {
+      console.log("handleMarkWord called with no currentWord.");
+      return;
+    }
 
     recordProgressMutation.mutate({
       wordId: currentWord.id,
       isRemembered,
+    }, {
+      onSuccess: () => {
+        setRotationCount(0);
+      }
     });
-
-    setTimeout(() => {
-      markWord(isRemembered);
-    }, 300);
   };
 
   const handleSkip = () => {
-    nextWord();
-    // スキップ時も回転数をリセット
-    setRotationCount(0);
+    if (!currentWord) return;
+    markWord(false);
   };
 
   const handleEarlyFinish = () => {
-    if (!hasCompleted) {
-      setHasCompleted(true);
-      const isReviewSession = session.id.startsWith('review-');
-
-      // 途中終了時のセッションデータを作成
-      const completedSessionData = {
-        ...session,
-        correctCount,
-        incorrectCount,
-        totalWords: currentWordIndex, // 実際に答えた問題数を設定
-        isCompleted: true
-      };
-
-      if (isReviewSession) {
-        queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
-        onComplete(completedSessionData);
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
-      onComplete(completedSessionData);
-      }
-    }
+    // useStudySessionフック内のhandleEarlyFinishを呼び出す
+    hookHandleEarlyFinish();
+    toast({
+      title: "学習中断",
+      description: "ここまでの学習結果を保存しました。",
+    });
+    setIsEarlyFinishDialogOpen(false);
   };
 
-  if (!currentWord) {
+  if (isLoading || !Array.isArray(studyWords)) {
     return (
       <Card>
         <CardContent className="p-8 text-center">
@@ -152,24 +133,50 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     );
   }
 
-  const progress = ((currentWordIndex + 1) / studyWords.length) * 100;
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <div className="space-y-4">
+            <i className="fas fa-exclamation-triangle text-4xl text-destructive"></i>
+            <p className="text-destructive-foreground">データの取得中にエラーが発生しました。</p>
+            <p className="text-sm text-muted-foreground">{error?.message}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (studyWords.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <div className="space-y-4">
+            <i className="fas fa-box-open text-4xl text-muted-foreground"></i>
+            <p className="text-muted-foreground">指定された範囲に単語が見つかりませんでした。</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const progress = (currentWordIndex / (studyWords?.length || 1)) * 100;
 
   return (
     <Card className="overflow-hidden">
-      {/* Progress Header */}
       <div className="bg-muted/50 px-6 py-4 border-b border-border">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onBack}
-              data-testid="button-back"
-            >
-              <i className="fas fa-arrow-left mr-2"></i>
-              戻る
-            </Button>
-          </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            data-testid="button-back"
+          >
+            <i className="fas fa-arrow-left mr-2"></i>
+            戻る
+          </Button>
+        </div>
+        <div className="flex items-center justify-center space-x-4 mt-2">
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-foreground" data-testid="text-current-question">
               {currentWordIndex + 1}
@@ -179,121 +186,131 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
               {studyWords.length}
             </span>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <i className="fas fa-check-circle text-success text-sm"></i>
-              <span className="text-sm text-success" data-testid="text-correct-count">{correctCount}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <i className="fas fa-times-circle text-warning text-sm"></i>
-              <span className="text-sm text-warning" data-testid="text-incorrect-count">{incorrectCount}</span>
-            </div>
+          <div className="flex items-center space-x-2">
+            <i className="fas fa-check-circle text-success text-sm"></i>
+            <span className="text-sm text-success" data-testid="text-correct-count">{correctCount}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <i className="fas fa-times-circle text-warning text-sm"></i>
+            <span className="text-sm text-warning" data-testid="text-incorrect-count">{incorrectCount}</span>
           </div>
         </div>
-        {/* Progress Bar */}
-        <div className="w-full bg-secondary rounded-full h-2">
-          <div 
-            className="progress-bar bg-primary h-2 rounded-full transition-all duration-500" 
-            style={{ width: `${progress}%` }}
-            data-testid="progress-bar"
-          ></div>
-        </div>
+        <Progress value={progress} className="h-2 w-full mt-2" />
       </div>
-
-      {/* Vocabulary Card */}
       <div className="p-8">
         <div className="max-w-md mx-auto">
-          <VocabularyCard
-            word={currentWord}
-            // rotationCount を渡す
-            rotationCount={rotationCount} 
-            onFlip={handleFlip}
-            fontSizeClass={fontSizeClass}
-          />
-
-          {/* Action Buttons */}
-          <div className="mt-8 grid grid-cols-2 gap-4">
-            <Button
-              variant="destructive"
-              size="lg"
-              onClick={() => handleMarkWord(false)}
-              // 修正後の disabled プロパティ
-              disabled={rotationCount % 2 === 0}
-              data-testid="button-not-remembered"
-            >
-              <i className="fas fa-times mr-2"></i>
-              覚えていない
-            </Button>
-            <Button
-              variant="default"
-              size="lg"
-              onClick={() => handleMarkWord(true)}
-              // 修正後の disabled プロパティ
-              disabled={rotationCount % 2 === 0}
-              className="bg-success hover:bg-success/90 text-success-foreground"
-              data-testid="button-remembered"
-            >
-              <i className="fas fa-check mr-2"></i>
-              覚えた
-            </Button>
-          </div>
-
-          {/* Skip and Early Finish Buttons */}
-          <div className="mt-4 flex flex-col items-center space-y-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSkip}
-              data-testid="button-skip"
-            >
-              <i className="fas fa-forward mr-1"></i>
-              スキップ
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEarlyFinish}
-              className="text-muted-foreground border-muted-foreground/50 hover:bg-muted hover:text-foreground"
-              data-testid="button-early-finish"
-            >
-              <i className="fas fa-stop mr-1"></i>
-              途中終了
-            </Button>
-          </div>
-
-          {/* 新しく追加したフォントサイズ変更ボタン */}
-          <div className="mt-4 flex items-center justify-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFontSizeClass('text-2xl')}
-            >
-              -A
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFontSizeClass('text-3xl')}
-            >
-              A
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFontSizeClass('text-4xl')}
-            >
-              +A
-            </Button>
-          </div>
-          {/* 回転の状態に応じてヒントを表示 */}
-          {rotationCount % 2 === 0 && (
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              カードをタップして意味を表示
-            </p>
+          {currentWord ? (
+            <>
+              <VocabularyCard
+                word={currentWord}
+                rotationCount={rotationCount}
+                onFlip={handleFlip}
+                fontSizeClass={fontSizeClass}
+              />
+              <div className="mt-8 grid grid-cols-2 gap-4">
+                <Button
+                  variant="destructive"
+                  size="lg"
+                  onClick={() => handleMarkWord(false)}
+                  disabled={rotationCount % 2 === 0}
+                  data-testid="button-not-remembered"
+                >
+                  <i className="fas fa-times mr-2"></i>
+                  覚えていない
+                </Button>
+                <Button
+                  variant="default"
+                  size="lg"
+                  onClick={() => handleMarkWord(true)}
+                  disabled={rotationCount % 2 === 0}
+                  className="bg-success hover:bg-success/90 text-success-foreground"
+                  data-testid="button-remembered"
+                >
+                  <i className="fas fa-check mr-2"></i>
+                  覚えた
+                </Button>
+              </div>
+              <div className="mt-4 flex flex-col items-center space-y-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSkip()}
+                  data-testid="button-skip"
+                >
+                  <i className="fas fa-forward mr-1"></i>
+                  スキップ
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEarlyFinishDialogOpen(true)}
+                  className="text-muted-foreground border-muted-foreground/50 hover:bg-muted hover:text-foreground"
+                  data-testid="button-early-finish"
+                >
+                  <i className="fas fa-stop mr-1"></i>
+                  途中終了
+                </Button>
+              </div>
+              <div className="mt-4 flex items-center justify-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFontSizeClass('text-2xl')}
+                >
+                  -A
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFontSizeClass('text-3xl')}
+                >
+                  A
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFontSizeClass('text-4xl')}
+                >
+                  +A
+                </Button>
+              </div>
+              {rotationCount % 2 === 0 && (
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                  カードをタップして意味を表示
+                </p>
+              )}
+            </>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <div className="space-y-4">
+                  <i className="fas fa-spinner fa-spin text-4xl text-primary"></i>
+                  <p className="text-muted-foreground">次の単語を読み込み中...</p>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
+      <Dialog open={isEarlyFinishDialogOpen} onOpenChange={setIsEarlyFinishDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>学習を途中でやめますか？</DialogTitle>
+            <DialogDescription>
+              ここまでの学習結果は保存されます。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsEarlyFinishDialogOpen(false)}>キャンセル</Button>
+            <Button
+              variant="default"
+              onClick={handleEarlyFinish}
+            >
+              中断してホームに戻る
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

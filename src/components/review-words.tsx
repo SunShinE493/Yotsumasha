@@ -6,9 +6,23 @@ import type { WordProgress, VocabularyWord } from "@shared/schema";
 interface ReviewWordsProps {
   reviewWords: (WordProgress & { word: VocabularyWord })[];
   onStartReview?: () => void;
+  isReviewWordsLoading?: boolean;
 }
 
-export function ReviewWords({ reviewWords, onStartReview }: ReviewWordsProps) {
+export function ReviewWords({ reviewWords, onStartReview, isReviewWordsLoading }: ReviewWordsProps) {
+  if (isReviewWordsLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center p-6 space-y-4">
+            <i className="fas fa-spinner fa-spin text-4xl text-primary"></i>
+            <p className="text-muted-foreground ml-2">復習単語を読み込み中...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (reviewWords.length === 0) {
     return (
       <Card>
@@ -47,7 +61,7 @@ export function ReviewWords({ reviewWords, onStartReview }: ReviewWordsProps) {
               onClick={onStartReview}
               data-testid="button-start-review"
             >
-              <i className="fas fa-study mr-1"></i>
+              <i className="fas fa-redo-alt mr-1"></i>
               復習開始
             </Button>
           </div>

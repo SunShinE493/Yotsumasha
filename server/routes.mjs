@@ -1,6 +1,7 @@
 import { createServer } from "http";
 import { randomUUID } from "crypto";
 import { storage } from "./storage.mjs";
+import { loadVocabularyFromJson } from "./utils.mjs";
 import { setupAuth, isAuthenticated, optionalAuthentication } from "./auth.mjs";
 import { 
   vocabularyFileSchema, 
@@ -18,7 +19,7 @@ export async function registerRoutes(app) {
     if (!req.session.guestId) {
       req.session.guestId = `guest_${randomUUID()}`;
     }
-    
+
     res.json({ 
       id: req.session.guestId,
       username: 'ゲストユーザー',
@@ -26,30 +27,30 @@ export async function registerRoutes(app) {
       message: 'ゲストとしてアクセス中です' 
     });
   });
-  
+
   // Guest logout/clear route - clears guest session data
   app.post('/api/guest/logout', (req, res) => {
     if (req.session.guestId) {
       // Clear guest data from storage
       storage.clearGuestData(req.session.guestId);
-      
+
       // Clear guest ID from session
       delete req.session.guestId;
     }
-    
+
     res.json({ message: 'ゲストデータをクリアしました' });
   });
-  
+
   // Upload vocabulary JSON file
   app.post("/api/vocabulary/upload", optionalAuthentication, async (req, res) => {
     try {
       const { words } = vocabularyFileSchema.parse(req.body);
       const userId = req.userId;
-      
+
       // Clear existing words and upload new ones for this user
       await storage.clearVocabularyWords(userId);
       const createdWords = await storage.createVocabularyWords(userId, words);
-      
+
       res.json({
         message: "Vocabulary uploaded successfully",
         count: createdWords.length,
@@ -67,10 +68,19 @@ export async function registerRoutes(app) {
   app.get("/api/vocabulary", optionalAuthentication, async (req, res) => {
     try {
       const userId = req.userId;
-      const words = await storage.getVocabularyWords(userId);
+      const sourceFile = req.query.source; // 'koumin.json'など
+
+      let words;
+      if (sourceFile) {
+        // JSONファイルから読み込む
+        words = await loadVocabularyFromJson(sourceFile);
+      } else {
+        // MemStorageから読み込む
+        words = await storage.getVocabularyWords(userId);
+      }
       res.json(words);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch vocabulary" });
+      res.status(500).json({ message: error.message || "Failed to fetch vocabulary" });
     }
   });
 
@@ -80,15 +90,24 @@ export async function registerRoutes(app) {
       const start = parseInt(req.params.start);
       const end = parseInt(req.params.end);
       const userId = req.userId;
-      
+      const sourceFile = req.query.source; // 'koumin.json'など
+
       if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
         return res.status(400).json({ message: "Invalid range parameters" });
       }
-      
-      const words = await storage.getVocabularyWordsInRange(userId, start, end);
+
+      let words;
+      if (sourceFile) {
+        // JSONファイルから読み込み、範囲を適用
+        const allWords = await loadVocabularyFromJson(sourceFile);
+        words = allWords.slice(start - 1, end);
+      } else {
+        // MemStorageから読み込み、範囲を適用
+        words = await storage.getVocabularyWordsInRange(userId, start, end);
+      }
       res.json(words);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch vocabulary range" });
+      res.status(500).json({ message: error.message || "Failed to fetch vocabulary range" });
     }
   });
 
@@ -97,13 +116,14 @@ export async function registerRoutes(app) {
     try {
       const config = studyConfigSchema.parse(req.body);
       const userId = req.userId;
-      
+
       const session = await storage.createStudySession(userId, {
         startRange: config.startRange,
         endRange: config.endRange,
-        totalWords: config.questionCount
+        totalWords: config.questionCount,
+        sourceFile: config.sourceFile,
       });
-      
+
       res.json(session);
     } catch (error) {
       res.status(400).json({ 

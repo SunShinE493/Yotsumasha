@@ -28,6 +28,7 @@ export const studyConfigSchema = z.object({
   questionCount: z.number().min(1),
   order: z.enum(["sequential", "random", "difficulty"]),
   reviewOnly: z.boolean().default(false),
+  sourceFile: z.string().optional(),
 });
 
 export const insertWordProgressSchema = z.object({

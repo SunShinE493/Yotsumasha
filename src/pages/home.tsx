@@ -1,35 +1,36 @@
-// home.tsx
-
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileUpload, SelectedJsonInfo } from "@/components/file-upload";
 import { RangeSelector } from "@/components/range-selector";
 import { StudySession } from "@/components/study-session";
 import { StudyResults } from "@/components/study-results";
 import { ReviewWords } from "@/components/review-words";
 import { apiRequest } from "@/lib/queryClient";
-import type { StudyConfig, StudySession as StudySessionType, VocabularyWord } from "@shared/schema";
+import type { StudyConfig, StudySession as StudySessionType, VocabularyWord, WordProgress } from "@shared/schema";
 import iconSvg from './1f974.svg';
 import { useToast } from "@/hooks/use-toast";
-import { useUserId } from "@/hooks/use-user-id";
-
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { user, isLoading: isUserLoading } = useAuth();
+  const userId = user?.id || null;
+  const username = user?.username || "ゲスト";
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [currentSession, setCurrentSession] = useState<StudySessionType | null>(null);
   const [completedSession, setCompletedSession] = useState<StudySessionType | null>(null);
-  const { toast } = useToast();
 
-  const userId = useUserId();
-
-  if (!userId) {
-    return <div>Loading user...</div>; // Or a loading spinner
-  }
-
-  const { data: reviewWords = [] } = useQuery<VocabularyWord[]>({
-    queryKey: ["/api/vocabulary/review", userId],
-    enabled: !!userId, // userIdがnullの間はクエリを実行しない
-  });;
+  // 復習が必要な単語のリストをサーバーから取得
+  const { data: reviewWords = [], isLoading: isReviewWordsLoading } = useQuery<(WordProgress & { word: VocabularyWord })[]>({
+    queryKey: ['/api/vocabulary/review', userId],
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/vocabulary/review`, null, userId);
+      return response.json();
+    },
+    enabled: !!userId,
+  });
 
   const quickStartMutation = useMutation({
     mutationFn: async (config: StudyConfig) => {
@@ -37,7 +38,6 @@ export default function Home() {
         throw new Error("User ID not available.");
       }
       const response = await apiRequest("POST", "/api/study/session", config, userId);
-747
       return response.json();
     },
     onSuccess: (session) => {
@@ -55,8 +55,23 @@ export default function Home() {
 
   const handleUploadSuccess = (fileInfo: SelectedJsonInfo) => {
     setSelectedJson(fileInfo);
-    // ファイルアップロード成功時に vocabularyWords の状態を更新
-    // ここでは refetchVocabulary() は不要
+    toast({
+      title: "アップロード成功",
+      description: `${fileInfo.wordCount}個の単語が読み込まれました`,
+    });
+  };
+
+  const handleSessionComplete = (sessionData: StudySessionType) => {
+    setCompletedSession(sessionData);
+    setCurrentSession(null);
+
+    queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/vocabulary"] });
+  };
+
+  const handleGoHome = () => {
+    setCurrentSession(null);
+    setCompletedSession(null);
   };
 
   const handleStartSession = (session: StudySessionType) => {
@@ -64,39 +79,26 @@ export default function Home() {
     setCompletedSession(null);
   };
 
-  const handleSessionComplete = (sessionData?: StudySessionType) => {
-    setCompletedSession(sessionData || currentSession);
-    setCurrentSession(null);
-  };
-
-  const handleNewSession = () => {
-    setCurrentSession(null);
-    setCompletedSession(null);
-  };
-
   const handleStartReview = () => {
-    if (reviewWords.length === 0) {
+    const wordsToReview = reviewWords.map(p => p.word);
+
+    if (wordsToReview.length === 0) {
       toast({
         title: "復習単語なし",
         description: "現在、復習すべき単語はありません。",
       });
       return;
     }
+
     const reviewSession: StudySessionType = {
       id: `review-${Date.now()}`,
-      config: {
-        startRange: 1,
-        endRange: reviewWords.length,
-        questionCount: reviewWords.length,
-        order: "random",
-        reviewOnly: true,
-      },
-      words: reviewWords,
       correctCount: 0,
       incorrectCount: 0,
-      isCompleted: false,
-      startTime: new Date(),
-      endTime: null,
+      totalWords: wordsToReview.length,
+      sourceFile: '',
+      startRange: 0,
+      endRange: 0,
+      words: wordsToReview,
     };
     handleStartSession(reviewSession);
   };
@@ -118,9 +120,20 @@ export default function Home() {
       questionCount: endRange,
       order: "random",
       reviewOnly: false,
+      sourceFile: selectedJson.name,
     };
     quickStartMutation.mutate(config);
   };
+
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex justify-center items-center h-full">
+          <p className="text-muted-foreground">ユーザー情報を読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -145,6 +158,10 @@ export default function Home() {
               <button
                 className="touch-target p-2 rounded-lg bg-secondary hover:bg-accent transition-colors"
                 data-testid="button-settings"
+                onClick={() => toast({
+                  title: "ユーザー情報",
+                  description: `現在のユーザーID: ${userId}\nユーザー名: ${username}`,
+                })}
               >
                 <i className="fas fa-cog text-secondary-foreground"></i>
               </button>
@@ -167,13 +184,13 @@ export default function Home() {
           <StudySession
             session={currentSession}
             onComplete={handleSessionComplete}
-            onBack={handleNewSession}
+            onBack={handleGoHome}
           />
         ) : completedSession ? (
           <StudyResults
             session={completedSession}
-            onNewSession={handleNewSession}
-            onReview={handleStartReview}
+            onNewSession={handleGoHome}
+            onReview={() => handleStartReview()}
           />
         ) : (
           <>
@@ -184,7 +201,8 @@ export default function Home() {
             />
             <ReviewWords
               reviewWords={reviewWords}
-              onStartReview={handleStartReview}
+              isReviewWordsLoading={isReviewWordsLoading}
+              onStartReview={() => handleStartReview()}
             />
           </>
         )}

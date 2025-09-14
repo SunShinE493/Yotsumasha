@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 });
 
 function AppRouter() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();                          console.log("AppRouter - user:", user, "isLoading:", isLoading);
 
   if (isLoading) {
     return (

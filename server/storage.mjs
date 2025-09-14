@@ -12,7 +12,7 @@ export class MemStorage {
     this.studySessions = new Map(); // userId -> Map<sessionId, session>
     this.wordProgress = new Map(); // userId -> Map<progressId, progress>
     this.nextWordIndex = new Map(); // userId -> nextIndex
-    
+
     // Session store for authentication
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
@@ -101,7 +101,7 @@ export class MemStorage {
       difficulty: insertWord.difficulty || null,
       createdAt: new Date(),
     };
-    
+
     if (!this.vocabularyWords.has(userId)) {
       this.vocabularyWords.set(userId, new Map());
     }
@@ -130,12 +130,13 @@ export class MemStorage {
     const session = {
       ...insertSession,
       id,
+      sourceFile: insertSession.sourceFile || null,
       correctCount: 0,
       incorrectCount: 0,
       isCompleted: false,
       createdAt: new Date(),
     };
-    
+
     if (!this.studySessions.has(userId)) {
       this.studySessions.set(userId, new Map());
     }
@@ -152,7 +153,7 @@ export class MemStorage {
     const userSessions = this.studySessions.get(userId) || new Map();
     const session = userSessions.get(id);
     if (!session) return undefined;
-    
+
     const updatedSession = { ...session, ...updates };
     userSessions.set(id, updatedSession);
     return updatedSession;
@@ -168,7 +169,7 @@ export class MemStorage {
       attempts: insertProgress.attempts || 1,
       lastStudied: new Date(),
     };
-    
+
     if (!this.wordProgress.has(userId)) {
       this.wordProgress.set(userId, new Map());
     }
@@ -184,11 +185,11 @@ export class MemStorage {
   async getReviewWords(userId) {
     const userProgress = this.wordProgress.get(userId) || new Map();
     const userWords = this.vocabularyWords.get(userId) || new Map();
-    
+
     const reviewProgress = Array.from(userProgress.values())
       .filter(p => !p.isRemembered)
       .sort((a, b) => (b.attempts || 0) - (a.attempts || 0));
-    
+
     const result = [];
     for (const progress of reviewProgress) {
       const word = userWords.get(progress.wordId);
@@ -202,10 +203,10 @@ export class MemStorage {
   async updateWordProgress(userId, progressId, updates) {
     const userProgress = this.wordProgress.get(userId);
     if (!userProgress) return undefined;
-    
+
     const progress = userProgress.get(progressId);
     if (!progress) return undefined;
-    
+
     const updatedProgress = { 
       ...progress, 
       ...updates,
