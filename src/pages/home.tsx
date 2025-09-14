@@ -21,6 +21,7 @@ export default function Home() {
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [currentSession, setCurrentSession] = useState<StudySessionType | null>(null);
   const [completedSession, setCompletedSession] = useState<StudySessionType | null>(null);
+  const [showUserInfo, setShowUserInfo] = useState<boolean>(false);
 
   // 復習が必要な単語のリストをサーバーから取得
   const { data: reviewWords = [], isLoading: isReviewWordsLoading } = useQuery<(WordProgress & { word: VocabularyWord })[]>({
@@ -61,12 +62,14 @@ export default function Home() {
     });
   };
 
-  const handleSessionComplete = (sessionData: StudySessionType) => {
-    setCompletedSession(sessionData);
-    setCurrentSession(null);
+  const handleSessionComplete = (sessionData?: StudySessionType) => {
+    if (sessionData) {
+      setCompletedSession(sessionData);
+      setCurrentSession(null);
 
-    queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/vocabulary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vocabulary"] });
+    }
   };
 
   const handleGoHome = () => {
@@ -158,10 +161,7 @@ export default function Home() {
               <button
                 className="touch-target p-2 rounded-lg bg-secondary hover:bg-accent transition-colors"
                 data-testid="button-settings"
-                onClick={() => toast({
-                  title: "ユーザー情報",
-                  description: `現在のユーザーID: ${userId}\nユーザー名: ${username}`,
-                })}
+                onClick={() => setShowUserInfo(!showUserInfo)}
               >
                 <i className="fas fa-cog text-secondary-foreground"></i>
               </button>
@@ -177,6 +177,29 @@ export default function Home() {
       </header>
 
       {/* --- */}
+
+      {/* User Info Panel */}
+      {showUserInfo && (
+        <div className="bg-card border-b border-border shadow-sm">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="bg-muted rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-foreground mb-2">ユーザー情報</h3>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <i className="fas fa-user text-primary"></i>
+                  <span className="text-sm text-muted-foreground">ユーザーID:</span>
+                  <span className="text-sm font-mono text-foreground bg-background px-2 py-1 rounded">{userId}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <i className="fas fa-id-badge text-primary"></i>
+                  <span className="text-sm text-muted-foreground">ユーザー名:</span>
+                  <span className="text-sm text-foreground">{username}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
