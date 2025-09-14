@@ -61,7 +61,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     initialSession: session,
     onComplete: (data) => {
       // useStudySession内でonCompleteが呼ばれたときに、このコンポーネントのonCompleteを呼び出す
-      onComplete(data);
+      if (data) onComplete(data);
     }
   });
 
@@ -69,7 +69,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
   useEffect(() => {
     console.log("DEBUG: Current word changed. Current word:", currentWord);
     console.log("DEBUG: Current word ID:", currentWord?.id);
-    console.log("DEBUG: Current word title:", currentWord?.title);
+    console.log("DEBUG: Current word word:", currentWord?.word);
   }, [currentWord]);
 
   const recordProgressMutation = useMutation({
@@ -140,7 +140,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
           <div className="space-y-4">
             <i className="fas fa-exclamation-triangle text-4xl text-destructive"></i>
             <p className="text-destructive-foreground">データの取得中にエラーが発生しました。</p>
-            <p className="text-sm text-muted-foreground">{error?.message}</p>
+            <p className="text-sm text-muted-foreground">{error && 'message' in error ? error.message : 'Unknown error'}</p>
           </div>
         </CardContent>
       </Card>

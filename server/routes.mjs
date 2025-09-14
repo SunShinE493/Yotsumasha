@@ -124,7 +124,34 @@ export async function registerRoutes(app) {
         sourceFile: config.sourceFile,
       });
 
-      res.json(session);
+      // Get vocabulary words for this session
+      let words;
+      if (config.sourceFile) {
+        // Get words from JSON file
+        const allWords = await loadVocabularyFromJson(config.sourceFile);
+        words = allWords.slice(config.startRange - 1, config.endRange);
+      } else {
+        // Get words from user storage
+        words = await storage.getVocabularyWordsInRange(userId, config.startRange, config.endRange);
+      }
+
+      // Shuffle words if random order is requested
+      if (config.order === "random") {
+        words = words.sort(() => Math.random() - 0.5);
+      }
+
+      // Limit to questionCount
+      words = words.slice(0, config.questionCount);
+
+      // Include words in the session response
+      const sessionWithWords = {
+        ...session,
+        words,
+        progress: [],
+        incorrectWords: []
+      };
+
+      res.json(sessionWithWords);
     } catch (error) {
       res.status(400).json({ 
         message: "Invalid study configuration",

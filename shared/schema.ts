@@ -111,6 +111,7 @@ endRange: z.number().min(1),
 questionCount: z.number().min(1),
 order: z.enum(["sequential", "random", "difficulty"]),
 reviewOnly: z.boolean().default(false),
+sourceFile: z.string().optional(),
 });
 
 // Types
@@ -118,7 +119,11 @@ export type VocabularyWord = typeof vocabularyWords.$inferSelect;
 export type InsertVocabularyWord = z.infer<typeof insertVocabularyWordSchema>;
 export type ReviewVocabularyWord = typeof reviewVocabularyWords.$inferSelect;
 export type InsertReviewVocabularyWord = z.infer<typeof insertReviewVocabularyWordSchema>;
-export type StudySession = typeof studySessions.$inferSelect;
+export type StudySession = typeof studySessions.$inferSelect & {
+  words?: VocabularyWord[];
+  progress?: WordProgress[];
+  incorrectWords?: VocabularyWord[];
+};
 export type InsertStudySession = z.infer<typeof insertStudySessionSchema>;
 export type WordProgress = typeof wordProgress.$inferSelect;
 export type InsertWordProgress = z.infer<typeof insertWordProgressSchema>;

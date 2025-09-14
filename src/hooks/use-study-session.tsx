@@ -22,7 +22,7 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
 
   const updateSessionMutation = useMutation({
     mutationFn: async (sessionData: StudySession) => {
-      const response = await apiRequest("PUT", `/api/study/session/${sessionData.id}`, sessionData, userId);
+      const response = await apiRequest("PUT", `/api/study/session/${sessionData.id}`, sessionData, userId || undefined);
       return response.json();
     },
     onSuccess: () => {

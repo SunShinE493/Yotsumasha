@@ -7,7 +7,7 @@ import { StudyResults } from "@/components/study-results";
 import { ReviewWords } from "@/components/review-words";
 import { apiRequest } from "@/lib/queryClient";
 import type { StudyConfig, StudySession as StudySessionType, VocabularyWord, WordProgress } from "@shared/schema";
-import iconSvg from './1f974.svg';
+// import iconSvg from './1f974.svg';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -26,7 +26,7 @@ export default function Home() {
   const { data: reviewWords = [], isLoading: isReviewWordsLoading } = useQuery<(WordProgress & { word: VocabularyWord })[]>({
     queryKey: ['/api/vocabulary/review', userId],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/vocabulary/review`, null, userId);
+      const response = await apiRequest("GET", `/api/vocabulary/review`, null, userId || undefined);
       return response.json();
     },
     enabled: !!userId,
@@ -37,7 +37,7 @@ export default function Home() {
       if (!userId) {
         throw new Error("User ID not available.");
       }
-      const response = await apiRequest("POST", "/api/study/session", config, userId);
+      const response = await apiRequest("POST", "/api/study/session", config, userId || undefined);
       return response.json();
     },
     onSuccess: (session) => {
@@ -98,7 +98,11 @@ export default function Home() {
       sourceFile: '',
       startRange: 0,
       endRange: 0,
+      isCompleted: false,
+      createdAt: new Date(),
       words: wordsToReview,
+      progress: [],
+      incorrectWords: []
     };
     handleStartSession(reviewSession);
   };
@@ -142,12 +146,8 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-                <img
-                  src={iconSvg}
-                  alt="App Logo"
-                  className="w-full h-full object-cover rounded-lg"
-                />
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+                <i className="fas fa-book text-primary-foreground"></i>
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-foreground">よつましゃアプリブラウザ版</h1>
