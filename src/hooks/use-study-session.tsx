@@ -5,136 +5,140 @@ import { useUserId } from "@/hooks/use-user-id";
 import { apiRequest } from "@/lib/queryClient";
 
 interface UseStudySessionProps {
-  initialSession: StudySession;
-  onComplete: (sessionData: StudySession) => void;
+initialSession: StudySession;
+onComplete: (sessionData: StudySession) => void;
 }
 
 export function useStudySession({ initialSession, onComplete }: UseStudySessionProps) {
-  const userId = useUserId();
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [correctCount, setCorrectCount] = useState(initialSession.correctCount || 0);
-  const [incorrectCount, setIncorrectCount] = useState(initialSession.incorrectCount || 0);
-  const [studyWords, setStudyWords] = useState<VocabularyWord[]>([]);
-  const [correctWords, setCorrectWords] = useState<VocabularyWord[]>([]);
-  const [incorrectWords, setIncorrectWords] = useState<VocabularyWord[]>([]);
-  const [hasCompleted, setHasCompleted] = useState(false);
-  const [isSessionLoading, setIsSessionLoading] = useState(true); // 新しいローディング状態
+const userId = useUserId();
+const [currentWordIndex, setCurrentWordIndex] = useState(0);
+const [correctCount, setCorrectCount] = useState(initialSession.correctCount || 0);
+const [incorrectCount, setIncorrectCount] = useState(initialSession.incorrectCount || 0);
+const [studyWords, setStudyWords] = useState<VocabularyWord[]>([]);
+const [correctWords, setCorrectWords] = useState<VocabularyWord[]>([]);
+const [incorrectWords, setIncorrectWords] = useState<VocabularyWord[]>([]);
+const [hasCompleted, setHasCompleted] = useState(false);
+const [isSessionLoading, setIsSessionLoading] = useState(true);
 
-  const updateSessionMutation = useMutation({
-    mutationFn: async (sessionData: StudySession) => {
-      const response = await apiRequest("PUT", `/api/study/session/${sessionData.id}`, sessionData, userId || undefined);
-      return response.json();
-    },
-    onSuccess: () => {
-      console.log("DEBUG: セッションデータの更新に成功しました。");
-    },
-    onError: (error) => {
-      console.log("DEBUG: セッションデータの更新に失敗しました。Error:", error);
-    }
-  });
+const updateSessionMutation = useMutation({
+mutationFn: async (sessionData: StudySession) => {
+const response = await apiRequest("PUT", `/api/study/session/${sessionData.id}`, sessionData, userId || undefined);
+return response.json();
+},
+onSuccess: (data, variables) => {
+console.log("DEBUG: セッションデータの更新に成功しました。");
+// API通信の成功後、初めて onComplete を呼び出す
+onComplete(variables);
+},
+onError: (error) => {
+console.log("DEBUG: セッションデータの更新に失敗しました。Error:", error);
+// エラー時もセッションを完了させるか、ユーザーに通知するかを検討
+// 例: onComplete(null);
+}
+});
 
-  useEffect(() => {
-    // initialSession.wordsがnullまたはundefinedの場合に備え、空の配列で初期化する
-    const words = initialSession.words || [];
+useEffect(() => {
+const words = initialSession.words || [];
+const filteredWords = words.filter(word => word != null);
+setStudyWords(filteredWords);
 
-    const filteredWords = words.filter(word => word != null);
-    setStudyWords(filteredWords);
+if (initialSession.id.startsWith('review-') && initialSession.incorrectWords) {
+setIncorrectWords(initialSession.incorrectWords);
+}
 
-    if (initialSession.id.startsWith('review-') && initialSession.incorrectWords) {
-      setIncorrectWords(initialSession.incorrectWords);
-    }
+const initialCorrect: VocabularyWord[] = [];
+const initialIncorrect: VocabularyWord[] = [];
+if (initialSession.progress) {
+for (const progress of initialSession.progress) {
+const word = filteredWords.find(w => w.id === progress.wordId);
+if (word) {
+if (progress.isRemembered) {
+initialCorrect.push(word);
+} else {
+initialIncorrect.push(word);
+}
+}
+}
+}
+setCorrectWords(initialCorrect);
+setIncorrectWords(initialIncorrect);
+setCorrectCount(initialCorrect.length);
+setIncorrectCount(initialIncorrect.length);
 
-    const initialCorrect: VocabularyWord[] = [];
-    const initialIncorrect: VocabularyWord[] = [];
-    if (initialSession.progress) {
-      for (const progress of initialSession.progress) {
-        const word = filteredWords.find(w => w.id === progress.wordId);
-        if (word) {
-          if (progress.isRemembered) {
-            initialCorrect.push(word);
-          } else {
-            initialIncorrect.push(word);
-          }
-        }
-      }
-    }
-    setCorrectWords(initialCorrect);
-    setIncorrectWords(initialIncorrect);
-    setCorrectCount(initialCorrect.length);
-    setIncorrectCount(initialIncorrect.length);
+setIsSessionLoading(false);
+}, [initialSession]);
 
-    // ここでローディング状態を解除
-    setIsSessionLoading(false);
+const currentWord = studyWords[currentWordIndex] || null;
+const isComplete = studyWords.length > 0 && currentWordIndex >= studyWords.length;
 
-  }, [initialSession]);
+useEffect(() => {
+console.log("DEBUG: useEffect isComplete trigger. isComplete:", isComplete, "hasCompleted:", hasCompleted);
+if (isComplete && !hasCompleted) {
+setHasCompleted(true);
 
-  const currentWord = studyWords[currentWordIndex] || null;
-  const isComplete = studyWords.length > 0 && currentWordIndex >= studyWords.length;
+const completedSessionData = {
+...initialSession,
+correctCount,
+incorrectCount,
+isCompleted: true,
+words: studyWords,
+incorrectWords,
+};
 
-  useEffect(() => {
-    console.log("DEBUG: useEffect isComplete trigger. isComplete:", isComplete, "hasCompleted:", hasCompleted);
-    if (isComplete && !hasCompleted) {
-      setHasCompleted(true);
+if (!initialSession.id.startsWith('review-')) {
+updateSessionMutation.mutate(completedSessionData);
+} else {
+// レビューセッションの場合はAPIを呼ばず、直接 onComplete を呼ぶ
+onComplete(completedSessionData);
+}
+}
+}, [isComplete, hasCompleted, onComplete, initialSession, correctCount, incorrectCount, studyWords, updateSessionMutation, incorrectWords]);
 
-      const completedSessionData = {
-        ...initialSession,
-        correctCount,
-        incorrectCount,
-        isCompleted: true,
-        words: studyWords,
-        incorrectWords,
-      };
+const markWord = (isRemembered: boolean) => {
+if (!currentWord) return;
 
-      if (!initialSession.id.startsWith('review-')) {
-        updateSessionMutation.mutate(completedSessionData);
-      }
-      onComplete(completedSessionData);
-    }
-  }, [isComplete, hasCompleted, onComplete, initialSession, correctCount, incorrectCount, studyWords, updateSessionMutation, incorrectWords]);
+if (isRemembered) {
+setCorrectCount(prev => prev + 1);
+setCorrectWords(prev => [...prev, currentWord]);
+} else {
+setIncorrectCount(prev => prev + 1);
+setIncorrectWords(prev => [...prev, currentWord]);
+}
+setCurrentWordIndex(prev => prev + 1);
+};
 
-  const markWord = (isRemembered: boolean) => {
-    if (!currentWord) return;
+const handleEarlyFinish = () => {
+const completedSessionData = {
+...initialSession,
+correctCount,
+incorrectCount,
+isCompleted: true,
+words: studyWords,
+incorrectWords,
+};
+if (!initialSession.id.startsWith('review-')) {
+updateSessionMutation.mutate(completedSessionData);
+} else {
+// レビューセッションの場合はAPIを呼ばず、直接 onComplete を呼ぶ
+onComplete(completedSessionData);
+}
+};
 
-    if (isRemembered) {
-      setCorrectCount(prev => prev + 1);
-      setCorrectWords(prev => [...prev, currentWord]);
-    } else {
-      setIncorrectCount(prev => prev + 1);
-      setIncorrectWords(prev => [...prev, currentWord]);
-    }
-    setCurrentWordIndex(prev => prev + 1);
-  };
+const isLoading = isSessionLoading || updateSessionMutation.isPending;
 
-  const handleEarlyFinish = () => {
-    const completedSessionData = {
-      ...initialSession,
-      correctCount,
-      incorrectCount,
-      isCompleted: true,
-      words: studyWords,
-      incorrectWords,
-    };
-    if (!initialSession.id.startsWith('review-')) {
-      updateSessionMutation.mutate(completedSessionData);
-    }
-    onComplete(completedSessionData);
-  };
-
-  const isLoading = isSessionLoading || updateSessionMutation.isPending;
-
-  return {
-    currentWordIndex,
-    currentWord,
-    correctCount,
-    incorrectCount,
-    studyWords,
-    isComplete,
-    markWord,
-    handleEarlyFinish,
-    isLoading,
-    isError: false,
-    error: null,
-    correctWords,
-    incorrectWords,
-  };
+return {
+currentWordIndex,
+currentWord,
+correctCount,
+incorrectCount,
+studyWords,
+isComplete,
+markWord,
+handleEarlyFinish,
+isLoading,
+isError: false,
+error: null,
+correctWords,
+incorrectWords,
+};
 }

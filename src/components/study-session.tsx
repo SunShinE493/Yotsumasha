@@ -88,8 +88,11 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
   };
 
   const handleMarkWord = (isRemembered: boolean) => {
-    markWord(isRemembered);
-
+    setRotationCount(0);
+    setTimeout(() => {
+      markWord(isRemembered);
+    },200);
+    
     if (!currentWord) {
       console.log("handleMarkWord called with no currentWord.");
       return;
@@ -100,7 +103,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
       isRemembered,
     }, {
       onSuccess: () => {
-        setRotationCount(0);
+       // setRotationCount(0);
       }
     });
   };
