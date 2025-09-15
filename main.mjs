@@ -234,7 +234,7 @@ async function checkFeed(channelFeedUrl) {
 import {dailyTrigger} from './commands/samples/daymath.mjs'
 import {askQuiz} from './commands/samples/wordQuiz.mjs'
 import { sendJsonAsText } from './commands/samples/wordQuiz.mjs'
-let wcount = 1;
+let wcount = 52;
 async function SchTrigger() {
 
   const now = moment().tz("Asia/Tokyo");
