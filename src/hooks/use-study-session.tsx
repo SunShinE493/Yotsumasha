@@ -77,7 +77,9 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
       if (!initialSession.id.startsWith('review-')) {
         updateSessionMutation.mutate(completedSessionData);
       } else {
+        setTimeout(() => {
         onComplete(completedSessionData);
+        },500);
       }
     }
   }, [isComplete, hasCompleted, onComplete, initialSession, correctCount, incorrectCount, studyWords, updateSessionMutation, incorrectWords]);

@@ -57,14 +57,22 @@ isCompleted: boolean("is_completed").default(false),
 createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const wordProgress = pgTable("word_progress", {
-id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-wordId: varchar("word_id").references(() => vocabularyWords.id),
-sessionId: varchar("session_id").references(() => studySessions.id),
-isRemembered: boolean("is_remembered").notNull(),
-attempts: integer("attempts").default(1),
-lastStudied: timestamp("last_studied").defaultNow(),
-});
+export const wordProgress = pgTable(
+  "word_progress",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    wordId: varchar("word_id").references(() => vocabularyWords.id).notNull(), 
+    sessionId: varchar("session_id").references(() => studySessions.id).notNull(),
+    isRemembered: boolean("is_remembered").notNull(),
+    attempts: integer("attempts").default(1),
+    lastStudied: timestamp("last_studied").defaultNow(),
+  },
+  (table) => {
+    return {
+      uniqueProgress: uniqueIndex("unique_progress_idx").on(table.wordId, table.sessionId),
+    };
+  }
+);
 
 // Zod schemas
 export const insertVocabularyWordSchema = createInsertSchema(vocabularyWords).pick({

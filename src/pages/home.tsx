@@ -6,6 +6,7 @@ import { StudySession } from "@/components/study-session";
 import { StudyResults } from "@/components/study-results";
 import { ReviewWords } from "@/components/review-words";
 import { apiRequest } from "@/lib/queryClient";
+import iconSvg from './1f974.svg';
 import type { StudyConfig, StudySession as StudySessionType, VocabularyWord, WordProgress } from "@shared/schema";
 // import iconSvg from './1f974.svg';
 import { useToast } from "@/hooks/use-toast";
@@ -158,8 +159,12 @@ return (
 <div className="max-w-4xl mx-auto px-4 py-4">
 <div className="flex items-center justify-between">
 <div className="flex items-center space-x-3">
-<div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-<i className="fas fa-book text-primary-foreground"></i>
+<div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center">
+  <img
+                  src={iconSvg}
+                  alt="App Logo"
+                  className="w-full h-full object-cover rounded-lg"
+                />
 </div>
 <div>
 <h1 className="text-xl font-semibold text-foreground">よつましゃアプリブラウザ版</h1>

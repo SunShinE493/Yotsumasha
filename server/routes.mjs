@@ -68,14 +68,14 @@ export async function registerRoutes(app) {
   app.get("/api/vocabulary", optionalAuthentication, async (req, res) => {
     try {
       const userId = req.userId;
-      const sourceFile = req.query.source; // 'koumin.json'など
+      const sourceFile = req.query.source;
 
       let words;
       if (sourceFile) {
-        // JSONファイルから読み込む
+        // Load from JSON file
         words = await loadVocabularyFromJson(sourceFile);
       } else {
-        // MemStorageから読み込む
+        // Load from MemStorage
         words = await storage.getVocabularyWords(userId);
       }
       res.json(words);
@@ -90,7 +90,7 @@ export async function registerRoutes(app) {
       const start = parseInt(req.params.start);
       const end = parseInt(req.params.end);
       const userId = req.userId;
-      const sourceFile = req.query.source; // 'koumin.json'など
+      const sourceFile = req.query.source;
 
       if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
         return res.status(400).json({ message: "Invalid range parameters" });
@@ -98,11 +98,9 @@ export async function registerRoutes(app) {
 
       let words;
       if (sourceFile) {
-        // JSONファイルから読み込み、範囲を適用
         const allWords = await loadVocabularyFromJson(sourceFile);
         words = allWords.slice(start - 1, end);
       } else {
-        // MemStorageから読み込み、範囲を適用
         words = await storage.getVocabularyWordsInRange(userId, start, end);
       }
       res.json(words);
@@ -124,49 +122,33 @@ export async function registerRoutes(app) {
         sourceFile: config.sourceFile,
       });
 
-      // Get vocabulary words for this session
       let words;
       if (config.sourceFile) {
-        // Get words from JSON file
         const allWords = await loadVocabularyFromJson(config.sourceFile);
         words = allWords.slice(config.startRange - 1, config.endRange);
       } else {
-        // Get words from user storage
         words = await storage.getVocabularyWordsInRange(userId, config.startRange, config.endRange);
       }
 
-      // Shuffle words if random order is requested
       if (config.order === "random") {
         words = words.sort(() => Math.random() - 0.5);
       }
 
-      // Limit to questionCount
       words = words.slice(0, config.questionCount);
 
-      // Store words in vocabularyWords for review functionality
-      if (config.sourceFile && words.length > 0) {
-        for (const word of words) {
-          // Only create if the word doesn't already exist for this user
-          const userWords = storage.vocabularyWords.get(userId) || new Map();
-          const existingWord = Array.from(userWords.values()).find(w => w.word === word.word);
-          if (!existingWord) {
-            await storage.createVocabularyWord(userId, word);
-          }
-        }
-      }
+      const reviewWords = await storage.getReviewWords(userId);
 
-      // Include words in the session response
       const sessionWithWords = {
         ...session,
         words,
         progress: [],
-        incorrectWords: []
+        incorrectWords: reviewWords,
       };
 
       res.json(sessionWithWords);
     } catch (error) {
       res.status(400).json({ 
-        message: "Invalid study configuration",
+        message: "セッションの作成に失敗しました。無効な学習設定です。",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
@@ -186,7 +168,7 @@ export async function registerRoutes(app) {
     }
   });
 
-  // Update study session
+  // Update study session (PATCH and PUT)
   app.patch("/api/study/session/:id", optionalAuthentication, async (req, res) => {
     try {
       const updates = req.body;
@@ -201,7 +183,6 @@ export async function registerRoutes(app) {
     }
   });
 
-  // Update study session (PUT method for frontend compatibility)
   app.put("/api/study/session/:id", optionalAuthentication, async (req, res) => {
     try {
       const updates = req.body;
@@ -221,6 +202,7 @@ export async function registerRoutes(app) {
     try {
       const progressData = insertWordProgressSchema.parse(req.body);
       const userId = req.userId;
+      // The storage.createWordProgress function now handles the check-and-update logic
       const progress = await storage.createWordProgress(userId, progressData);
       res.json(progress);
     } catch (error) {

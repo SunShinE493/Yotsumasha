@@ -78,7 +78,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
         wordId,
         sessionId: session.id,
         isRemembered,
-        attempts: 1,
+        //attempts: 1,
       }, userId);
     },
   });
@@ -104,6 +104,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     }, {
       onSuccess: () => {
        // setRotationCount(0);
+        //markWord(isRemembered);
       }
     });
   };
