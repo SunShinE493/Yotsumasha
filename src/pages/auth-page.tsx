@@ -116,10 +116,10 @@ export default function AuthPage() {
         <div className="w-full max-w-md mx-auto">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4 shadow-lg">
-              <span className="text-2xl">🥔</span>
+              <span className="text-2xl">🥴</span>
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">
-              MiniPotato Bot へようこそ
+              よつましゃアプリブラウザ版 へようこそ
             </h1>
             <p className="text-gray-600 text-lg">
               単語クイズで楽しく学習しましょう ✨
@@ -177,7 +177,7 @@ export default function AuthPage() {
                     )}
                     <Button
                       type="submit"
-                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-white"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending && (
@@ -239,7 +239,7 @@ export default function AuthPage() {
                     )}
                     <Button
                       type="submit"
-                      className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl text-white"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending && (
@@ -293,13 +293,13 @@ export default function AuthPage() {
 
         {/* Right side - App Description */}
         <div className="lg:pl-8">
-          <div className="text-center lg:text-left space-y-8">
+          <div className="text-center space-y-8">
             <div>
-              <h2 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6 leading-tight">
+              <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6 leading-tight">
                 効率的な単語学習
               </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                MiniPotato Botで楽しく語彙力を向上させましょう 🚀
+              <p className="text-base text-gray-600 leading-relaxed">
+                よつましゃアプリで語彙力を向上させましょう 🚀
               </p>
             </div>
 
