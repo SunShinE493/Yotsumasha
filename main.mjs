@@ -140,7 +140,7 @@ client.on("messageCreate", async (message) => {
   await handlers.get("messageCreate").default(message);
 });
 
-client.on("ready", async () => {
+client.on("clientReady", async () => {
   await client.user.setActivity('🥔', { type: ActivityType.Custom, state: "🥔を栽培中" });
   console.log(`${client.user.tag} がログインしました！`);
   const channel = await client.channels.fetch('1390928894118596650')//'1390928894118596650'); // てるまない雑談1162776615445594122   ,1201294753040453642
