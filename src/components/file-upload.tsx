@@ -39,11 +39,26 @@ const FILE_PRESETS = {
   "rinri.json": {
   presets: [
   { start: 1, end: 73, label: "倫理Ⅰ1-73" },
+    { start: 74, end: 221, label: "倫理Ⅱ74-221" },
   ],
   },
   "seikei.json":{
     presets: [
-      { start: 1, end: 53, label: "政経Ⅱ1-53" },
+      { start: 1, end: 53, label: "政経Ⅰ1-53" },
+      
+    ]
+  },
+  "chiri.json":{
+    presets: [
+      { start: 1, end: 180, label: "地理Ⅰ1-180" },
+      { start: 181, end: 340, label: "地理Ⅱ181-340" },
+      { start: 341, end: 440, label: "地理Ⅲ341-440" },
+    ]
+  },
+  "chiri2.json":{
+    presets: [
+      { start: 1, end: 100, label: "地理Ⅳ1-100" },
+      { start: 181, end: 400, label: "地理Ⅴ101-400" },
     ]
   }
 };
@@ -53,12 +68,16 @@ import koumin from "./data/koumin.json";
 import koumin2 from "./data/koumin2.json";
 import rinri from "./data/rinri.json";
 import seikei from "./data/seikei.json";
+import chiri from "./data/chiri.json";
+import chiri2 from "./data/chiri2.json";
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
   "koumin.json": koumin,
   "koumin2.json": koumin2,
   "rinri.json": rinri,
   "seikei.json": seikei,
+  "chiri.json":chiri,
+  "chiri2.json":chiri2,
 };
 
 // 親に渡すデータの型を定義

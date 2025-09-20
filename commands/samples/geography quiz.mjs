@@ -30,7 +30,7 @@ export const data = new SlashCommandBuilder()
 
     option.setName('category')
 
-      .setDescription('問題のカテゴリ\n1:定期考査Ⅰ\n2:定期考査Ⅱ\n3:定期考査Ⅲ 5:考査ⅴ 15:公共V')
+      .setDescription('問題のカテゴリ\n1:定期考査Ⅰ\n2:Ⅱ\n3:Ⅲ 5;Ⅳ 6:考査ⅴ 15:公共V')
 
       .setRequired(true)
 
