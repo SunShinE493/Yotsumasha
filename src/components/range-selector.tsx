@@ -1,60 +1,48 @@
-// range-selector.tsx
-
 import { useState ,useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import type { StudyConfig, StudySession } from "@shared/schema";
+import { SelectedJsonInfo } from "./file-upload";
+import { Check } from "lucide-react";
 
-// 修正後: presetsプロパティを追加
 interface RangeSelectorProps {
-  selectedJson: {
-    name: string;
-    wordCount: number;
-    presets: { start: number; end: number; label: string }[];
-  } | null;
+  selectedJson: SelectedJsonInfo | null;
   onStartSession: (session: StudySession) => void;
+  isStarting: boolean;
+  userId: string | null; // 👈 ユーザーIDを追加
 }
 
-export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorProps) {
+export function RangeSelector({ selectedJson, onStartSession, isStarting, userId }: RangeSelectorProps) {
   const totalWords = selectedJson?.wordCount || 0;
-  // 修正: 初期値を空文字列に変更
   const [endRange, setEndRange] = useState<number | string>(Math.min(50, totalWords));
   const [startRange, setStartRange] = useState<number | string>(1);
-  const [questionCount, setQuestionCount] = useState((Math.min(50, totalWords)));
+  const [questionCount, setQuestionCount] = useState<number>(-1);
   const [order, setOrder] = useState<"sequential" | "random" | "difficulty">("random");
   const [reviewOnly, setReviewOnly] = useState(false);
   const { toast } = useToast();
 
-
-
-
   useEffect(() => {
     if (selectedJson && selectedJson.wordCount > 0) {
-      // selectedJson が有効な値になったときに範囲を更新
       setStartRange(1);
       setEndRange(Math.min(50, selectedJson.wordCount));
       setQuestionCount(-1);
     }
-  }, [selectedJson]); // selectedJson が変更されたときにこの effect を実行
-
-
-
-
-
-
-
-
+  }, [selectedJson]);
 
   const createSessionMutation = useMutation({
     mutationFn: async (config: StudyConfig) => {
-      const response = await apiRequest("POST", "/api/study/session", config);
+      // ユーザーIDがない場合はエラーを投げる
+      if (!userId) {
+        throw new Error("ユーザーIDが利用できません。");
+      }
+      const response = await apiRequest("POST", "/api/study/session", config, userId);
       return response.json();
     },
     onSuccess: (session) => {
@@ -63,7 +51,7 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
     onError: (error) => {
       toast({
         title: "セッション作成エラー",
-        description: error.message,
+        description: "セッションの作成に失敗しました。",
         variant: "destructive",
       });
     }
@@ -89,12 +77,15 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
     }
 
     const config: StudyConfig = {
-      startRange,
-      endRange,
-      questionCount: questionCount === -1 ? endRange - startRange + 1 : questionCount,
+      startRange: Number(startRange),
+      endRange: Number(endRange),
+      questionCount: questionCount === -1 ? Number(endRange) - Number(startRange) + 1 : questionCount,
       order,
       reviewOnly,
-      sourceFile: selectedJson.name,
+      // プリセットが設定されている場合のみ sourceFile を渡す
+      ...(selectedJson?.presets && selectedJson.presets.length > 0
+        ? { sourceFile: selectedJson.name }
+        : {}),
     };
 
     createSessionMutation.mutate(config);
@@ -105,16 +96,22 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
     setEndRange(Math.min(end, totalWords));
   };
 
+  const isPresetActive = (preset: { start: number; end: number }) => {
+    return startRange === preset.start && endRange === preset.end;
+  };
+
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
+      <CardHeader>
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <i className="fas fa-sliders-h text-primary"></i>
-            <h2 className="text-lg font-semibold text-foreground">学習範囲の設定</h2>
+            <i className="fas fa-cogs text-primary text-xl"></i>
+            <CardTitle>範囲設定</CardTitle>
           </div>
           <div className="flex items-center space-x-2">
-            <Label htmlFor="review-mode" className="text-sm text-muted-foreground">復習のみ</Label>
+            <Label htmlFor="review-mode" className="text-sm text-muted-foreground">
+              復習のみ
+            </Label>
             <Switch
               id="review-mode"
               checked={reviewOnly}
@@ -123,9 +120,12 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
             />
           </div>
         </div>
-
+        <CardDescription>
+          単語の範囲や出題順序をカスタマイズして学習を開始できます。
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
         <div className="grid md:grid-cols-3 gap-4">
-          {/* Range Inputs */}
           <div className="space-y-3">
             <div>
               <Label htmlFor="start-range" className="text-sm font-medium text-foreground mb-1">
@@ -138,8 +138,7 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
                 value={startRange}
                 onChange={(e) => {
                   const value = e.target.value;
-                  // 修正: 入力値が空の場合は空文字列に設定
-                  setStartRange(value === '' ? '' : parseInt(value));
+                  setStartRange(value === "" ? "" : parseInt(value));
                 }}
                 data-testid="input-start-range"
               />
@@ -152,33 +151,30 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
                 id="end-range"
                 type="number"
                 min="1"
-                max={totalWords} // valueはそのまま endRange を使用
+                max={totalWords}
                 value={endRange}
                 onChange={(e) => {
                   const value = e.target.value;
-                  // 修正: 入力値が空の場合は空文字列に設定
-                  setEndRange(value === '' ? '' : parseInt(value));
+                  setEndRange(value === "" ? "" : parseInt(value));
                 }}
                 data-testid="input-end-range"
               />
             </div>
           </div>
-
-          {/* Quick Presets */}
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground mb-2">クイック設定</p>
             <div className="grid grid-cols-2 gap-2">
-              {/* 修正箇所：動的にプリセットボタンを生成 */}
               {selectedJson?.presets.length > 0 ? (
                 selectedJson.presets.map((preset, index) => (
                   <Button
                     key={index}
-                    variant="secondary"
+                    variant={isPresetActive(preset) ? "secondary" : "outline"}
                     size="sm"
                     onClick={() => setPresetRange(preset.start, preset.end)}
                     data-testid={`button-preset-${preset.label}`}
                   >
                     {preset.label}
+                    {isPresetActive(preset) && <Check className="ml-2 h-4 w-4" />}
                   </Button>
                 ))
               ) : (
@@ -194,8 +190,6 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
               </Button>
             </div>
           </div>
-
-          {/* Study Options */}
           <div className="space-y-3">
             <div>
               <Label htmlFor="question-count" className="text-sm font-medium text-foreground mb-1">
@@ -231,16 +225,14 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
             </div>
           </div>
         </div>
-
-        {/* Start Study Button */}
         <div className="mt-6 flex justify-center">
           <Button
             onClick={handleStartStudy}
-            disabled={createSessionMutation.isPending || !selectedJson}
+            disabled={isStarting || !selectedJson}
             size="lg"
             data-testid="button-start-study"
           >
-            {createSessionMutation.isPending ? (
+            {isStarting ? (
               <i className="fas fa-spinner fa-spin mr-2"></i>
             ) : (
               <i className="fas fa-play mr-2"></i>
@@ -248,7 +240,6 @@ export function RangeSelector({ selectedJson, onStartSession }: RangeSelectorPro
             学習を開始
           </Button>
         </div>
-
         {!selectedJson && (
           <p className="text-center text-sm text-muted-foreground mt-2">
             学習を開始するJSONファイルを選択してください。
