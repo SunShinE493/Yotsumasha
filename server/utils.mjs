@@ -14,6 +14,8 @@ const ALLOWED_JSON_FILES = [
   'koumin2.json',
   'rinri.json',
   'seikei.json',
+  'chiri.json',
+  'chiri2.json',
 ];
 
 export async function loadVocabularyFromJson(fileName) {
