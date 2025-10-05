@@ -191,12 +191,8 @@ export default function Home() {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-foreground">
-                  よつましゃアプリブラウザ版
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Vocabulary Learning
-                </p>
+                <h1 className="text-xl font-semibold text-foreground">学習ホーム</h1>
+                <p className="text-sm text-muted-foreground">単語の暗記学習</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">

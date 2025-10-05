@@ -14,6 +14,12 @@ export class MemStorage {
     this.wordProgress = new Map(); // userId -> Map<compositeKey, progress>
     this.nextWordIndex = new Map(); // userId -> nextIndex
 
+    // User datasets library: userId -> Map<datasetName, words[]>
+    this.userDatasets = new Map();
+
+    // Score attack: userId -> record
+    this.scoreAttack = new Map();
+
     // Session store for authentication
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
@@ -124,6 +130,45 @@ export class MemStorage {
       this.vocabularyWords.get(userId).clear();
     }
     this.nextWordIndex.set(userId, 1);
+  }
+
+  // --- User datasets library ---
+  _ensureUserDatasetMap(userId) {
+    if (!this.userDatasets.has(userId)) {
+      this.userDatasets.set(userId, new Map());
+    }
+    return this.userDatasets.get(userId);
+  }
+
+  async saveDataset(userId, name, words) {
+    const map = this._ensureUserDatasetMap(userId);
+    const normalized = words.map((w) => ({
+      id: w.id || randomUUID(),
+      word: w.word,
+      meaning: w.meaning,
+      category: w.category || null,
+      example: w.example || null,
+      difficulty: w.difficulty || null,
+      createdAt: w.createdAt || new Date(),
+    }));
+    map.set(name, normalized);
+    return { name, count: normalized.length };
+  }
+
+  async listDatasets(userId) {
+    const map = this.userDatasets.get(userId) || new Map();
+    return Array.from(map.entries()).map(([name, arr]) => ({ name, count: arr.length }));
+  }
+
+  async applyDataset(userId, name) {
+    const map = this.userDatasets.get(userId) || new Map();
+    const arr = map.get(name);
+    if (!arr) return { applied: false, count: 0 };
+    this.vocabularyWords.set(userId, new Map());
+    for (const w of arr) {
+      await this.createVocabularyWord(userId, w);
+    }
+    return { applied: true, count: arr.length };
   }
 
   async createStudySession(userId, insertSession) {
@@ -276,6 +321,77 @@ export class MemStorage {
     };
     userProgress.set(progressId, updatedProgress);
     return updatedProgress;
+  }
+
+  // --- Export/Import all user data (backup/restore) ---
+  async exportUserData(userId) {
+    const words = await this.getVocabularyWords(userId);
+    const sessions = Array.from((this.studySessions.get(userId) || new Map()).values());
+    const progress = Array.from((this.wordProgress.get(userId) || new Map()).values());
+    const datasets = await this.listDatasets(userId);
+    const dsMap = this.userDatasets.get(userId) || new Map();
+    const datasetPayload = {};
+    for (const [name, arr] of dsMap.entries()) {
+      datasetPayload[name] = arr;
+    }
+    const score = this.scoreAttack?.get(userId) || null;
+    return { words, sessions, progress, datasets, datasetPayload, score };
+  }
+
+  async importUserData(userId, data) {
+    // restore datasets
+    if (data && data.datasetPayload && typeof data.datasetPayload === 'object') {
+      const ds = new Map();
+      for (const name of Object.keys(data.datasetPayload)) {
+        ds.set(name, data.datasetPayload[name]);
+      }
+      this.userDatasets.set(userId, ds);
+    }
+    // restore vocabulary
+    this.vocabularyWords.set(userId, new Map());
+    if (Array.isArray(data?.words)) {
+      for (const w of data.words) {
+        await this.createVocabularyWord(userId, w);
+      }
+    }
+    // restore sessions
+    this.studySessions.set(userId, new Map());
+    if (Array.isArray(data?.sessions)) {
+      const m = this.studySessions.get(userId);
+      for (const s of data.sessions) {
+        m.set(s.id || randomUUID(), { ...s });
+      }
+    }
+    // restore progress
+    this.wordProgress.set(userId, new Map());
+    if (Array.isArray(data?.progress)) {
+      const m = this.wordProgress.get(userId);
+      for (const p of data.progress) {
+        m.set(p.wordId, { ...p });
+      }
+    }
+    // restore score attack
+    if (!this.scoreAttack) this.scoreAttack = new Map();
+    if (data?.score) {
+      this.scoreAttack.set(userId, data.score);
+    }
+    return true;
+  }
+
+  // --- Score Attack operations ---
+  async saveScoreAttack(userId, score) {
+    const prev = this.scoreAttack.get(userId) || { lastScore: 0, bestScore: 0, updatedAt: null };
+    const record = {
+      lastScore: score,
+      bestScore: Math.max(prev.bestScore || 0, score),
+      updatedAt: new Date(),
+    };
+    this.scoreAttack.set(userId, record);
+    return record;
+  }
+
+  async getScoreAttack(userId) {
+    return this.scoreAttack.get(userId) || { lastScore: 0, bestScore: 0, updatedAt: null };
   }
 }
 

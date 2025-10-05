@@ -1,6 +1,6 @@
 // FileUpload.tsx
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -272,6 +272,9 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
               </Select>
             </div>
 
+            {/* 保存済みデータセットの適用 */}
+            <SavedDatasets />
+
             {/* Sample JSON Structure */}
             <div className="bg-muted rounded-lg p-3">
               <p className="text-sm font-medium text-foreground mb-2">サンプル構造:</p>
@@ -325,5 +328,46 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function SavedDatasets() {
+  const { toast } = useToast();
+  const [datasets, setDatasets] = useState<{ name: string; count: number }[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiRequest('GET', '/api/datasets');
+        setDatasets(await res.json());
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  const handleApply = async (name: string) => {
+    try {
+      await apiRequest('POST', '/api/datasets/apply', { name });
+      toast({ title: '適用完了', description: `${name} を現在の単語に適用しました` });
+    } catch (e) {
+      toast({ title: '適用失敗', description: 'データセットの適用に失敗しました', variant: 'destructive' });
+    }
+  };
+
+  if (datasets.length === 0) return null;
+
+  return (
+    <div className="bg-muted rounded-lg p-3 space-y-2">
+      <Label className="block text-sm font-medium text-foreground mb-1">保存済みデータセット</Label>
+      <div className="grid gap-2">
+        {datasets.map(ds => (
+          <div key={ds.name} className="flex items-center justify-between rounded-md bg-background border border-border px-3 py-2">
+            <div className="text-sm text-foreground">{ds.name} <span className="text-muted-foreground">({ds.count})</span></div>
+            <Button size="sm" variant="outline" onClick={() => handleApply(ds.name)}>適用</Button>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

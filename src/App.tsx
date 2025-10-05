@@ -7,6 +7,10 @@ import { Toaster } from "@/components/ui/toaster";
 import Home from './pages/home';
 import AuthPage from './pages/auth-page';
 import TestPage from './pages/test';
+import Landing from './pages/landing';
+import BattlePage from './pages/battle';
+import ScorePage from './pages/score';
+import RankingPage from './pages/ranking';
 import { Loader2 } from 'lucide-react';
 
 const queryClient = new QueryClient({
@@ -35,13 +39,18 @@ function AppRouter() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+      {/* New dashboard homepage always available */}
+      <Route path="/" component={Landing} />
       {user ? (
         <>
-          <Route path="/" component={Home} />
+          <Route path="/study" component={Home} />
           <Route path="/test" component={TestPage} />
+          <Route path="/battle" component={BattlePage} />
+          <Route path="/score" component={ScorePage} />
+          <Route path="/ranking" component={RankingPage} />
         </>
       ) : (
-        <Route path="/" component={AuthPage} />
+        <Route path="/login" component={AuthPage} />
       )}
       <Route>
         <div className="min-h-screen bg-background flex items-center justify-center">
