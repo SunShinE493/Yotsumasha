@@ -89,12 +89,14 @@ export class MemStorage {
 
   async getVocabularyWords(userId) {
     const userWords = this.vocabularyWords.get(userId) || new Map();
-    return Array.from(userWords.values()).sort((a, b) => a.word.localeCompare(b.word));
+    // Preserve insertion order (JSON order) instead of alphabetical sort
+    return Array.from(userWords.values());
   }
 
   async getVocabularyWordsInRange(userId, start, end) {
     const userWords = this.vocabularyWords.get(userId) || new Map();
-    const allWords = Array.from(userWords.values()).sort((a, b) => a.word.localeCompare(b.word));
+    // Preserve insertion order when slicing range
+    const allWords = Array.from(userWords.values());
     return allWords.slice(start - 1, end);
   }
 

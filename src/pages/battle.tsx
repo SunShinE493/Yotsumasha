@@ -106,7 +106,7 @@ export default function BattlePage() {
     // Load chosen range words from server-side storage for this user
     const s = Math.max(1, rangeStart);
     const e = Math.max(s, rangeEnd);
-    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}`);
+    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
     const words = await res.json();
     const ws = ensureSocket();
     const sendCreate = () => {

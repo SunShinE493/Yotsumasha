@@ -45,7 +45,7 @@ export default function ScorePage() {
     // Fetch words from server storage (FileUpload already saved them)
     const s = Math.max(1, rangeStart);
     const e = Math.max(s, rangeEnd);
-    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}`);
+    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
     const list = await res.json();
     const shuffled = [...list].sort(() => Math.random() - 0.5);
     setWords(shuffled);
