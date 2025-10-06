@@ -18,6 +18,19 @@ export default function ScorePage() {
   const [answer, setAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [mistakes, setMistakes] = useState(0);
+  const [skips, setSkips] = useState(0);
+  const [flash, setFlash] = useState<'none'|'red'>('none');
+  const [result, setResult] = useState<null | {
+    fileName: string | null;
+    start: number;
+    end: number;
+    limit: number;
+    maxCombo: number;
+    score: number;
+    mistakes: number;
+    skips: number;
+  }>(null);
   const [remaining, setRemaining] = useState(0);
   const timerRef = useRef<number | null>(null);
 
@@ -38,6 +51,10 @@ export default function ScorePage() {
     setIdx(0);
     setScore(0);
     setCombo(0);
+    setMistakes(0);
+    setSkips(0);
+    setFlash('none');
+    setResult(null);
     setRemaining(limitSec);
     setIsPlaying(true);
     if (timerRef.current) window.clearInterval(timerRef.current);
@@ -55,6 +72,17 @@ export default function ScorePage() {
 
   const finishGame = async () => {
     setIsPlaying(false);
+    const summary = {
+      fileName: selectedJson?.name ?? null,
+      start: rangeStart,
+      end: rangeEnd,
+      limit: limitSec,
+      maxCombo: combo, // this is current; compute max below
+      score,
+      mistakes,
+      skips,
+    };
+    setResult(summary);
     try {
       await apiRequest('POST', '/api/score-attack/submit', { score });
     } catch {}
@@ -62,7 +90,7 @@ export default function ScorePage() {
 
   const submitAnswer = () => {
     if (!current) return;
-    const ok = answer.trim().toLowerCase() === String(current.meaning||'').trim().toLowerCase();
+    const ok = answer.trim() === String(current.meaning||'').trim();
     if (ok) {
       const next = (idx + 1) % words.length;
       setScore((s) => s + 100 + combo * 10);
@@ -71,7 +99,22 @@ export default function ScorePage() {
       setAnswer('');
     } else {
       setCombo(0);
+      setMistakes((m)=>m+1);
+      setFlash('red');
+      setTimeout(()=>setFlash('none'), 200);
     }
+  };
+
+  const skipQuestion = () => {
+    if (!current) return;
+    setSkips((k)=>k+1);
+    setScore((s)=> Math.max(0, s - 50));
+    setCombo(0);
+    setFlash('red');
+    setTimeout(()=>setFlash('none'), 200);
+    const next = (idx + 1) % words.length;
+    setIdx(next);
+    setAnswer('');
   };
 
   return (
@@ -118,7 +161,7 @@ export default function ScorePage() {
           </Card>
         ) : (
           <Card>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className={`p-6 space-y-4 ${flash==='red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div>コンボ: <span className="text-foreground font-medium">{combo}</span></div>
                 <div>スコア: <span className="text-foreground font-medium">{score}</span></div>
@@ -131,7 +174,29 @@ export default function ScorePage() {
               <div className="flex gap-2">
                 <Input placeholder="ここに意味を入力" value={answer} onChange={(e)=>setAnswer(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter') submitAnswer(); }} />
                 <Button onClick={submitAnswer}>送信</Button>
+                <Button variant="secondary" onClick={skipQuestion}>？</Button>
                 <Button variant="outline" onClick={finishGame}>終了</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {(!isPlaying && result) && (
+          <Card>
+            <CardContent className="p-6 space-y-3">
+              <h3 className="font-semibold">リザルト</h3>
+              <div className="grid sm:grid-cols-2 gap-2 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">ファイル</span><span className="text-foreground">{result.fileName ?? '-'}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">範囲</span><span className="text-foreground">{rangeStart} - {rangeEnd}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">制限時間</span><span className="text-foreground">{limitSec}s</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">コンボ</span><span className="text-foreground">{combo}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">スコア</span><span className="text-foreground">{score}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">間違い</span><span className="text-foreground">{mistakes}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">スキップ</span><span className="text-foreground">{skips}</span></div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={startGame}>もう一度</Button>
+                <Button variant="outline" onClick={()=>setResult(null)}>閉じる</Button>
               </div>
             </CardContent>
           </Card>

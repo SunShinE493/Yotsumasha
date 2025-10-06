@@ -20,7 +20,7 @@ export default function BattlePage() {
   const wsRef = useRef<WebSocket | null>(null);
   const [phase, setPhase] = useState<'idle'|'lobby'|'running'|'ended'>('idle');
   const [players, setPlayers] = useState<string[]>([]);
-  const [questionMeaning, setQuestionMeaning] = useState<string | null>(null);
+  const [questionWord, setQuestionWord] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
   const [remaining, setRemaining] = useState<number | null>(null);
@@ -55,7 +55,7 @@ export default function BattlePage() {
           }
         } else if (msg.type === 'question') {
           setPhase('running');
-          setQuestionMeaning(msg.meaning ?? null);
+          setQuestionWord(msg.word ?? null);
           setAnswerText('');
           if (!timerRef.current && typeof remaining === 'number' && remaining > 0) {
             startCountdown(remaining);
@@ -65,7 +65,7 @@ export default function BattlePage() {
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
-          setQuestionMeaning(null);
+          setQuestionWord(null);
           if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         }
       } catch {}
@@ -235,12 +235,12 @@ export default function BattlePage() {
               </div>
               <div className="rounded-lg border border-border p-6 bg-card">
                 <div className="text-sm text-muted-foreground mb-1">問題:</div>
-                <div className="text-2xl font-semibold text-foreground">{questionMeaning ?? (phase==='ended' ? '終了しました' : '...')}</div>
+                <div className="text-2xl font-semibold text-foreground">{questionWord ?? (phase==='ended' ? '終了しました' : '...')}</div>
               </div>
 
               {phase === 'running' && (
                 <form onSubmit={submitAnswer} className="flex gap-2">
-                  <Input placeholder="英単語を入力" value={answerText} onChange={(e)=>setAnswerText(e.target.value)} autoFocus />
+                  <Input placeholder="意味を入力" value={answerText} onChange={(e)=>setAnswerText(e.target.value)} autoFocus />
                   <Button type="submit">回答</Button>
                 </form>
               )}

@@ -109,7 +109,7 @@ async function runWebserver(){
     }, room.timeLimit * 1000);
     // first question
     const q = room.words[room.idx];
-    broadcast(roomId, { type: 'question', index: room.idx, meaning: q?.meaning ?? null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
+    broadcast(roomId, { type: 'question', index: room.idx, word: q?.word ?? null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
   }
 
   wss.on('connection', (ws) => {
@@ -160,7 +160,7 @@ async function runWebserver(){
         const { room, name, text } = msg; const r = rooms.get(room);
         if (!r || r.state !== 'running') return;
         const q = r.words[r.idx]; if (!q) return;
-        const ok = String(text||'').trim().toLowerCase() === q.word.trim().toLowerCase();
+        const ok = String(text||'').trim() === q.meaning.trim();
         if (ok) {
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
           r.asked = (r.asked || 0) + 1;
@@ -173,7 +173,7 @@ async function runWebserver(){
           r.idx = (r.idx + 1) % r.words.length;
           const nq = r.words[r.idx];
           broadcast(room, { type: 'score', scores: toScores(r) });
-          broadcast(room, { type: 'question', index: r.idx, meaning: nq?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          broadcast(room, { type: 'question', index: r.idx, word: nq?.word ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
         }
       }
     });
