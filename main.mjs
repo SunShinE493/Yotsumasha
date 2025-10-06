@@ -166,7 +166,7 @@ async function runWebserver(){
         const { room, name, text } = msg; const r = rooms.get(room);
         if (!r || r.state !== 'running') return;
         const q = r.words[r.idx]; if (!q) return;
-        const ok = String(text||'').trim() === q.meaning.trim();
+        const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
         if (ok) {
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
           r.asked = (r.asked || 0) + 1;
