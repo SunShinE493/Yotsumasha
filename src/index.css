@@ -214,11 +214,17 @@
 @layer utilities {
   /* Glass morphism effects */
   .glass {
-    @apply backdrop-blur-md bg-white/10 border border-white/20;
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.2);
   }
   
   .glass-dark {
-    @apply backdrop-blur-md bg-black/10 border border-white/10;
+    backdrop-filter: blur(12px);
+    background-color: rgba(0, 0, 0, 0.1);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   /* Gradient backgrounds */
