@@ -21,6 +21,8 @@ export default function BattlePage() {
   const [phase, setPhase] = useState<'idle'|'lobby'|'running'|'ended'>('idle');
   const [players, setPlayers] = useState<string[]>([]);
   const [questionWord, setQuestionWord] = useState<string | null>(null);
+  const [questionMeaning, setQuestionMeaning] = useState<string | null>(null);
+  const [questionId, setQuestionId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
@@ -56,9 +58,12 @@ export default function BattlePage() {
           }
         } else if (msg.type === 'question') {
           setPhase('running');
+          // when next question arrives, show previous question's answer
+          setLastAnswer((prev) => (questionMeaning ? questionMeaning : prev));
           setQuestionWord(msg.word ?? null);
+          setQuestionMeaning(msg.meaning ?? null);
+          setQuestionId(msg.id ?? null);
           setAnswerText('');
-          if (msg.meaning) setLastAnswer(msg.meaning);
           if (!timerRef.current && typeof remaining === 'number' && remaining > 0) {
             startCountdown(remaining);
           }
@@ -68,6 +73,8 @@ export default function BattlePage() {
           setPhase('ended');
           setScores(msg.scores || {});
           setQuestionWord(null);
+          setQuestionMeaning(null);
+          setQuestionId(null);
           setLastAnswer(null);
           if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         }
@@ -124,10 +131,16 @@ export default function BattlePage() {
     startCountdown(limitSec);
   };
 
-  const submitAnswer = (e: React.FormEvent) => {
+  const submitAnswer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!wsRef.current || !answerText.trim()) return;
-    wsRef.current.send(JSON.stringify({ type: 'answer', room, name, text: answerText.trim() }));
+    const text = answerText.trim();
+    // locally detect wrong answer to add to review
+    const isCorrect = questionMeaning ? (text === questionMeaning) : false;
+    if (!isCorrect && questionId) {
+      try { await apiRequest('POST', '/api/study/progress', { wordId: questionId, isRemembered: false }); } catch {}
+    }
+    wsRef.current.send(JSON.stringify({ type: 'answer', room, name, text }));
     setAnswerText('');
   };
 
