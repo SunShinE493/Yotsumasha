@@ -25,6 +25,7 @@ export default function BattlePage() {
   const [questionId, setQuestionId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
+  const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -139,6 +140,9 @@ export default function BattlePage() {
     const isCorrect = questionMeaning ? (text === questionMeaning) : false;
     if (!isCorrect && questionId) {
       try { await apiRequest('POST', '/api/study/progress', { wordId: questionId, isRemembered: false }); } catch {}
+      setFlash('red'); setTimeout(()=>setFlash('none'), 200);
+    } else {
+      setFlash('green'); setTimeout(()=>setFlash('none'), 120);
     }
     wsRef.current.send(JSON.stringify({ type: 'answer', room, name, text }));
     setAnswerText('');
@@ -162,7 +166,7 @@ export default function BattlePage() {
 
         {mode === 'host' && (
           <Card>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className={`p-6 space-y-4 ${flash==='green' ? 'bg-green-500/10' : ''} ${flash==='red' ? 'bg-red-500/10' : ''}`}>
               <h2 className="font-semibold">部屋設定</h2>
               <div className="grid gap-4">
                 <div className="grid grid-cols-2 gap-2">
@@ -226,7 +230,7 @@ export default function BattlePage() {
                   <div className="mt-4 rounded-lg border border-border p-4">
                     <div className="flex items-center justify-between">
                       <div className="font-semibold">ロビー</div>
-                      <Button size="sm" onClick={handleStart} disabled={players.length === 0}>開始</Button>
+                      <Button size="sm" onClick={() => { handleStart(); /* collapse settings into game view */ setMode(null); }} disabled={players.length === 0}>開始</Button>
                     </div>
                     <div className="mt-2 text-sm text-muted-foreground">参加者: {players.join(', ') || '---'}</div>
                     {typeof remaining === 'number' && (

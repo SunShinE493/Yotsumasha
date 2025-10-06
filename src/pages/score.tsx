@@ -20,7 +20,7 @@ export default function ScorePage() {
   const [combo, setCombo] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [skips, setSkips] = useState(0);
-  const [flash, setFlash] = useState<'none'|'red'>('none');
+  const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [result, setResult] = useState<null | {
     fileName: string | null;
@@ -104,6 +104,7 @@ export default function ScorePage() {
       setIdx(next);
       setAnswer('');
       if (current?.meaning) setLastAnswer(current.meaning);
+      setFlash('green'); setTimeout(()=>setFlash('none'), 120);
     } else {
       setCombo(0);
       setMistakes((m)=>m+1);
@@ -187,7 +188,7 @@ export default function ScorePage() {
           </Card>
         ) : (
           <Card>
-            <CardContent className={`p-6 space-y-4 ${flash==='red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
+            <CardContent className={`p-6 space-y-4 ${flash==='green' ? 'bg-green-500/10' : ''} ${flash==='red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div>コンボ: <span className="text-foreground font-medium">{combo}</span></div>
                 <div>スコア: <span className="text-foreground font-medium">{score}</span></div>
