@@ -3,6 +3,7 @@ import path from "path";
 import express from "express";
 import { Client, Collection, Events, GatewayIntentBits, ActivityType, EmbedBuilder, Partials } from "discord.js";
 import { createServer } from "http";
+import { WebSocketServer } from 'ws';
 import CommandsRegister from "./regist-commands.mjs";
 import Notification from "./models/notification.mjs";
 import YoutubeFeeds from "./models/youtubeFeeds.mjs";
@@ -74,6 +75,109 @@ async function runWebserver(){
   }
   
   const server = createServer(app);
+  // --- WebSocket Real-time Battle ---
+  const rooms = new Map(); // roomId -> { host, timeLimit, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
+  const wss = new WebSocketServer({ server });
+
+  function broadcast(roomId, payload) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    const data = JSON.stringify(payload);
+    for (const ws of room.players.values()) {
+      try { ws.send(data); } catch {}
+    }
+    if (room.host) { try { room.host.send(data); } catch {} }
+  }
+
+  function toScores(room) {
+    const out = {};
+    for (const [n, s] of room.scores.entries()) out[n] = s;
+    return out;
+  }
+
+  function startRoom(roomId) {
+    const room = rooms.get(roomId);
+    if (!room || room.state !== 'waiting') return;
+    room.state = 'running';
+    room.idx = 0;
+    // timer
+    if (room.timer) clearTimeout(room.timer);
+    room.timer = setTimeout(() => {
+      room.state = 'ended';
+      broadcast(roomId, { type: 'end', scores: toScores(room) });
+    }, room.timeLimit * 1000);
+    // first question
+    const q = room.words[room.idx];
+    broadcast(roomId, { type: 'question', index: room.idx, meaning: q?.meaning ?? null });
+  }
+
+  wss.on('connection', (ws) => {
+    ws.on('message', (raw) => {
+      let msg;
+      try { msg = JSON.parse(raw.toString()); } catch { return; }
+      const { type } = msg || {};
+      if (type === 'create') {
+        const { room, name, limitSec, words } = msg;
+        if (!room || !name || !Array.isArray(words) || !words.length) {
+          ws.send(JSON.stringify({ type: 'error', message: 'invalid_create' }));
+          return;
+        }
+        if (rooms.has(room)) {
+          ws.send(JSON.stringify({ type: 'error', message: 'room_exists' }));
+          return;
+        }
+        const normalized = words.map(w => ({ word: String(w.word||''), meaning: String(w.meaning||'') })).filter(w => w.word && w.meaning);
+        const r = {
+          host: ws,
+          timeLimit: Math.max(5, Number(limitSec)||30),
+          words: normalized,
+          state: 'waiting',
+          players: new Map(),
+          scores: new Map(),
+          idx: 0,
+          timer: null,
+        };
+        rooms.set(room, r);
+        ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+      } else if (type === 'join') {
+        const { room, name } = msg;
+        const r = rooms.get(room);
+        if (!r || r.state !== 'waiting') { ws.send(JSON.stringify({ type: 'error', message: 'room_not_available' })); return; }
+        if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
+        r.players.set(name, ws); r.scores.set(name, 0);
+        ws._room = room; ws._name = name;
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+      } else if (type === 'start') {
+        const { room } = msg; const r = rooms.get(room);
+        if (!r) return; if (ws !== r.host) return; startRoom(room);
+      } else if (type === 'answer') {
+        const { room, name, text } = msg; const r = rooms.get(room);
+        if (!r || r.state !== 'running') return;
+        const q = r.words[r.idx]; if (!q) return;
+        const ok = String(text||'').trim().toLowerCase() === q.word.trim().toLowerCase();
+        if (ok) {
+          const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
+          r.idx = (r.idx + 1) % r.words.length;
+          const nq = r.words[r.idx];
+          broadcast(room, { type: 'score', scores: toScores(r) });
+          broadcast(room, { type: 'question', index: r.idx, meaning: nq?.meaning ?? null });
+        }
+      }
+    });
+    ws.on('close', () => {
+      const room = ws._room; const name = ws._name;
+      if (!room || !rooms.has(room)) return;
+      const r = rooms.get(room);
+      if (r.players.has(name)) r.players.delete(name);
+      if (r.players.size === 0) {
+        if (r.timer) clearTimeout(r.timer);
+        rooms.delete(room);
+      } else {
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+      }
+    });
+  });
   server.listen(port,'0.0.0.0',()=>{
     console.log(`server is running on port ${port}`);
   });
