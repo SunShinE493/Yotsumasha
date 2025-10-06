@@ -75,7 +75,7 @@ export function StudyResults({ session, onNewSession, onReview }: StudyResultsPr
             data-testid="button-new-session"
           >
             <i className="fas fa-book-open mr-2"></i>
-            新しい学習セッションを開始
+            ホームに戻る
           </Button>
         </div>
       </CardContent>

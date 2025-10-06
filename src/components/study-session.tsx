@@ -310,7 +310,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
               variant="default"
               onClick={handleEarlyFinish}
             >
-              中断してホームに戻る
+              中断して結果画面へ
             </Button>
           </DialogFooter>
         </DialogContent>
