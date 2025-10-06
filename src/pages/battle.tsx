@@ -13,6 +13,7 @@ export default function BattlePage() {
   const [rangeStart, setRangeStart] = useState<number>(1);
   const [rangeEnd, setRangeEnd] = useState<number>(50);
   const [limitSec, setLimitSec] = useState<number>(30);
+  const [questionCount, setQuestionCount] = useState<number>(20);
   const [canStart, setCanStart] = useState(false);
 
   // --- WebSocket client state ---
@@ -99,7 +100,7 @@ export default function BattlePage() {
     const words = await res.json();
     const ws = ensureSocket();
     const sendCreate = () => {
-      ws.send(JSON.stringify({ type: 'create', room, name, limitSec, words }));
+      ws.send(JSON.stringify({ type: 'create', room, name, limitSec, questionCount, words }));
       setMode('host');
     };
     if (ws.readyState === WebSocket.OPEN) sendCreate();
@@ -175,6 +176,12 @@ export default function BattlePage() {
                   <div>
                     <label className="text-sm text-muted-foreground">制限(秒)</label>
                     <Input type="number" min={5} value={limitSec} onChange={(e)=>setLimitSec(Number(e.target.value)||30)} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-sm text-muted-foreground">出題数</label>
+                    <Input type="number" min={1} max={Math.max(1, rangeEnd - rangeStart + 1)} value={questionCount} onChange={(e)=>setQuestionCount(Math.max(1, Number(e.target.value)||questionCount))} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">

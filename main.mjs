@@ -76,7 +76,7 @@ async function runWebserver(){
   
   const server = createServer(app);
   // --- WebSocket Real-time Battle ---
-  const rooms = new Map(); // roomId -> { host, timeLimit, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
+  const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
   const wss = new WebSocketServer({ server });
 
   function broadcast(roomId, payload) {
@@ -100,6 +100,7 @@ async function runWebserver(){
     if (!room || room.state !== 'waiting') return;
     room.state = 'running';
     room.idx = 0;
+    room.asked = 0;
     // timer
     if (room.timer) clearTimeout(room.timer);
     room.timer = setTimeout(() => {
@@ -108,7 +109,7 @@ async function runWebserver(){
     }, room.timeLimit * 1000);
     // first question
     const q = room.words[room.idx];
-    broadcast(roomId, { type: 'question', index: room.idx, meaning: q?.meaning ?? null });
+    broadcast(roomId, { type: 'question', index: room.idx, meaning: q?.meaning ?? null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
   }
 
   wss.on('connection', (ws) => {
@@ -117,7 +118,7 @@ async function runWebserver(){
       try { msg = JSON.parse(raw.toString()); } catch { return; }
       const { type } = msg || {};
       if (type === 'create') {
-        const { room, name, limitSec, words } = msg;
+        const { room, name, limitSec, words, questionCount } = msg;
         if (!room || !name || !Array.isArray(words) || !words.length) {
           ws.send(JSON.stringify({ type: 'error', message: 'invalid_create' }));
           return;
@@ -126,11 +127,15 @@ async function runWebserver(){
           ws.send(JSON.stringify({ type: 'error', message: 'room_exists' }));
           return;
         }
-        const normalized = words.map(w => ({ word: String(w.word||''), meaning: String(w.meaning||'') })).filter(w => w.word && w.meaning);
+        let normalized = words.map(w => ({ word: String(w.word||''), meaning: String(w.meaning||'') })).filter(w => w.word && w.meaning);
+        normalized = normalized.sort(() => Math.random() - 0.5);
+        const maxQuestions = Math.max(1, Math.min(Number(questionCount)||normalized.length, normalized.length));
         const r = {
           host: ws,
           timeLimit: Math.max(5, Number(limitSec)||30),
           words: normalized,
+          maxQuestions,
+          asked: 0,
           state: 'waiting',
           players: new Map(),
           scores: new Map(),
@@ -139,7 +144,7 @@ async function runWebserver(){
         };
         rooms.set(room, r);
         ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit });
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions });
       } else if (type === 'join') {
         const { room, name } = msg;
         const r = rooms.get(room);
@@ -147,7 +152,7 @@ async function runWebserver(){
         if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit });
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
       } else if (type === 'start') {
         const { room } = msg; const r = rooms.get(room);
         if (!r) return; if (ws !== r.host) return; startRoom(room);
@@ -158,10 +163,17 @@ async function runWebserver(){
         const ok = String(text||'').trim().toLowerCase() === q.word.trim().toLowerCase();
         if (ok) {
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
+          r.asked = (r.asked || 0) + 1;
+          if (r.maxQuestions && r.asked >= r.maxQuestions) {
+            r.state = 'ended';
+            if (r.timer) { clearTimeout(r.timer); r.timer = null; }
+            broadcast(room, { type: 'end', scores: toScores(r) });
+            return;
+          }
           r.idx = (r.idx + 1) % r.words.length;
           const nq = r.words[r.idx];
           broadcast(room, { type: 'score', scores: toScores(r) });
-          broadcast(room, { type: 'question', index: r.idx, meaning: nq?.meaning ?? null });
+          broadcast(room, { type: 'question', index: r.idx, meaning: nq?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
         }
       }
     });
