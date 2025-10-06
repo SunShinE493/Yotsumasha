@@ -139,7 +139,7 @@ async function runWebserver(){
         };
         rooms.set(room, r);
         ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit });
       } else if (type === 'join') {
         const { room, name } = msg;
         const r = rooms.get(room);
@@ -147,7 +147,7 @@ async function runWebserver(){
         if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit });
       } else if (type === 'start') {
         const { room } = msg; const r = rooms.get(room);
         if (!r) return; if (ws !== r.host) return; startRoom(room);

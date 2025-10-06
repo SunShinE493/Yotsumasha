@@ -15,23 +15,114 @@ export default function BattlePage() {
   const [limitSec, setLimitSec] = useState<number>(30);
   const [canStart, setCanStart] = useState(false);
 
+  // --- WebSocket client state ---
+  const wsRef = useRef<WebSocket | null>(null);
+  const [phase, setPhase] = useState<'idle'|'lobby'|'running'|'ended'>('idle');
+  const [players, setPlayers] = useState<string[]>([]);
+  const [questionMeaning, setQuestionMeaning] = useState<string | null>(null);
+  const [answerText, setAnswerText] = useState('');
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(()=>{
     setCanStart(Boolean(name && room && selectedJson && rangeEnd >= rangeStart));
   },[name, room, selectedJson, rangeStart, rangeEnd]);
 
+  // Utility: compute ws endpoint based on current page origin
+  const wsUrl = useMemo(() => {
+    const loc = window.location;
+    const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${proto}//${loc.host}`; // ws to same host:port
+  }, []);
+
+  function ensureSocket(): WebSocket {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return wsRef.current;
+    if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) return wsRef.current;
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+    ws.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'error') {
+          alert(`エラー: ${msg.message}`);
+        } else if (msg.type === 'lobby') {
+          setPhase('lobby');
+          setPlayers(msg.players || []);
+          if (typeof msg.timeLimit === 'number') {
+            setRemaining(msg.timeLimit);
+          }
+        } else if (msg.type === 'question') {
+          setPhase('running');
+          setQuestionMeaning(msg.meaning ?? null);
+          setAnswerText('');
+        } else if (msg.type === 'score') {
+          setScores(msg.scores || {});
+        } else if (msg.type === 'end') {
+          setPhase('ended');
+          setScores(msg.scores || {});
+          setQuestionMeaning(null);
+          if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+        }
+      } catch {}
+    };
+    ws.onclose = () => {
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    };
+    return ws;
+  }
+
+  function startCountdown(seconds: number) {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRemaining(seconds);
+    timerRef.current = setInterval(() => {
+      setRemaining((prev) => {
+        if (prev == null) return prev;
+        if (prev <= 1) {
+          if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
   const handleCreate = async () => {
-    // In a future step this would create a server room (socket.io). For now, validate inputs.
     if (!canStart) return;
-    // Preload words to ensure data exists on server
+    // Preload to server
     const s = Math.max(1, rangeStart);
     const e = Math.max(s, rangeEnd);
     await apiRequest('GET', `/api/vocabulary/range/${s}/${e}`);
-    alert(`部屋 ${room} を作成しました。参加者に部屋番号を共有してください。`);
+    const ws = ensureSocket();
+    ws.onopen = () => {
+      const createMsg = { type: 'create', room, name, limitSec, words: [] };
+      // words array is not sent via REST; server uses uploaded vocabulary. But protocol expects words array.
+      // Send a minimal placeholder; server validates and normalizes existing upload on its side.
+      ws.send(JSON.stringify(createMsg));
+      // Immediately transition to lobby; server will broadcast lobby with players
+      setMode('host');
+    };
   };
 
   const handleJoin = async () => {
     if (!name || !room) return;
-    alert(`部屋 ${room} に入室しました（デモ）。`);
+    const ws = ensureSocket();
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'join', room, name }));
+    };
+  };
+
+  const handleStart = () => {
+    if (!wsRef.current) return;
+    wsRef.current.send(JSON.stringify({ type: 'start', room }));
+    startCountdown(limitSec);
+  };
+
+  const submitAnswer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!wsRef.current || !answerText.trim()) return;
+    wsRef.current.send(JSON.stringify({ type: 'answer', room, name, text: answerText.trim() }));
+    setAnswerText('');
   };
 
   return (
@@ -88,8 +179,20 @@ export default function BattlePage() {
                   <div className="text-sm text-muted-foreground">
                     {selectedJson ? `${selectedJson.name} / ${selectedJson.wordCount}語` : 'ファイル未選択'}
                   </div>
-                  <Button className="mt-2" onClick={handleCreate} disabled={!canStart}>部屋を作成して開始</Button>
+                  <Button className="mt-2" onClick={handleCreate} disabled={!canStart}>部屋を作成</Button>
                 </div>
+                {phase === 'lobby' && (
+                  <div className="mt-4 rounded-lg border border-border p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold">ロビー</div>
+                      <Button size="sm" onClick={handleStart} disabled={players.length === 0}>開始</Button>
+                    </div>
+                    <div className="mt-2 text-sm text-muted-foreground">参加者: {players.join(', ') || '---'}</div>
+                    {typeof remaining === 'number' && (
+                      <div className="mt-2 text-sm">制限時間: {remaining}s</div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -103,6 +206,46 @@ export default function BattlePage() {
                 <Input placeholder="名前" value={name} onChange={(e)=>setName(e.target.value)} />
                 <Input placeholder="部屋番号" value={room} onChange={(e)=>setRoom(e.target.value)} />
                 <Button className="mt-2" onClick={handleJoin} disabled={!name || !room}>入室</Button>
+              </div>
+              {phase === 'lobby' && (
+                <div className="mt-4 rounded-lg border border-border p-4">
+                  <div className="font-semibold">ロビー</div>
+                  <div className="mt-2 text-sm text-muted-foreground">参加者: {players.join(', ') || '---'}</div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {(phase === 'running' || phase === 'ended') && (
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">部屋: {room}</div>
+                <div className="text-sm">残り時間: {remaining ?? '-'}s</div>
+              </div>
+              <div className="rounded-lg border border-border p-6 bg-card">
+                <div className="text-sm text-muted-foreground mb-1">問題:</div>
+                <div className="text-2xl font-semibold text-foreground">{questionMeaning ?? (phase==='ended' ? '終了しました' : '...')}</div>
+              </div>
+
+              {phase === 'running' && (
+                <form onSubmit={submitAnswer} className="flex gap-2">
+                  <Input placeholder="英単語を入力" value={answerText} onChange={(e)=>setAnswerText(e.target.value)} autoFocus />
+                  <Button type="submit">回答</Button>
+                </form>
+              )}
+
+              <div>
+                <div className="font-semibold mb-2">スコア</div>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
+                    <div key={n} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
+                      <div className="text-foreground">{n}</div>
+                      <div className="text-sm text-muted-foreground">{sc}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
