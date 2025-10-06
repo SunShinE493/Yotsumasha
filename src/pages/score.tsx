@@ -1,10 +1,78 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function ScorePage() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
+  const [rangeStart, setRangeStart] = useState<number>(1);
+  const [rangeEnd, setRangeEnd] = useState<number>(50);
+  const [limitSec, setLimitSec] = useState<number>(60);
+
+  // gameplay state
+  const [words, setWords] = useState<Array<{ id: string; word: string; meaning: string }>>([]);
+  const [idx, setIdx] = useState<number>(0);
+  const [answer, setAnswer] = useState('');
+  const [score, setScore] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [remaining, setRemaining] = useState(0);
+  const timerRef = useRef<number | null>(null);
+
+  const current = words[idx];
+
+  useEffect(() => {
+    return () => { if (timerRef.current) window.clearInterval(timerRef.current); };
+  }, []);
+
+  const startGame = async () => {
+    // Fetch words from server storage (FileUpload already saved them)
+    const s = Math.max(1, rangeStart);
+    const e = Math.max(s, rangeEnd);
+    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}`);
+    const list = await res.json();
+    const shuffled = [...list].sort(() => Math.random() - 0.5);
+    setWords(shuffled);
+    setIdx(0);
+    setScore(0);
+    setCombo(0);
+    setRemaining(limitSec);
+    setIsPlaying(true);
+    if (timerRef.current) window.clearInterval(timerRef.current);
+    timerRef.current = window.setInterval(() => {
+      setRemaining((r) => {
+        if (r <= 1) {
+          if (timerRef.current) window.clearInterval(timerRef.current);
+          finishGame();
+          return 0;
+        }
+        return r - 1;
+      });
+    }, 1000);
+  };
+
+  const finishGame = async () => {
+    setIsPlaying(false);
+    try {
+      await apiRequest('POST', '/api/score-attack/submit', { score });
+    } catch {}
+  };
+
+  const submitAnswer = () => {
+    if (!current) return;
+    const ok = answer.trim().toLowerCase() === current.word.trim().toLowerCase();
+    if (ok) {
+      const next = (idx + 1) % words.length;
+      setScore((s) => s + 100 + combo * 10);
+      setCombo((c) => c + 1);
+      setIdx(next);
+      setAnswer('');
+    } else {
+      setCombo(0);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -19,29 +87,51 @@ export default function ScorePage() {
           <Card>
             <CardContent className="p-6 space-y-4">
               <h2 className="font-semibold">設定</h2>
-              <div className="grid gap-3">
-                <Input placeholder="jsonファイル名 (例: rinri.json)" />
-                <div className="grid grid-cols-2 gap-2">
-                  <Input placeholder="開始 (例: 1)" />
-                  <Input placeholder="終了 (例: 100)" />
+              <div className="grid gap-4">
+                <FileUpload onUploadSuccess={(info) => {
+                  setSelectedJson(info);
+                  setRangeStart(1);
+                  setRangeEnd(Math.min(50, info.wordCount));
+                }} />
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-sm text-muted-foreground">開始</label>
+                    <Input type="number" min={1} value={rangeStart} onChange={(e)=>setRangeStart(Number(e.target.value)||1)} />
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">終了</label>
+                    <Input type="number" min={rangeStart} value={rangeEnd} onChange={(e)=>setRangeEnd(Number(e.target.value)||rangeStart)} />
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">制限(秒)</label>
+                    <Input type="number" min={10} value={limitSec} onChange={(e)=>setLimitSec(Number(e.target.value)||60)} />
+                  </div>
                 </div>
-                <Input placeholder="制限時間(秒)" />
-                <Button className="mt-2" onClick={() => setIsPlaying(true)}>開始</Button>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    {selectedJson ? `${selectedJson.name} / ${selectedJson.wordCount}語` : 'ファイル未選択'}
+                  </div>
+                  <Button className="mt-2" onClick={startGame} disabled={!selectedJson}>開始</Button>
+                </div>
               </div>
             </CardContent>
           </Card>
         ) : (
           <Card>
             <CardContent className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>コンボ: 0</div>
-                <div>スコア: 0</div>
-                <div>残り: 00:00</div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div>コンボ: <span className="text-foreground font-medium">{combo}</span></div>
+                <div>スコア: <span className="text-foreground font-medium">{score}</span></div>
+                <div>残り: <span className="text-foreground font-medium">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</span></div>
               </div>
-              <Input placeholder="ここに回答を入力" />
+              <div className="text-center space-y-2">
+                <div className="text-xl font-semibold">{current?.meaning ?? '読み込み中...'}</div>
+                <div className="text-sm text-muted-foreground">英単語（または用語）を入力</div>
+              </div>
               <div className="flex gap-2">
-                <Button>送信</Button>
-                <Button variant="outline" onClick={() => setIsPlaying(false)}>終了</Button>
+                <Input placeholder="ここに回答を入力" value={answer} onChange={(e)=>setAnswer(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter') submitAnswer(); }} />
+                <Button onClick={submitAnswer}>送信</Button>
+                <Button variant="outline" onClick={finishGame}>終了</Button>
               </div>
             </CardContent>
           </Card>
