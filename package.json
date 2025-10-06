@@ -105,5 +105,8 @@
   "keywords": [
     "node",
     "glitch"
-  ]
+  ],
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.14"
+  }
 }
