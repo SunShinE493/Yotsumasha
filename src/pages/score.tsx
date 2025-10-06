@@ -8,8 +8,13 @@ export default function ScorePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
-        <h1 className="text-2xl font-semibold text-foreground">スコアアタック 🕒🏆</h1>
+      <header className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">スコアアタック 🕒🏆</h1>
+          <a href="/" className="text-sm text-muted-foreground hover:underline">ホーム</a>
+        </div>
+      </header>
+      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {!isPlaying ? (
           <Card>
             <CardContent className="p-6 space-y-4">
@@ -41,7 +46,7 @@ export default function ScorePage() {
             </CardContent>
           </Card>
         )}
-      </div>
+      </main>
     </div>
   );
 }

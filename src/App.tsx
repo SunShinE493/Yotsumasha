@@ -36,30 +36,41 @@ function AppRouter() {
     );
   }
 
+  const Redirect = ({ to }: { to: string }) => {
+    window.location.replace(to);
+    return null;
+  };
+
   return (
     <Switch>
+      {/* Auth routes */}
       <Route path="/auth" component={AuthPage} />
-      {/* New dashboard homepage always available */}
-      <Route path="/" component={Landing} />
+      <Route path="/login" component={AuthPage} />
+
       {user ? (
         <>
+          {/* Logged-in routes */}
+          <Route path="/" component={Landing} />
           <Route path="/study" component={Home} />
           <Route path="/test" component={TestPage} />
           <Route path="/battle" component={BattlePage} />
           <Route path="/score" component={ScorePage} />
           <Route path="/ranking" component={RankingPage} />
+          <Route>
+            <Redirect to="/" />
+          </Route>
         </>
       ) : (
-        <Route path="/login" component={AuthPage} />
+        <>
+          {/* Not logged in: send to /auth on any route (including /) */}
+          <Route path="/">
+            <Redirect to="/auth" />
+          </Route>
+          <Route>
+            <Redirect to="/auth" />
+          </Route>
+        </>
       )}
-      <Route>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-2">404 - ページが見つかりません</h1>
-            <p className="text-muted-foreground">お探しのページは存在しません。</p>
-          </div>
-        </div>
-      </Route>
     </Switch>
   );
 }

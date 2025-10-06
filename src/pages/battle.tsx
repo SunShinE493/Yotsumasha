@@ -8,8 +8,13 @@ export default function BattlePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
-        <h1 className="text-2xl font-semibold text-foreground">リアルタイム対戦 🧠⚡</h1>
+      <header className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">リアルタイム対戦 🧠⚡</h1>
+          <a href="/" className="text-sm text-muted-foreground hover:underline">ホーム</a>
+        </div>
+      </header>
+      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {!mode && (
           <div className="grid gap-4 sm:grid-cols-2">
             <Button onClick={() => setMode('host')} className="h-12">部屋を立てる</Button>
@@ -48,7 +53,7 @@ export default function BattlePage() {
             </CardContent>
           </Card>
         )}
-      </div>
+      </main>
     </div>
   );
 }

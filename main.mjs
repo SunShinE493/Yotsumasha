@@ -33,8 +33,8 @@ const port = 5000;
 const distDir = path.join(process.cwd(), 'dist');
 app.use(express.static(distDir));
 
-// Serve React app for non-API routes (SPA fallback) - BEFORE any routes
-app.get(/^\/(?!api).*$/, (req, res) => res.sendFile(path.join(distDir, 'index.html')));
+// SPA fallback: send index.html for all non-API routes so /battle 等で404にならない
+app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(distDir, 'index.html')));
 app.post('/api', function(req, res) {
   console.log(`Received POST request.`);
  
