@@ -59,6 +59,12 @@ app.get('/', function(req, res) {
   res.send('<a href="https://note.com/exteoi/n/n0ea64e258797</a> に解説があります。');
 });
 
+// Lightweight keep-alive endpoint (pre-auth/CSRF). Define BEFORE auth middleware registration.
+app.post('/', function(req, res) {
+  // No CSRF required for this keep-alive ping
+  res.status(204).end();
+});
+
 // Static and SPA fallback moved above to take precedence over legacy routes
 
 async function runWebserver(){
