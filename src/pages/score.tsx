@@ -144,9 +144,24 @@ export default function ScorePage() {
               <div className="grid gap-4">
                 <FileUpload onUploadSuccess={(info) => {
                   setSelectedJson(info);
-                  setRangeStart(1);
-                  setRangeEnd(Math.min(50, info.wordCount));
+                  if (info.presets && info.presets.length > 0) {
+                    setRangeStart(info.presets[0].start);
+                    setRangeEnd(info.presets[0].end);
+                  } else {
+                    setRangeStart(1);
+                    setRangeEnd(Math.min(50, info.wordCount));
+                  }
                 }} />
+                {selectedJson?.presets?.length ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {selectedJson.presets.map((p)=> (
+                      <Button key={p.label} variant="outline" size="sm" onClick={()=>{ setRangeStart(p.start); setRangeEnd(p.end); }}>
+                        {p.label}
+                      </Button>
+                    ))}
+                    <Button variant="secondary" size="sm" onClick={()=>{ setRangeStart(1); setRangeEnd(selectedJson.wordCount); }}>全範囲</Button>
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
