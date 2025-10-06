@@ -21,6 +21,7 @@ export default function ScorePage() {
   const [mistakes, setMistakes] = useState(0);
   const [skips, setSkips] = useState(0);
   const [flash, setFlash] = useState<'none'|'red'>('none');
+  const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [result, setResult] = useState<null | {
     fileName: string | null;
     start: number;
@@ -85,10 +86,15 @@ export default function ScorePage() {
     setResult(summary);
     try {
       await apiRequest('POST', '/api/score-attack/submit', { score });
+      // Record review entries for mistakes and skips
+      const currentWord = words[idx];
+      if (currentWord) {
+        try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false }); } catch {}
+      }
     } catch {}
   };
 
-  const submitAnswer = () => {
+  const submitAnswer = async () => {
     if (!current) return;
     const ok = answer.trim() === String(current.meaning||'').trim();
     if (ok) {
@@ -97,15 +103,17 @@ export default function ScorePage() {
       setCombo((c) => c + 1);
       setIdx(next);
       setAnswer('');
+      if (current?.meaning) setLastAnswer(current.meaning);
     } else {
       setCombo(0);
       setMistakes((m)=>m+1);
       setFlash('red');
       setTimeout(()=>setFlash('none'), 200);
+      try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false }); } catch {}
     }
   };
 
-  const skipQuestion = () => {
+  const skipQuestion = async () => {
     if (!current) return;
     setSkips((k)=>k+1);
     setScore((s)=> Math.max(0, s - 50));
@@ -115,6 +123,9 @@ export default function ScorePage() {
     const next = (idx + 1) % words.length;
     setIdx(next);
     setAnswer('');
+    if (current?.meaning) setLastAnswer(current.meaning);
+    // Save to review
+    try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false }); } catch {}
   };
 
   return (
@@ -177,6 +188,9 @@ export default function ScorePage() {
                 <Button variant="secondary" onClick={skipQuestion}>？</Button>
                 <Button variant="outline" onClick={finishGame}>終了</Button>
               </div>
+              {lastAnswer && (
+                <div className="text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span></div>
+              )}
             </CardContent>
           </Card>
         )}

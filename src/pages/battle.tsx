@@ -23,6 +23,7 @@ export default function BattlePage() {
   const [questionWord, setQuestionWord] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
+  const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -57,6 +58,7 @@ export default function BattlePage() {
           setPhase('running');
           setQuestionWord(msg.word ?? null);
           setAnswerText('');
+          if (msg.meaning) setLastAnswer(msg.meaning);
           if (!timerRef.current && typeof remaining === 'number' && remaining > 0) {
             startCountdown(remaining);
           }
@@ -66,6 +68,7 @@ export default function BattlePage() {
           setPhase('ended');
           setScores(msg.scores || {});
           setQuestionWord(null);
+          setLastAnswer(null);
           if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         }
       } catch {}
@@ -255,6 +258,9 @@ export default function BattlePage() {
                     </div>
                   ))}
                 </div>
+                {lastAnswer && (
+                  <div className="mt-4 text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span></div>
+                )}
               </div>
             </CardContent>
           </Card>
