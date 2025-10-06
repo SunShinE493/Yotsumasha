@@ -33,8 +33,11 @@ const port = 5000;
 const distDir = path.join(process.cwd(), 'dist');
 app.use(express.static(distDir));
 
-// SPA fallback: send index.html for all non-API routes so /battle 等で404にならない
-app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(distDir, 'index.html')));
+// SPA fallback: only for non-API, non-asset, non-file-extension paths
+// This prevents returning index.html for /assets/*.css|js and similar
+app.get(/^\/(?!api)(?!assets)(?!.*\.[^\/]+$).*/, (req, res) =>
+  res.sendFile(path.join(distDir, 'index.html'))
+);
 app.post('/api', function(req, res) {
   console.log(`Received POST request.`);
  
