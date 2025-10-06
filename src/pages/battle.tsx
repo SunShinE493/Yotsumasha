@@ -56,6 +56,9 @@ export default function BattlePage() {
           setPhase('running');
           setQuestionMeaning(msg.meaning ?? null);
           setAnswerText('');
+          if (!timerRef.current && typeof remaining === 'number' && remaining > 0) {
+            startCountdown(remaining);
+          }
         } else if (msg.type === 'score') {
           setScores(msg.scores || {});
         } else if (msg.type === 'end') {
@@ -89,19 +92,18 @@ export default function BattlePage() {
 
   const handleCreate = async () => {
     if (!canStart) return;
-    // Preload to server
+    // Load chosen range words from server-side storage for this user
     const s = Math.max(1, rangeStart);
     const e = Math.max(s, rangeEnd);
-    await apiRequest('GET', `/api/vocabulary/range/${s}/${e}`);
+    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}`);
+    const words = await res.json();
     const ws = ensureSocket();
-    ws.onopen = () => {
-      const createMsg = { type: 'create', room, name, limitSec, words: [] };
-      // words array is not sent via REST; server uses uploaded vocabulary. But protocol expects words array.
-      // Send a minimal placeholder; server validates and normalizes existing upload on its side.
-      ws.send(JSON.stringify(createMsg));
-      // Immediately transition to lobby; server will broadcast lobby with players
+    const sendCreate = () => {
+      ws.send(JSON.stringify({ type: 'create', room, name, limitSec, words }));
       setMode('host');
     };
+    if (ws.readyState === WebSocket.OPEN) sendCreate();
+    else ws.onopen = sendCreate;
   };
 
   const handleJoin = async () => {
