@@ -62,7 +62,7 @@ export default function ScorePage() {
 
   const submitAnswer = () => {
     if (!current) return;
-    const ok = answer.trim().toLowerCase() === current.word.trim().toLowerCase();
+    const ok = answer.trim().toLowerCase() === String(current.meaning||'').trim().toLowerCase();
     if (ok) {
       const next = (idx + 1) % words.length;
       setScore((s) => s + 100 + combo * 10);
@@ -125,11 +125,11 @@ export default function ScorePage() {
                 <div>残り: <span className="text-foreground font-medium">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</span></div>
               </div>
               <div className="text-center space-y-2">
-                <div className="text-xl font-semibold">{current?.meaning ?? '読み込み中...'}</div>
-                <div className="text-sm text-muted-foreground">英単語（または用語）を入力</div>
+                <div className="text-xl font-semibold">{current?.word ?? '読み込み中...'}</div>
+                <div className="text-sm text-muted-foreground">意味を入力</div>
               </div>
               <div className="flex gap-2">
-                <Input placeholder="ここに回答を入力" value={answer} onChange={(e)=>setAnswer(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter') submitAnswer(); }} />
+                <Input placeholder="ここに意味を入力" value={answer} onChange={(e)=>setAnswer(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter') submitAnswer(); }} />
                 <Button onClick={submitAnswer}>送信</Button>
                 <Button variant="outline" onClick={finishGame}>終了</Button>
               </div>
