@@ -63,11 +63,16 @@ export default function BattlePage() {
             setRemaining(msg.timeLimit);
             setServerLimitSec(msg.timeLimit);
           }
+          // reset previous answer state when entering lobby (new game)
+          setLastAnswer(null);
+          setLastAnswerWord(null);
+          prevWordRef.current = null;
+          prevMeaningRef.current = null;
         } else if (msg.type === 'question') {
           setPhase('running');
-          // Prefer server-sent previous answer if available (authoritative)
-          setLastAnswer(msg.prevMeaning ?? prevMeaningRef.current);
-          setLastAnswerWord(msg.prevWord ?? prevWordRef.current);
+          // Prefer server-sent previous answer only; avoid fallback to prevent first-question leakage
+          setLastAnswer(typeof msg.prevMeaning === 'string' ? msg.prevMeaning : null);
+          setLastAnswerWord(typeof msg.prevWord === 'string' ? msg.prevWord : null);
           setQuestionWord(msg.word ?? null);
           setQuestionMeaning(msg.meaning ?? null);
           setQuestionId(msg.id ?? null);
