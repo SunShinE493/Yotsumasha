@@ -264,36 +264,46 @@ export default function BattlePage() {
 
         {(phase === 'running' || phase === 'ended') && (
           <Card>
-            <CardContent className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">部屋: {room}</div>
-                <div className="text-sm">残り時間: {remaining ?? '-'}s</div>
-              </div>
-              <div className="rounded-lg border border-border p-6 bg-card">
-                <div className="text-sm text-muted-foreground mb-1">問題:</div>
-                <div className="text-2xl font-semibold text-foreground">{questionWord ?? (phase==='ended' ? '終了しました' : '...')}</div>
-              </div>
-
-              {phase === 'running' && (
-                <form onSubmit={submitAnswer} className="flex gap-2">
-                  <Input placeholder="意味を入力" value={answerText} onChange={(e)=>setAnswerText(e.target.value)} autoFocus />
-                  <Button type="submit">回答</Button>
-                </form>
-              )}
-
-              <div>
-                <div className="font-semibold mb-2">スコア</div>
-                <div className="grid sm:grid-cols-2 gap-2">
-                  {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
-                    <div key={n} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
-                      <div className="text-foreground">{n}</div>
-                      <div className="text-sm text-muted-foreground">{sc}</div>
-                    </div>
-                  ))}
+            <CardContent className={`p-0 ${flash==='green' ? 'bg-green-500/10' : ''} ${flash==='red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
+              {typeof remaining === 'number' && (
+                <div className="h-1 bg-blue-500/20">
+                  <div
+                    className="h-1 bg-blue-500 transition-[width] duration-1000"
+                    style={{ width: `${Math.max(0, Math.min(100, (remaining / Math.max(1, limitSec)) * 100))}%` }}
+                  />
                 </div>
-                {lastAnswer && (
-                  <div className="mt-4 text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span></div>
+              )}
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">部屋: {room}</div>
+                  <div className="text-sm">残り時間: {remaining ?? '-'}s</div>
+                </div>
+                <div className="rounded-lg border border-border p-6 bg-card">
+                  <div className="text-sm text-muted-foreground mb-1">問題:</div>
+                  <div className="text-2xl font-semibold text-foreground">{questionWord ?? (phase==='ended' ? '終了しました' : '...')}</div>
+                </div>
+
+                {phase === 'running' && (
+                  <form onSubmit={submitAnswer} className="flex gap-2">
+                    <Input placeholder="意味を入力" value={answerText} onChange={(e)=>setAnswerText(e.target.value)} autoFocus />
+                    <Button type="submit">回答</Button>
+                  </form>
                 )}
+
+                <div>
+                  <div className="font-semibold mb-2">スコア</div>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
+                      <div key={n} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
+                        <div className="text-foreground">{n}</div>
+                        <div className="text-sm text-muted-foreground">{sc}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {lastAnswer && (
+                    <div className="mt-4 text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span></div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
