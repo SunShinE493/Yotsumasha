@@ -145,7 +145,13 @@ export default function BattlePage() {
     // locally detect wrong answer to add to review
     const isCorrect = questionMeaning ? (text === questionMeaning) : false;
     if (!isCorrect && questionId) {
-      try { await apiRequest('POST', '/api/study/progress', { wordId: questionId, isRemembered: false }); } catch {}
+      try {
+        await apiRequest('POST', '/api/study/progress', {
+          wordId: questionId,
+          isRemembered: false,
+          word: { id: questionId, word: questionWord || '', meaning: questionMeaning || '' }
+        });
+      } catch {}
       setFlash('red'); setTimeout(()=>setFlash('none'), 200);
     } else {
       setFlash('green'); setTimeout(()=>setFlash('none'), 120);

@@ -237,6 +237,16 @@ export class MemStorage {
 
   async createWordProgress(userId, insertProgress) {
     const userProgress = this.wordProgress.get(userId) || new Map();
+    // Ensure vocabulary contains the word; allow upsert if payload provided
+    if (insertProgress.word && insertProgress.word.word && insertProgress.word.meaning) {
+      const ensureId = insertProgress.wordId || insertProgress.word.id || randomUUID();
+      insertProgress.word.id = ensureId;
+      insertProgress.wordId = ensureId;
+      const userWords = this.vocabularyWords.get(userId) || new Map();
+      if (!userWords.has(ensureId)) {
+        await this.createVocabularyWord(userId, insertProgress.word);
+      }
+    }
     const existingProgress = userProgress.get(insertProgress.wordId);
 
     if (existingProgress) {

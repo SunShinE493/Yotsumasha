@@ -110,7 +110,7 @@ export default function ScorePage() {
       setMistakes((m)=>m+1);
       setFlash('red');
       setTimeout(()=>setFlash('none'), 200);
-      try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false }); } catch {}
+      try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false, word: { id: current.id, word: current.word, meaning: current.meaning } }); } catch {}
     }
   };
 
@@ -126,7 +126,7 @@ export default function ScorePage() {
     setAnswer('');
     if (current?.meaning) setLastAnswer(current.meaning);
     // Save to review
-    try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false }); } catch {}
+    try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false, word: { id: current.id, word: current.word, meaning: current.meaning } }); } catch {}
   };
 
   return (
