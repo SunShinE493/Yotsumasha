@@ -199,6 +199,8 @@ async function runWebserver(){
           broadcast(room, { type: 'score', scores: toScores(r) });
           broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
           scheduleQuestionTimer(room);
+        } else {
+          // wrong answer -> add to review list for this user if possible (requires session mapping; skipped here)
         }
       }
     });

@@ -22,6 +22,9 @@ export default function Landing() {
                 <span className="text-sm text-muted-foreground">Study</span>
               </div>
               <p className="mt-2 text-sm text-muted-foreground">単語帳で学習する</p>
+              <div className="mt-3 inline-flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1 text-xs text-primary">
+                復習をすぐに開始
+              </div>
             </a>
 
             <a href="/battle" className="group block rounded-xl border border-border bg-card p-5 hover:bg-accent transition-colors">

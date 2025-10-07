@@ -146,24 +146,8 @@ export default function Home() {
   };
 
   const handleQuickStart = () => {
-    if (!selectedJson || selectedJson.wordCount === 0) {
-      toast({
-        title: "データなし",
-        description: "学習を開始するJSONファイルを選択してください。",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const endRange = Math.min(20, selectedJson.wordCount);
-    const config: StudyConfig = {
-      startRange: 1,
-      endRange,
-      questionCount: endRange,
-      order: "random",
-      reviewOnly: false,
-    };
-    startSessionMutation.mutate(config);
+    // Quick start now launches Review mode instead of 20 questions
+    handleStartReview();
   };
 
   if (isUserLoading) {

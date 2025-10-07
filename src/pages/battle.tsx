@@ -28,6 +28,7 @@ export default function BattlePage() {
   const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [serverLimitSec, setServerLimitSec] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(()=>{
@@ -56,6 +57,7 @@ export default function BattlePage() {
           setPlayers(msg.players || []);
           if (typeof msg.timeLimit === 'number') {
             setRemaining(msg.timeLimit);
+            setServerLimitSec(msg.timeLimit);
           }
         } else if (msg.type === 'question') {
           setPhase('running');
@@ -65,14 +67,18 @@ export default function BattlePage() {
           setQuestionMeaning(msg.meaning ?? null);
           setQuestionId(msg.id ?? null);
           setAnswerText('');
-          if (!timerRef.current && typeof remaining === 'number' && remaining > 0) {
-            startCountdown(remaining);
-          }
+          const secs = (serverLimitSec ?? limitSec);
+          startCountdown(secs);
         } else if (msg.type === 'score') {
           setScores(msg.scores || {});
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
+          // Build ranking with medals
+          const entries = Object.entries(msg.scores || {}).sort((a,b)=> (b[1]??0) - (a[1]??0));
+          const medal = ['🥇','🥈','🥉'];
+          const lines = entries.map(([n,s],i)=> `${medal[i]||' '} ${n}: ${s}`).join('\n');
+          if (entries.length) alert(`ランキング\n${lines}`);
           setQuestionWord(null);
           setQuestionMeaning(null);
           setQuestionId(null);
