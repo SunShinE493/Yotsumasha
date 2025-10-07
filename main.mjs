@@ -32,13 +32,24 @@ const port = 5000;
 
 // Serve static files from dist directory (built React app) - BEFORE any routes
 const distDir = path.join(process.cwd(), 'dist');
-app.use(express.static(distDir));
+app.use(
+  express.static(distDir, {
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  })
+);
 
 // SPA fallback: only for non-API, non-asset, non-file-extension paths
 // This prevents returning index.html for /assets/*.css|js and similar
-app.get(/^\/(?!api)(?!assets)(?!.*\.[^\/]+$).*/, (req, res) =>
-  res.sendFile(path.join(distDir, 'index.html'))
-);
+app.get(/^\/(?!api)(?!assets)(?!.*\.[^\/]+$).*/, (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.sendFile(path.join(distDir, 'index.html'));
+});
 app.post('/api', function(req, res) {
   console.log(`Received POST request.`);
  
