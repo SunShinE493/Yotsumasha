@@ -36,4 +36,15 @@ export const insertWordProgressSchema = z.object({
   sessionId: z.string().optional(),
   isRemembered: z.boolean(),
   attempts: z.number().optional(),
+  // Optional word payload to upsert into vocabulary if missing
+  word: z
+    .object({
+      id: z.string().optional(),
+      word: z.string(),
+      meaning: z.string(),
+      category: z.string().optional(),
+      example: z.string().optional(),
+      difficulty: z.number().min(1).max(5).optional(),
+    })
+    .optional(),
 });

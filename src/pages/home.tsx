@@ -146,24 +146,8 @@ export default function Home() {
   };
 
   const handleQuickStart = () => {
-    if (!selectedJson || selectedJson.wordCount === 0) {
-      toast({
-        title: "データなし",
-        description: "学習を開始するJSONファイルを選択してください。",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const endRange = Math.min(20, selectedJson.wordCount);
-    const config: StudyConfig = {
-      startRange: 1,
-      endRange,
-      questionCount: endRange,
-      order: "random",
-      reviewOnly: false,
-    };
-    startSessionMutation.mutate(config);
+    // Quick start now launches Review mode instead of 20 questions
+    handleStartReview();
   };
 
   if (isUserLoading) {
@@ -191,15 +175,12 @@ export default function Home() {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-foreground">
-                  よつましゃアプリブラウザ版
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Vocabulary Learning
-                </p>
+                <h1 className="text-xl font-semibold text-foreground">学習ホーム</h1>
+                <p className="text-sm text-muted-foreground">単語の暗記学習</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              <a href="/" className="px-3 py-2 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm">ホームへ</a>
               <button
                 className="touch-target p-2 rounded-lg bg-secondary hover:bg-accent transition-colors"
                 data-testid="button-settings"

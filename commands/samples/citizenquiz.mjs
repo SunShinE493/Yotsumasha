@@ -195,6 +195,9 @@ export async function execute(interaction) {
             } else if (hani === 8) {
                 tango =  Koumin7[2*random];
                 seikai = Koumin7[2*random+1];
+            }else if(hani === 9){
+              tango =  Rinri3[2*random];
+              seikai = Rinri3[2*random+1];
             }
         }else {
           console. log('普通の')
@@ -227,7 +230,7 @@ export async function execute(interaction) {
                 tango =  Koumin7[2*random];
                 seikai = Koumin7[2*random+1];
             } else if (hani === 9) {
-                random = genRandomInt(Rinri3.length);
+                random = genRandomInt(Rinri3.length/2);
                 tango =   Rinri3[2*random];
                 seikai = Rinri3[2*random+1];
             } else if (hani === 10) {

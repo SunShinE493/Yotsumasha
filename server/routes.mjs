@@ -41,6 +41,42 @@ export async function registerRoutes(app) {
     res.json({ message: 'ゲストデータをクリアしました' });
   });
 
+  // --- Admin backup/restore gated by env ---
+  function isBackupAdmin(req) {
+    const envUser = process.env.BACKUP_ADMIN_EMAIL;
+    const envPass = process.env.BACKUP_ADMIN_PASSWORD;
+    // Allow only when body matches env creds AND current session user (or username) equals the admin email
+    const bodyEmail = req.body?.email;
+    const bodyPassword = req.body?.password;
+    const sessionUserEmail = req.user?.username || null;
+    return (
+      envUser && envPass &&
+      bodyEmail === envUser &&
+      bodyPassword === envPass &&
+      (sessionUserEmail === envUser || req.isGuest === false)
+    );
+  }
+
+  app.post('/api/admin/export', optionalAuthentication, async (req, res) => {
+    try {
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      const data = await storage.exportUserData(req.userId);
+      res.json(data);
+    } catch (e) {
+      res.status(500).json({ message: 'failed to export' });
+    }
+  });
+
+  app.post('/api/admin/import', optionalAuthentication, async (req, res) => {
+    try {
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      await storage.importUserData(req.userId, req.body?.data || {});
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ message: 'failed to import' });
+    }
+  });
+
   // Upload vocabulary JSON file
   app.post("/api/vocabulary/upload", optionalAuthentication, async (req, res) => {
     try {
@@ -232,6 +268,65 @@ export async function registerRoutes(app) {
       res.json(reviewWords);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch review words" });
+    }
+  });
+
+  // --- Score Attack APIs ---
+  app.post('/api/score-attack/submit', optionalAuthentication, async (req, res) => {
+    try {
+      const userId = req.userId;
+      const { score } = req.body || {};
+      if (typeof score !== 'number' || score < 0) {
+        return res.status(400).json({ message: 'Invalid score' });
+      }
+      const record = await storage.saveScoreAttack(userId, score);
+      res.json(record);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to save score' });
+    }
+  });
+
+  app.get('/api/score-attack/me', optionalAuthentication, async (req, res) => {
+    try {
+      const userId = req.userId;
+      const record = await storage.getScoreAttack(userId);
+      res.json(record);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to load score' });
+    }
+  });
+
+  // --- User datasets library ---
+  app.get('/api/datasets', optionalAuthentication, async (req, res) => {
+    try {
+      const list = await storage.listDatasets(req.userId);
+      res.json(list);
+    } catch (e) {
+      res.status(500).json({ message: 'Failed to list datasets' });
+    }
+  });
+
+  app.post('/api/datasets', optionalAuthentication, async (req, res) => {
+    try {
+      const { name, words } = req.body || {};
+      if (!name || !Array.isArray(words)) {
+        return res.status(400).json({ message: 'Invalid dataset' });
+      }
+      const saved = await storage.saveDataset(req.userId, name, words);
+      res.json(saved);
+    } catch (e) {
+      res.status(500).json({ message: 'Failed to save dataset' });
+    }
+  });
+
+  app.post('/api/datasets/apply', optionalAuthentication, async (req, res) => {
+    try {
+      const { name } = req.body || {};
+      if (!name) return res.status(400).json({ message: 'name required' });
+      const result = await storage.applyDataset(req.userId, name);
+      res.json(result);
+    } catch (e) {
+      res.status(500).json({ message: 'Failed to apply dataset' });
     }
   });
 

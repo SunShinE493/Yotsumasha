@@ -3,6 +3,7 @@ import path from "path";
 import express from "express";
 import { Client, Collection, Events, GatewayIntentBits, ActivityType, EmbedBuilder, Partials } from "discord.js";
 import { createServer } from "http";
+import { WebSocketServer } from 'ws';
 import CommandsRegister from "./regist-commands.mjs";
 import Notification from "./models/notification.mjs";
 import YoutubeFeeds from "./models/youtubeFeeds.mjs";
@@ -31,10 +32,24 @@ const port = 5000;
 
 // Serve static files from dist directory (built React app) - BEFORE any routes
 const distDir = path.join(process.cwd(), 'dist');
-app.use(express.static(distDir));
+app.use(
+  express.static(distDir, {
+    setHeaders(res, filePath) {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  })
+);
 
-// Serve React app for non-API routes (SPA fallback) - BEFORE any routes
-app.get(/^\/(?!api).*$/, (req, res) => res.sendFile(path.join(distDir, 'index.html')));
+// SPA fallback: only for non-API, non-asset, non-file-extension paths
+// This prevents returning index.html for /assets/*.css|js and similar
+app.get(/^\/(?!api)(?!assets)(?!.*\.[^\/]+$).*/, (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.sendFile(path.join(distDir, 'index.html'));
+});
 app.post('/api', function(req, res) {
   console.log(`Received POST request.`);
  
@@ -55,6 +70,12 @@ app.get('/', function(req, res) {
   res.send('<a href="https://note.com/exteoi/n/n0ea64e258797</a> に解説があります。');
 });
 
+// Lightweight keep-alive endpoint (pre-auth/CSRF). Define BEFORE auth middleware registration.
+app.post('/', function(req, res) {
+  // No CSRF required for this keep-alive ping
+  res.status(204).end();
+});
+
 // Static and SPA fallback moved above to take precedence over legacy routes
 
 async function runWebserver(){
@@ -71,6 +92,142 @@ async function runWebserver(){
   }
   
   const server = createServer(app);
+  // --- WebSocket Real-time Battle ---
+  const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
+  const wss = new WebSocketServer({ server });
+
+  function broadcast(roomId, payload) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    const data = JSON.stringify(payload);
+    for (const ws of room.players.values()) {
+      try { ws.send(data); } catch {}
+    }
+    if (room.host) { try { room.host.send(data); } catch {} }
+  }
+
+  function toScores(room) {
+    const out = {};
+    for (const [n, s] of room.scores.entries()) out[n] = s;
+    return out;
+  }
+
+  function scheduleQuestionTimer(roomId) {
+    const r = rooms.get(roomId);
+    if (!r || r.state !== 'running') return;
+    if (r.timer) clearTimeout(r.timer);
+    r.timer = setTimeout(() => {
+      // time's up for this question -> advance to next (no score change)
+      const room = rooms.get(roomId);
+      if (!room || room.state !== 'running') return;
+      room.asked = (room.asked || 0) + 1;
+      if (room.maxQuestions && room.asked >= room.maxQuestions) {
+        room.state = 'ended';
+        if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+        broadcast(roomId, { type: 'end', scores: toScores(room) });
+        return;
+      }
+      room.idx = (room.idx + 1) % room.words.length;
+      const nq = room.words[room.idx];
+      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
+      scheduleQuestionTimer(roomId);
+    }, r.timeLimit * 1000);
+  }
+
+  function startRoom(roomId) {
+    const room = rooms.get(roomId);
+    if (!room || room.state !== 'waiting') return;
+    room.state = 'running';
+    room.idx = 0;
+    room.asked = 0;
+    if (room.timer) clearTimeout(room.timer);
+    // first question
+    const q = room.words[room.idx];
+    broadcast(roomId, { type: 'question', index: room.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
+    scheduleQuestionTimer(roomId);
+  }
+
+  wss.on('connection', (ws) => {
+    ws.on('message', (raw) => {
+      let msg;
+      try { msg = JSON.parse(raw.toString()); } catch { return; }
+      const { type } = msg || {};
+      if (type === 'create') {
+        const { room, name, limitSec, words, questionCount } = msg;
+        if (!room || !name || !Array.isArray(words) || !words.length) {
+          ws.send(JSON.stringify({ type: 'error', message: 'invalid_create' }));
+          return;
+        }
+        if (rooms.has(room)) {
+          ws.send(JSON.stringify({ type: 'error', message: 'room_exists' }));
+          return;
+        }
+        let normalized = words.map(w => ({ id: String(w.id||''), word: String(w.word||''), meaning: String(w.meaning||'') })).filter(w => w.word && w.meaning);
+        normalized = normalized.sort(() => Math.random() - 0.5);
+        const maxQuestions = Math.max(1, Math.min(Number(questionCount)||normalized.length, normalized.length));
+        const r = {
+          host: ws,
+          timeLimit: Math.max(5, Number(limitSec)||30),
+          words: normalized,
+          maxQuestions,
+          asked: 0,
+          state: 'waiting',
+          players: new Map(),
+          scores: new Map(),
+          idx: 0,
+          timer: null,
+        };
+        rooms.set(room, r);
+        ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions });
+      } else if (type === 'join') {
+        const { room, name } = msg;
+        const r = rooms.get(room);
+        if (!r || r.state !== 'waiting') { ws.send(JSON.stringify({ type: 'error', message: 'room_not_available' })); return; }
+        if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
+        r.players.set(name, ws); r.scores.set(name, 0);
+        ws._room = room; ws._name = name;
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+      } else if (type === 'start') {
+        const { room } = msg; const r = rooms.get(room);
+        if (!r) return; if (ws !== r.host) return; startRoom(room);
+      } else if (type === 'answer') {
+        const { room, name, text } = msg; const r = rooms.get(room);
+        if (!r || r.state !== 'running') return;
+        const q = r.words[r.idx]; if (!q) return;
+        const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        if (ok) {
+          const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
+          r.asked = (r.asked || 0) + 1;
+          if (r.maxQuestions && r.asked >= r.maxQuestions) {
+            r.state = 'ended';
+            if (r.timer) { clearTimeout(r.timer); r.timer = null; }
+            broadcast(room, { type: 'end', scores: toScores(r) });
+            return;
+          }
+          r.idx = (r.idx + 1) % r.words.length;
+          const nq = r.words[r.idx];
+          broadcast(room, { type: 'score', scores: toScores(r) });
+          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          scheduleQuestionTimer(room);
+        } else {
+          // wrong answer -> add to review list for this user if possible (requires session mapping; skipped here)
+        }
+      }
+    });
+    ws.on('close', () => {
+      const room = ws._room; const name = ws._name;
+      if (!room || !rooms.has(room)) return;
+      const r = rooms.get(room);
+      if (r.players.has(name)) r.players.delete(name);
+      if (r.players.size === 0) {
+        if (r.timer) clearTimeout(r.timer);
+        rooms.delete(room);
+      } else {
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+      }
+    });
+  });
   server.listen(port,'0.0.0.0',()=>{
     console.log(`server is running on port ${port}`);
   });
