@@ -31,6 +31,9 @@ export default function BattlePage() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [serverLimitSec, setServerLimitSec] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Refs to track previous question for reliable display (avoid stale closures)
+  const prevWordRef = useRef<string | null>(null);
+  const prevMeaningRef = useRef<string | null>(null);
 
   useEffect(()=>{
     setCanStart(Boolean(name && room && selectedJson && rangeEnd >= rangeStart));
@@ -62,16 +65,18 @@ export default function BattlePage() {
           }
         } else if (msg.type === 'question') {
           setPhase('running');
-          // when next question arrives, show previous question's answer
-          // store previous question's correct answer for display
-          setLastAnswer((prev) => (questionMeaning ? questionMeaning : prev));
-          setLastAnswerWord((prev) => (questionWord ? questionWord : prev));
+          // when next question arrives, show previous question's answer reliably
+          setLastAnswer(prevMeaningRef.current);
+          setLastAnswerWord(prevWordRef.current);
           setQuestionWord(msg.word ?? null);
           setQuestionMeaning(msg.meaning ?? null);
           setQuestionId(msg.id ?? null);
           setAnswerText('');
           const secs = (serverLimitSec ?? limitSec);
           startCountdown(secs);
+          // update previous refs to this new question
+          prevWordRef.current = msg.word ?? null;
+          prevMeaningRef.current = msg.meaning ?? null;
         } else if (msg.type === 'score') {
           setScores(msg.scores || {});
         } else if (msg.type === 'end') {
