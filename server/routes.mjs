@@ -77,14 +77,25 @@ export async function registerRoutes(app) {
     }
   });
 
+  // --- Open rooms listing for battle ---
+  // Provide a lightweight endpoint that lists room IDs and player counts
+  app.get('/api/battle/rooms', (req, res) => {
+    try {
+      // Expose indirectly via storage/session map on server; since rooms are in main.mjs,
+      // use a global publisher -- for simplicity, return 501 if not available in this module.
+      res.status(501).json({ message: 'rooms listing not available on this route handler' });
+    } catch (e) {
+      res.status(500).json({ message: 'failed' });
+    }
+  });
+
   // Upload vocabulary JSON file
   app.post("/api/vocabulary/upload", optionalAuthentication, async (req, res) => {
     try {
       const { words } = vocabularyFileSchema.parse(req.body);
       const userId = req.userId;
 
-      // Clear existing words and upload new ones for this user
-      await storage.clearVocabularyWords(userId);
+      // Append words without clearing existing vocabulary to preserve review and prior datasets
       const createdWords = await storage.createVocabularyWords(userId, words);
 
       res.json({

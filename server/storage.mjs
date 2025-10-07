@@ -311,6 +311,10 @@ export class MemStorage {
       if (word) {
         result.push({ ...progress, word });
         console.log(`[DEBUG] Added review word: ${word.word}`);
+      } else if (progress.word && progress.word.word && progress.word.meaning) {
+        // Fallback to embedded word payload if vocabulary no longer has it
+        result.push({ ...progress, word: progress.word });
+        console.log(`[DEBUG] Using embedded word for progress wordId ${progress.wordId}`);
       } else {
         console.log(`[DEBUG] Warning: No word found for progress wordId ${progress.wordId}`);
       }

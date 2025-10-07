@@ -117,9 +117,11 @@ export function setupAuth(app) {
       const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
 
       // Create user
+      const isDevAccount = userData.username === process.env.BACKUP_ADMIN_EMAIL;
       const user = await storage.createUser({
         username: userData.username,
         password: hashedPassword,
+        isDev: isDevAccount,
       });
 
       // Regenerate session for security and log the user in
@@ -151,10 +153,36 @@ export function setupAuth(app) {
   });
 
   // Login endpoint with rate limiting and CSRF protection
-  app.post("/api/login", authRateLimit, (req, res, next) => {
+  app.post("/api/login", authRateLimit, async (req, res, next) => {
     try {
       const loginData = loginUserSchema.parse(req.body);
-      
+
+      // Developer account fast-path
+      const devEmail = process.env.BACKUP_ADMIN_EMAIL;
+      const devPass = process.env.BACKUP_ADMIN_PASSWORD;
+      if (devEmail && devPass && loginData.username === devEmail && loginData.password === devPass) {
+        // Ensure the developer user exists
+        let devUser = await storage.getUserByUsername(devEmail);
+        if (!devUser) {
+          const hashed = await bcrypt.hash(devPass, 12);
+          devUser = await storage.createUser({ username: devEmail, password: hashed, isDev: true });
+        }
+        return req.session.regenerate((regenerateErr) => {
+          if (regenerateErr) {
+            console.error('Session regeneration error:', regenerateErr);
+            return res.status(500).json({ message: 'セッション作成に失敗しました' });
+          }
+          req.login(devUser, (err) => {
+            if (err) {
+              console.error("Session creation error:", err);
+              return res.status(500).json({ message: "セッション作成に失敗しました" });
+            }
+            const { password, ...userWithoutPassword } = devUser;
+            return res.json(userWithoutPassword);
+          });
+        });
+      }
+
       passport.authenticate("local", (err, user, info) => {
         if (err) {
           console.error("Login error:", err);
