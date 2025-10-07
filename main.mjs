@@ -127,9 +127,10 @@ async function runWebserver(){
         broadcast(roomId, { type: 'end', scores: toScores(room) });
         return;
       }
+      const prevQ = room.words[room.idx];
       room.idx = (room.idx + 1) % room.words.length;
       const nq = room.words[room.idx];
-      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
+      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
       scheduleQuestionTimer(roomId);
     }, r.timeLimit * 1000);
   }
@@ -143,7 +144,7 @@ async function runWebserver(){
     if (room.timer) clearTimeout(room.timer);
     // first question
     const q = room.words[room.idx];
-    broadcast(roomId, { type: 'question', index: room.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
+    broadcast(roomId, { type: 'question', index: room.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
     scheduleQuestionTimer(roomId);
   }
 
@@ -205,10 +206,11 @@ async function runWebserver(){
             broadcast(room, { type: 'end', scores: toScores(r) });
             return;
           }
+          const prevQ = r.words[r.idx];
           r.idx = (r.idx + 1) % r.words.length;
           const nq = r.words[r.idx];
           broadcast(room, { type: 'score', scores: toScores(r) });
-          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
           scheduleQuestionTimer(room);
         } else {
           // wrong answer -> add to review list for this user if possible (requires session mapping; skipped here)

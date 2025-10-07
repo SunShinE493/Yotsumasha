@@ -65,9 +65,9 @@ export default function BattlePage() {
           }
         } else if (msg.type === 'question') {
           setPhase('running');
-          // when next question arrives, show previous question's answer reliably
-          setLastAnswer(prevMeaningRef.current);
-          setLastAnswerWord(prevWordRef.current);
+          // Prefer server-sent previous answer if available (authoritative)
+          setLastAnswer(msg.prevMeaning ?? prevMeaningRef.current);
+          setLastAnswerWord(msg.prevWord ?? prevWordRef.current);
           setQuestionWord(msg.word ?? null);
           setQuestionMeaning(msg.meaning ?? null);
           setQuestionId(msg.id ?? null);
