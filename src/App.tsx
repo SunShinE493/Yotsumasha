@@ -11,6 +11,7 @@ import Landing from './pages/landing';
 import BattlePage from './pages/battle';
 import ScorePage from './pages/score';
 import RankingPage from './pages/ranking';
+import DevToolsPage from './pages/dev';
 import { Loader2 } from 'lucide-react';
 
 const queryClient = new QueryClient({
@@ -56,6 +57,8 @@ function AppRouter() {
           <Route path="/battle" component={BattlePage} />
           <Route path="/score" component={ScorePage} />
           <Route path="/ranking" component={RankingPage} />
+          {/* Dev route (no link from home) */}
+          <Route path="/dev" component={DevToolsPage} />
           <Route>
             <Redirect to="/" />
           </Route>
