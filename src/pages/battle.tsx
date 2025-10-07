@@ -27,6 +27,7 @@ export default function BattlePage() {
   const [scores, setScores] = useState<Record<string, number>>({});
   const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
+  const [lastAnswerWord, setLastAnswerWord] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [serverLimitSec, setServerLimitSec] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -62,7 +63,9 @@ export default function BattlePage() {
         } else if (msg.type === 'question') {
           setPhase('running');
           // when next question arrives, show previous question's answer
+          // store previous question's correct answer for display
           setLastAnswer((prev) => (questionMeaning ? questionMeaning : prev));
+          setLastAnswerWord((prev) => (questionWord ? questionWord : prev));
           setQuestionWord(msg.word ?? null);
           setQuestionMeaning(msg.meaning ?? null);
           setQuestionId(msg.id ?? null);
@@ -83,6 +86,7 @@ export default function BattlePage() {
           setQuestionMeaning(null);
           setQuestionId(null);
           setLastAnswer(null);
+          setLastAnswerWord(null);
           if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         }
       } catch {}
@@ -313,7 +317,10 @@ export default function BattlePage() {
                     ))}
                   </div>
                   {lastAnswer && (
-                    <div className="mt-4 text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span></div>
+                    <div className="mt-4 text-sm text-muted-foreground">
+                      直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span>
+                      {lastAnswerWord ? <span className="text-muted-foreground">（{lastAnswerWord}）</span> : null}
+                    </div>
                   )}
                 </div>
               </div>
