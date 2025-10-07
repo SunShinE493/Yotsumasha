@@ -101,21 +101,39 @@ async function runWebserver(){
     return out;
   }
 
+  function scheduleQuestionTimer(roomId) {
+    const r = rooms.get(roomId);
+    if (!r || r.state !== 'running') return;
+    if (r.timer) clearTimeout(r.timer);
+    r.timer = setTimeout(() => {
+      // time's up for this question -> advance to next (no score change)
+      const room = rooms.get(roomId);
+      if (!room || room.state !== 'running') return;
+      room.asked = (room.asked || 0) + 1;
+      if (room.maxQuestions && room.asked >= room.maxQuestions) {
+        room.state = 'ended';
+        if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+        broadcast(roomId, { type: 'end', scores: toScores(room) });
+        return;
+      }
+      room.idx = (room.idx + 1) % room.words.length;
+      const nq = room.words[room.idx];
+      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
+      scheduleQuestionTimer(roomId);
+    }, r.timeLimit * 1000);
+  }
+
   function startRoom(roomId) {
     const room = rooms.get(roomId);
     if (!room || room.state !== 'waiting') return;
     room.state = 'running';
     room.idx = 0;
     room.asked = 0;
-    // timer
     if (room.timer) clearTimeout(room.timer);
-    room.timer = setTimeout(() => {
-      room.state = 'ended';
-      broadcast(roomId, { type: 'end', scores: toScores(room) });
-    }, room.timeLimit * 1000);
     // first question
     const q = room.words[room.idx];
     broadcast(roomId, { type: 'question', index: room.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
+    scheduleQuestionTimer(roomId);
   }
 
   wss.on('connection', (ws) => {
@@ -180,6 +198,7 @@ async function runWebserver(){
           const nq = r.words[r.idx];
           broadcast(room, { type: 'score', scores: toScores(r) });
           broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          scheduleQuestionTimer(room);
         }
       }
     });
