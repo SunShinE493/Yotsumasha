@@ -96,6 +96,22 @@ async function runWebserver(){
   const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
   const wss = new WebSocketServer({ server });
 
+  // Public API: list open rooms (waiting/running)
+  app.get('/api/battle/rooms', (_req, res) => {
+    try {
+      const list = Array.from(rooms.entries()).map(([id, r]) => ({
+        id,
+        state: r.state,
+        playerCount: r.players?.size || 0,
+        timeLimit: r.timeLimit,
+        maxQuestions: r.maxQuestions || r.words?.length || 0,
+      }));
+      res.json(list);
+    } catch (e) {
+      res.status(500).json({ message: 'failed to list rooms' });
+    }
+  });
+
   function broadcast(roomId, payload) {
     const room = rooms.get(roomId);
     if (!room) return;

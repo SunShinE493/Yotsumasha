@@ -9,6 +9,7 @@ export default function BattlePage() {
   const [mode, setMode] = useState<'host'|'join'|null>(null);
   const [room, setRoom] = useState('');
   const [name, setName] = useState('');
+  const [openRooms, setOpenRooms] = useState<Array<{id:string; state:string; playerCount:number}> | null>(null);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [rangeStart, setRangeStart] = useState<number>(1);
   const [rangeEnd, setRangeEnd] = useState<number>(50);
@@ -277,6 +278,31 @@ export default function BattlePage() {
                 <Input placeholder="名前" value={name} onChange={(e)=>setName(e.target.value)} />
                 <Input placeholder="部屋番号" value={room} onChange={(e)=>setRoom(e.target.value)} />
                 <Button className="mt-2" onClick={handleJoin} disabled={!name || !room}>入室</Button>
+              </div>
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-semibold">開いている部屋</div>
+                  <Button size="sm" variant="outline" onClick={async ()=>{
+                    try {
+                      const res = await fetch('/api/battle/rooms');
+                      const list = await res.json();
+                      setOpenRooms(list);
+                    } catch {
+                      setOpenRooms([]);
+                    }
+                  }}>更新</Button>
+                </div>
+                <div className="grid gap-2">
+                  {(openRooms||[]).map(r => (
+                    <div key={r.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
+                      <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span></div>
+                      <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
+                    </div>
+                  ))}
+                  {openRooms && openRooms.length === 0 && (
+                    <div className="text-sm text-muted-foreground">開いている部屋はありません</div>
+                  )}
+                </div>
               </div>
               {phase === 'lobby' && (
                 <div className="mt-4 rounded-lg border border-border p-4">
