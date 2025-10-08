@@ -339,32 +339,29 @@ export class MemStorage {
     return updatedProgress;
   }
 
-  // --- Export/Import all user data (backup/restore) ---
+  // --- Export (minimal) / Import all user data (backup/restore) ---
+  // Minimal export: only account info and review (incorrect) words
   async exportUserData(userId) {
-    const words = await this.getVocabularyWords(userId);
-    const sessions = Array.from((this.studySessions.get(userId) || new Map()).values());
-    const progress = Array.from((this.wordProgress.get(userId) || new Map()).values());
-    const datasets = await this.listDatasets(userId);
-    const dsMap = this.userDatasets.get(userId) || new Map();
-    const datasetPayload = {};
-    for (const [name, arr] of dsMap.entries()) {
-      datasetPayload[name] = arr;
-    }
-    const score = this.scoreAttack?.get(userId) || null;
-    return { words, sessions, progress, datasets, datasetPayload, score };
+    const user = await this.getUser(userId);
+    const reviewWords = await this.getReviewWords(userId);
+    // reduce payload of reviewWords to essential fields
+    const compact = (reviewWords || []).map((rw) => ({
+      wordId: rw.word?.id || rw.wordId,
+      word: rw.word ? { id: rw.word.id, word: rw.word.word, meaning: rw.word.meaning } : undefined,
+    }));
+    return {
+      user: { id: userId, username: user?.username || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId) },
+      reviewWords: compact,
+    };
   }
 
   async exportAllUsersData() {
     const result = [];
+    // Collect known users from the users map only (minimal and safe)
     for (const user of this.users.values()) {
       const userId = user.id;
-      const data = await this.exportUserData(userId);
-      const reviewWords = await this.getReviewWords(userId);
-      result.push({
-        user: { id: user.id, username: user.username, isDev: !!user.isDev },
-        data,
-        reviewWords,
-      });
+      const minimal = await this.exportUserData(userId);
+      result.push(minimal);
     }
     return { users: result };
   }
