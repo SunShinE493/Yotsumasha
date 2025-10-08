@@ -96,11 +96,11 @@ async function runWebserver(){
   const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
   const wss = new WebSocketServer({ server });
 
-  // Public API: list open rooms (waiting only)
+  // Public API: list open rooms (waiting and running)
   app.get('/api/battle/rooms', (_req, res) => {
     try {
       const list = Array.from(rooms.entries())
-        .filter(([, r]) => r && r.state === 'waiting')
+        .filter(([, r]) => r && (r.state === 'waiting' || r.state === 'running'))
         .map(([id, r]) => ({
           id,
           state: r.state,
@@ -214,6 +214,7 @@ async function runWebserver(){
           idx: 0,
           timer: null,
           cleanupTimer: null,
+          lastCorrectBy: null,
         };
         rooms.set(room, r);
         ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
@@ -235,8 +236,11 @@ async function runWebserver(){
         const q = r.words[r.idx]; if (!q) return;
         const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
         if (ok) {
+          r.lastCorrectBy = name;
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
           r.asked = (r.asked || 0) + 1;
+          // notify who answered
+          broadcast(room, { type: 'answered', by: name });
           if (r.maxQuestions && r.asked >= r.maxQuestions) {
             r.state = 'ended';
             if (r.timer) { clearTimeout(r.timer); r.timer = null; }
@@ -248,7 +252,8 @@ async function runWebserver(){
           r.idx = (r.idx + 1) % r.words.length;
           const nq = r.words[r.idx];
           broadcast(room, { type: 'score', scores: toScores(r) });
-          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, prevAnswerer: r.lastCorrectBy || null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          r.lastCorrectBy = null;
           scheduleQuestionTimer(room);
         } else {
           // wrong answer -> add to review list for this user if possible (requires session mapping; skipped here)

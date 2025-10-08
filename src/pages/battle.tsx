@@ -29,6 +29,7 @@ export default function BattlePage() {
   const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [lastAnswerWord, setLastAnswerWord] = useState<string | null>(null);
+  const [lastAnswerer, setLastAnswerer] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [serverLimitSec, setServerLimitSec] = useState<number | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,6 +77,7 @@ export default function BattlePage() {
           // reset previous answer state when entering lobby (new game)
           setLastAnswer(null);
           setLastAnswerWord(null);
+          setLastAnswerer(null);
           prevWordRef.current = null;
           prevMeaningRef.current = null;
         } else if (msg.type === 'question') {
@@ -83,6 +85,7 @@ export default function BattlePage() {
           // Prefer server-sent previous answer only; avoid fallback to prevent first-question leakage
           setLastAnswer(typeof msg.prevMeaning === 'string' ? msg.prevMeaning : null);
           setLastAnswerWord(typeof msg.prevWord === 'string' ? msg.prevWord : null);
+          if (typeof msg.prevAnswerer === 'string') setLastAnswerer(msg.prevAnswerer);
           setQuestionWord(msg.word ?? null);
           setQuestionMeaning(msg.meaning ?? null);
           setQuestionId(msg.id ?? null);
@@ -94,6 +97,9 @@ export default function BattlePage() {
           prevMeaningRef.current = msg.meaning ?? null;
         } else if (msg.type === 'score') {
           setScores(msg.scores || {});
+        } else if (msg.type === 'answered') {
+          // someone answered correctly -> flash effect
+          setFlash('green'); setTimeout(()=>setFlash('none'), 200);
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
@@ -387,6 +393,7 @@ export default function BattlePage() {
                     <div className="mt-4 text-sm text-muted-foreground">
                       直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span>
                       {lastAnswerWord ? <span className="text-muted-foreground">（{lastAnswerWord}）</span> : null}
+                      {lastAnswerer ? <span className="ml-2 text-xs text-muted-foreground">正解者: <span className="text-foreground font-medium">{lastAnswerer}</span></span> : null}
                     </div>
                   )}
                   {phase==='ended' && (
