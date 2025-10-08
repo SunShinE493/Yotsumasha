@@ -77,9 +77,24 @@ export default function DevToolsPage() {
               <label className="text-sm text-muted-foreground">Developer Password</label>
               <Input value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="ebiomochi" type="password" />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <Button onClick={doExport}>Export User Data</Button>
               <Button variant="outline" onClick={()=>{ setImportJson(exportJson); }}>Load Above as Import</Button>
+              <Button variant="secondary" onClick={async ()=>{
+                try {
+                  setStatus('Exporting all users...');
+                  const res = await fetch('/api/admin/export', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, all: true })
+                  });
+                  if (!res.ok) { setStatus(`Export all failed (${res.status})`); return; }
+                  const data = await res.json();
+                  const str = JSON.stringify(data, null, 2);
+                  setExportJson(str);
+                  setStatus('Exported all users');
+                } catch (e) { setStatus('Export all error'); }
+              }}>Export ALL Users</Button>
             </div>
             <div className="grid gap-2">
               <label className="text-sm text-muted-foreground">Exported JSON</label>

@@ -354,6 +354,21 @@ export class MemStorage {
     return { words, sessions, progress, datasets, datasetPayload, score };
   }
 
+  async exportAllUsersData() {
+    const result = [];
+    for (const user of this.users.values()) {
+      const userId = user.id;
+      const data = await this.exportUserData(userId);
+      const reviewWords = await this.getReviewWords(userId);
+      result.push({
+        user: { id: user.id, username: user.username, isDev: !!user.isDev },
+        data,
+        reviewWords,
+      });
+    }
+    return { users: result };
+  }
+
   async importUserData(userId, data) {
     // restore datasets
     if (data && data.datasetPayload && typeof data.datasetPayload === 'object') {

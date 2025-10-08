@@ -64,8 +64,13 @@ export async function registerRoutes(app) {
   app.post('/api/admin/export', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      // If "all" flag is provided, export all users' data
+      if (req.body && req.body.all === true) {
+        const all = await storage.exportAllUsersData();
+        return res.json(all);
+      }
       const data = await storage.exportUserData(req.userId);
-      res.json(data);
+      return res.json(data);
     } catch (e) {
       res.status(500).json({ message: 'failed to export' });
     }
