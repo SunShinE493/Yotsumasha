@@ -71,11 +71,11 @@ export default function DevToolsPage() {
           <CardContent className="p-6 space-y-4">
             <div className="grid gap-2">
               <label className="text-sm text-muted-foreground">Developer Email</label>
-              <Input value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="taiyo.849@gmail.com" />
+              <Input value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="developper_mailAddress" />
             </div>
             <div className="grid gap-2">
               <label className="text-sm text-muted-foreground">Developer Password</label>
-              <Input value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="ebiomochi" type="password" />
+              <Input value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="password" type="password" />
             </div>
             <div className="flex gap-2 items-center">
               <Button onClick={doExport}>Export User Data</Button>
