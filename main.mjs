@@ -138,15 +138,16 @@ async function runWebserver(){
       if (!room || room.state !== 'running') return;
       room.asked = (room.asked || 0) + 1;
       if (room.maxQuestions && room.asked >= room.maxQuestions) {
+        const lastQ = room.words[room.idx];
         room.state = 'ended';
         if (room.timer) { clearTimeout(room.timer); room.timer = null; }
-        broadcast(roomId, { type: 'end', scores: toScores(room) });
+        broadcast(roomId, { type: 'end', scores: toScores(room), endReason: 'timeout', lastId: lastQ?.id ?? null, lastWord: lastQ?.word ?? null, lastMeaning: lastQ?.meaning ?? null });
         return;
       }
       const prevQ = room.words[room.idx];
       room.idx = (room.idx + 1) % room.words.length;
       const nq = room.words[room.idx];
-      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
+      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, timeLimit: room.timeLimit, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
       scheduleQuestionTimer(roomId);
     }, r.timeLimit * 1000);
   }

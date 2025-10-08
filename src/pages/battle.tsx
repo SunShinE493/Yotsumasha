@@ -96,6 +96,16 @@ export default function BattlePage() {
           if (msg.lastMeaning) {
             setFinalLastMeaning(msg.lastMeaning);
             setFinalLastWord(msg.lastWord ?? null);
+            // add to review if timeout
+            if (msg.endReason === 'timeout' && msg.lastId) {
+              try {
+                apiRequest('POST','/api/study/progress', {
+                  wordId: msg.lastId,
+                  isRemembered: false,
+                  word: { id: msg.lastId, word: msg.lastWord || '', meaning: msg.lastMeaning || '' }
+                } as any);
+              } catch {}
+            }
           }
           setQuestionWord(null);
           setQuestionMeaning(null);

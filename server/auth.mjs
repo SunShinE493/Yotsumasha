@@ -276,6 +276,18 @@ export function setupAuth(app) {
     });
   });
 
+  // GET route convenience for logout (redirect to /)
+  app.get("/api/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      if (req.session) {
+        req.session.destroy(() => res.redirect('/auth'));
+      } else {
+        res.redirect('/auth');
+      }
+    });
+  });
+
   // Get current user (supports both authenticated users and guests)
   app.get("/api/user", (req, res) => {
     if (req.isAuthenticated()) {
