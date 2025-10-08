@@ -60,6 +60,7 @@ export async function registerRoutes(app) {
     );
   }
 
+  // CSRF-exempt for developer account (handled in auth through isDev)
   app.post('/api/admin/export', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });

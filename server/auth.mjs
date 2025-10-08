@@ -101,9 +101,16 @@ export function setupAuth(app) {
   const csrfSecret = process.env.CSRF_SECRET || "12345678901234567890123456789012"; // 32 chars
   app.use(csurf(csrfSecret, ["POST", "PUT", "PATCH", "DELETE"]));
 
-  // CSRF token endpoint
+  // CSRF token endpoint - also set cookie so tiny-csrf can validate (cookie vs header)
   app.get("/api/csrf", (req, res) => {
     const token = req.csrfToken();
+    // Expose token in a cookie; httpOnly false so client JS can read if needed
+    res.cookie('csrf-token', token, {
+      httpOnly: false,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+    });
     res.json({ csrfToken: token });
   });
 
