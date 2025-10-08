@@ -45,15 +45,18 @@ export async function registerRoutes(app) {
   function isBackupAdmin(req) {
     const envUser = process.env.BACKUP_ADMIN_EMAIL;
     const envPass = process.env.BACKUP_ADMIN_PASSWORD;
-    // Allow only when body matches env creds AND current session user (or username) equals the admin email
     const bodyEmail = req.body?.email;
     const bodyPassword = req.body?.password;
     const sessionUserEmail = req.user?.username || null;
+    const isDevFlag = req.user?.isDev === true;
+    // Developer flag in session grants access directly
+    if (isDevFlag) return true;
+    // Otherwise require env credentials and that the logged-in user matches admin email
     return (
-      envUser && envPass &&
+      !!envUser && !!envPass &&
       bodyEmail === envUser &&
       bodyPassword === envPass &&
-      (sessionUserEmail === envUser || req.isGuest === false)
+      sessionUserEmail === envUser
     );
   }
 

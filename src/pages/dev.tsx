@@ -20,10 +20,16 @@ export default function DevToolsPage() {
       setStatus('Exporting...');
       const res = await fetch('/api/admin/export', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrf },
+        credentials: 'same-origin',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'CSRF-Token': csrf,
+          'csrf-token': csrf,
+          'x-csrf-token': csrf
+        },
         body: JSON.stringify({ email, password })
       });
-      if (!res.ok) { setStatus('Export failed'); return; }
+      if (!res.ok) { setStatus(`Export failed (${res.status})`); return; }
       const data = await res.json();
       const str = JSON.stringify(data, null, 2);
       setExportJson(str);
@@ -39,10 +45,11 @@ export default function DevToolsPage() {
       const payload = JSON.parse(importJson);
       const res = await fetch('/api/admin/import', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrf },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrf, 'csrf-token': csrf, 'x-csrf-token': csrf },
         body: JSON.stringify({ email, password, data: payload })
       });
-      if (!res.ok) { setStatus('Import failed'); return; }
+      if (!res.ok) { setStatus(`Import failed (${res.status})`); return; }
       setStatus('Imported');
     } catch (e) {
       setStatus('Import error');
