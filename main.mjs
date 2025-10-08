@@ -96,16 +96,18 @@ async function runWebserver(){
   const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
   const wss = new WebSocketServer({ server });
 
-  // Public API: list open rooms (waiting/running)
+  // Public API: list open rooms (waiting only)
   app.get('/api/battle/rooms', (_req, res) => {
     try {
-      const list = Array.from(rooms.entries()).map(([id, r]) => ({
-        id,
-        state: r.state,
-        playerCount: r.players?.size || 0,
-        timeLimit: r.timeLimit,
-        maxQuestions: r.maxQuestions || r.words?.length || 0,
-      }));
+      const list = Array.from(rooms.entries())
+        .filter(([, r]) => r && r.state === 'waiting')
+        .map(([id, r]) => ({
+          id,
+          state: r.state,
+          playerCount: r.players?.size || 0,
+          timeLimit: r.timeLimit,
+          maxQuestions: r.maxQuestions || r.words?.length || 0,
+        }));
       res.json(list);
     } catch (e) {
       res.status(500).json({ message: 'failed to list rooms' });
@@ -142,6 +144,7 @@ async function runWebserver(){
         room.state = 'ended';
         if (room.timer) { clearTimeout(room.timer); room.timer = null; }
         broadcast(roomId, { type: 'end', scores: toScores(room), endReason: 'timeout', lastId: lastQ?.id ?? null, lastWord: lastQ?.word ?? null, lastMeaning: lastQ?.meaning ?? null });
+        scheduleRoomCleanup(roomId);
         return;
       }
       const prevQ = room.words[room.idx];
@@ -150,6 +153,22 @@ async function runWebserver(){
       broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, timeLimit: room.timeLimit, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
       scheduleQuestionTimer(roomId);
     }, r.timeLimit * 1000);
+  }
+
+  // Schedule deletion of a room 60s after it ends
+  function scheduleRoomCleanup(roomId) {
+    const r = rooms.get(roomId);
+    if (!r) return;
+    if (r.cleanupTimer) { try { clearTimeout(r.cleanupTimer); } catch {} }
+    r.cleanupTimer = setTimeout(() => {
+      const target = rooms.get(roomId);
+      if (!target) return;
+      // Only remove if still ended or empty
+      if (target.state === 'ended' || (target.players && target.players.size === 0)) {
+        if (target.timer) { try { clearTimeout(target.timer); } catch {} }
+        rooms.delete(roomId);
+      }
+    }, 60_000);
   }
 
   function startRoom(roomId) {
@@ -194,6 +213,7 @@ async function runWebserver(){
           scores: new Map(),
           idx: 0,
           timer: null,
+          cleanupTimer: null,
         };
         rooms.set(room, r);
         ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
@@ -221,6 +241,7 @@ async function runWebserver(){
             r.state = 'ended';
             if (r.timer) { clearTimeout(r.timer); r.timer = null; }
             broadcast(room, { type: 'end', scores: toScores(r) });
+            scheduleRoomCleanup(room);
             return;
           }
           const prevQ = r.words[r.idx];

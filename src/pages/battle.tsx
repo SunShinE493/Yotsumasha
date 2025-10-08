@@ -320,6 +320,7 @@ export default function BattlePage() {
                     }
                   }}>更新</Button>
                 </div>
+                <AutoRoomsList onUpdate={(list)=>setOpenRooms(list)} intervalMs={5000} />
                 <div className="grid gap-2">
                   {(openRooms||[]).map(r => (
                     <div key={r.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
@@ -413,4 +414,25 @@ export default function BattlePage() {
       </main>
     </div>
   );
+}
+
+function AutoRoomsList({ onUpdate, intervalMs = 5000 }: { onUpdate: (list: any[]) => void; intervalMs?: number }) {
+  useEffect(() => {
+    let cancelled = false;
+    let timer: number | null = null;
+    const tick = async () => {
+      try {
+        const res = await fetch('/api/battle/rooms', { cache: 'no-store' });
+        const list = await res.json();
+        if (!cancelled) onUpdate(Array.isArray(list) ? list : []);
+      } catch {
+        if (!cancelled) onUpdate([]);
+      } finally {
+        if (!cancelled) timer = window.setTimeout(tick, intervalMs);
+      }
+    };
+    tick();
+    return () => { cancelled = true; if (timer) window.clearTimeout(timer); };
+  }, [onUpdate, intervalMs]);
+  return null;
 }
