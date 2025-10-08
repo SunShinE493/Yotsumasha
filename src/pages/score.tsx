@@ -43,8 +43,8 @@ export default function ScorePage() {
 
   const startGame = async () => {
     // Fetch words from server storage (FileUpload already saved them)
-    const s = Math.max(1, rangeStart);
-    const e = Math.max(s, rangeEnd);
+    const s = Math.max(1, Number(rangeStart));
+    const e = Math.max(s, Number(rangeEnd));
     const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
     const list = await res.json();
     const shuffled = [...list].sort(() => Math.random() - 0.5);
@@ -166,11 +166,17 @@ export default function ScorePage() {
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
-                    <Input type="number" min={1} value={rangeStart} onChange={(e)=>setRangeStart(Number(e.target.value)||1)} />
+                    <Input type="number" min={0} value={rangeStart} onChange={(e)=>{
+                      const v = e.target.value === '' ? 0 : Number(e.target.value);
+                      setRangeStart(isNaN(v) ? 0 : v);
+                    }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">終了</label>
-                    <Input type="number" min={rangeStart} value={rangeEnd} onChange={(e)=>setRangeEnd(Number(e.target.value)||rangeStart)} />
+                    <Input type="number" min={rangeStart} value={rangeEnd} onChange={(e)=>{
+                      const v = e.target.value === '' ? rangeStart : Number(e.target.value);
+                      setRangeEnd(isNaN(v) ? rangeStart : v);
+                    }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">制限(秒)</label>

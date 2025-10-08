@@ -40,7 +40,7 @@ export default function BattlePage() {
   const [finalLastMeaning, setFinalLastMeaning] = useState<string | null>(null);
 
   useEffect(()=>{
-    setCanStart(Boolean(name && room && selectedJson && rangeEnd >= rangeStart));
+    setCanStart(Boolean(name && room && selectedJson && Number(rangeEnd) >= Number(rangeStart)));
   },[name, room, selectedJson, rangeStart, rangeEnd]);
 
   // Utility: compute ws endpoint based on current page origin
@@ -140,8 +140,8 @@ export default function BattlePage() {
   const handleCreate = async () => {
     if (!canStart) return;
     // Load chosen range words from server-side storage for this user
-    const s = Math.max(1, rangeStart);
-    const e = Math.max(s, rangeEnd);
+    const s = Math.max(1, Number(rangeStart));
+    const e = Math.max(s, Number(rangeEnd));
     const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
     const words = await res.json();
     const ws = ensureSocket();
@@ -244,11 +244,17 @@ export default function BattlePage() {
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
-                    <Input type="number" min={1} value={rangeStart} onChange={(e)=>setRangeStart(Number(e.target.value)||1)} />
+                    <Input type="number" min={0} value={rangeStart} onChange={(e)=>{
+                      const v = e.target.value === '' ? 0 : Number(e.target.value);
+                      setRangeStart(isNaN(v) ? 0 : v);
+                    }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">終了</label>
-                    <Input type="number" min={rangeStart} value={rangeEnd} onChange={(e)=>setRangeEnd(Number(e.target.value)||rangeStart)} />
+                    <Input type="number" min={rangeStart} value={rangeEnd} onChange={(e)=>{
+                      const v = e.target.value === '' ? rangeStart : Number(e.target.value);
+                      setRangeEnd(isNaN(v) ? rangeStart : v);
+                    }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">制限(秒)</label>
