@@ -310,11 +310,13 @@ export default function BattlePage() {
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="font-semibold">開いている部屋</div>
-                  <Button size="sm" variant="outline" onClick={async ()=>{
+                  <Button type="button" size="sm" variant="outline" onClick={async (e)=>{
+                    e.preventDefault();
+                    e.stopPropagation();
                     try {
-                      const res = await fetch('/api/battle/rooms');
+                      const res = await fetch('/api/battle/rooms', { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
                       const list = await res.json();
-                      setOpenRooms(list);
+                      setOpenRooms(Array.isArray(list) ? list : []);
                     } catch {
                       setOpenRooms([]);
                     }
@@ -322,13 +324,13 @@ export default function BattlePage() {
                 </div>
                 <AutoRoomsList onUpdate={(list)=>setOpenRooms(list)} intervalMs={5000} />
                 <div className="grid gap-2">
-                  {(openRooms||[]).map(r => (
+                  {Array.isArray(openRooms) && openRooms.map(r => (
                     <div key={r.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
                       <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span></div>
                       <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
                     </div>
                   ))}
-                  {openRooms && openRooms.length === 0 && (
+                  {Array.isArray(openRooms) && openRooms.length === 0 && (
                     <div className="text-sm text-muted-foreground">開いている部屋はありません</div>
                   )}
                 </div>
