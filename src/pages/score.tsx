@@ -8,9 +8,9 @@ import { apiRequest } from '@/lib/queryClient';
 export default function ScorePage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
-  const [rangeStart, setRangeStart] = useState<number>(1);
-  const [rangeEnd, setRangeEnd] = useState<number>(50);
-  const [limitSec, setLimitSec] = useState<number>(60);
+  const [rangeStart, setRangeStart] = useState<number | ''>(1);
+  const [rangeEnd, setRangeEnd] = useState<number | ''>(50);
+  const [limitSec, setLimitSec] = useState<number | ''>(60);
 
   // gameplay state
   const [words, setWords] = useState<Array<{ id: string; word: string; meaning: string }>>([]);
@@ -56,7 +56,7 @@ export default function ScorePage() {
     setSkips(0);
     setFlash('none');
     setResult(null);
-    setRemaining(limitSec);
+    setRemaining(Number(limitSec) || 60);
     setIsPlaying(true);
     if (timerRef.current) window.clearInterval(timerRef.current);
     timerRef.current = window.setInterval(() => {
@@ -77,7 +77,7 @@ export default function ScorePage() {
       fileName: selectedJson?.name ?? null,
       start: rangeStart,
       end: rangeEnd,
-      limit: limitSec,
+      limit: Number(limitSec) || 0,
       maxCombo: combo, // this is current; compute max below
       score,
       mistakes,
@@ -167,20 +167,22 @@ export default function ScorePage() {
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
                     <Input type="number" min={0} value={rangeStart} onChange={(e)=>{
-                      const v = e.target.value === '' ? 0 : Number(e.target.value);
-                      setRangeStart(isNaN(v) ? 0 : v);
+                      if (e.target.value === '') { setRangeStart(''); return; }
+                      const v = Number(e.target.value);
+                      setRangeStart(isNaN(v) ? '' : v);
                     }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">終了</label>
-                    <Input type="number" min={rangeStart} value={rangeEnd} onChange={(e)=>{
-                      const v = e.target.value === '' ? rangeStart : Number(e.target.value);
-                      setRangeEnd(isNaN(v) ? rangeStart : v);
+                    <Input type="number" min={typeof rangeStart==='number' ? rangeStart : 0} value={rangeEnd} onChange={(e)=>{
+                      if (e.target.value === '') { setRangeEnd(''); return; }
+                      const v = Number(e.target.value);
+                      setRangeEnd(isNaN(v) ? '' : v);
                     }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">制限(秒)</label>
-                    <Input type="number" min={10} value={limitSec} onChange={(e)=>setLimitSec(Number(e.target.value)||60)} />
+                    <Input type="number" min={10} value={limitSec} onChange={(e)=>{ if(e.target.value===''){ setLimitSec(''); return; } const v = Number(e.target.value); setLimitSec(isNaN(v)?'':v); }} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">

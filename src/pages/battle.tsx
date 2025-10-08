@@ -11,10 +11,10 @@ export default function BattlePage() {
   const [name, setName] = useState('');
   const [openRooms, setOpenRooms] = useState<Array<{id:string; state:string; playerCount:number}> | null>(null);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
-  const [rangeStart, setRangeStart] = useState<number>(1);
-  const [rangeEnd, setRangeEnd] = useState<number>(50);
-  const [limitSec, setLimitSec] = useState<number>(30);
-  const [questionCount, setQuestionCount] = useState<number>(20);
+  const [rangeStart, setRangeStart] = useState<number | ''>(1);
+  const [rangeEnd, setRangeEnd] = useState<number | ''>(50);
+  const [limitSec, setLimitSec] = useState<number | ''>(30);
+  const [questionCount, setQuestionCount] = useState<number | ''>(20);
   const [canStart, setCanStart] = useState(false);
 
   // --- WebSocket client state ---
@@ -40,7 +40,13 @@ export default function BattlePage() {
   const [finalLastMeaning, setFinalLastMeaning] = useState<string | null>(null);
 
   useEffect(()=>{
-    setCanStart(Boolean(name && room && selectedJson && Number(rangeEnd) >= Number(rangeStart)));
+    const isNum = (v: number | ''): v is number => typeof v === 'number' && !Number.isNaN(v);
+    const ok = Boolean(
+      name && room && selectedJson &&
+      isNum(rangeStart) && isNum(rangeEnd) &&
+      rangeEnd >= rangeStart
+    );
+    setCanStart(ok);
   },[name, room, selectedJson, rangeStart, rangeEnd]);
 
   // Utility: compute ws endpoint based on current page origin
@@ -164,7 +170,7 @@ export default function BattlePage() {
   const handleStart = () => {
     if (!wsRef.current) return;
     wsRef.current.send(JSON.stringify({ type: 'start', room }));
-    startCountdown(limitSec);
+    startCountdown(Number(serverLimitSec ?? limitSec) || 0);
   };
 
   const submitAnswer = async (e: React.FormEvent) => {
@@ -245,26 +251,28 @@ export default function BattlePage() {
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
                     <Input type="number" min={0} value={rangeStart} onChange={(e)=>{
-                      const v = e.target.value === '' ? 0 : Number(e.target.value);
-                      setRangeStart(isNaN(v) ? 0 : v);
+                      if (e.target.value === '') { setRangeStart(''); return; }
+                      const v = Number(e.target.value);
+                      setRangeStart(isNaN(v) ? '' : v);
                     }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">終了</label>
-                    <Input type="number" min={rangeStart} value={rangeEnd} onChange={(e)=>{
-                      const v = e.target.value === '' ? rangeStart : Number(e.target.value);
-                      setRangeEnd(isNaN(v) ? rangeStart : v);
+                    <Input type="number" min={typeof rangeStart==='number' ? rangeStart : 0} value={rangeEnd} onChange={(e)=>{
+                      if (e.target.value === '') { setRangeEnd(''); return; }
+                      const v = Number(e.target.value);
+                      setRangeEnd(isNaN(v) ? '' : v);
                     }} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">制限(秒)</label>
-                    <Input type="number" min={5} value={limitSec} onChange={(e)=>setLimitSec(Number(e.target.value)||30)} />
+                    <Input type="number" min={5} value={limitSec} onChange={(e)=>{ if(e.target.value===''){ setLimitSec(''); return; } const v = Number(e.target.value); setLimitSec(isNaN(v)?'':v); }} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">出題数</label>
-                    <Input type="number" min={1} max={Math.max(1, rangeEnd - rangeStart + 1)} value={questionCount} onChange={(e)=>setQuestionCount(Math.max(1, Number(e.target.value)||questionCount))} />
+                    <Input type="number" value={questionCount} onChange={(e)=>{ if(e.target.value===''){ setQuestionCount(''); return; } const v = Number(e.target.value); setQuestionCount(isNaN(v)?'':v); }} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -341,7 +349,7 @@ export default function BattlePage() {
                 <div className="h-1 bg-blue-500/20">
                   <div
                     className="h-1 bg-blue-500 transition-[width] duration-1000"
-                    style={{ width: `${Math.max(0, Math.min(100, (remaining / Math.max(1, limitSec)) * 100))}%` }}
+                    style={{ width: `${Math.max(0, Math.min(100, (remaining / Math.max(1, Number(serverLimitSec ?? limitSec) || 1)) * 100))}%` }}
                   />
                 </div>
               )}
