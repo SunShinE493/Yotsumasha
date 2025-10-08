@@ -12,7 +12,9 @@ export default function DevToolsPage() {
   const [status, setStatus] = useState<string>('');
 
   useEffect(() => {
-    fetch('/api/csrf').then(r=>r.json()).then(d=> setCsrf(d.csrfToken || '')); 
+    fetch('/api/csrf', { credentials: 'same-origin' })
+      .then(r=>r.json())
+      .then(d=> setCsrf(d.csrfToken || '')); 
   }, []);
 
   const doExport = async () => {

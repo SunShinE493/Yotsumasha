@@ -86,6 +86,17 @@ export function setupAuth(app) {
   app.use(passport.initialize());
   app.use(passport.session());
   
+  // Normalize CSRF header names from clients before CSRF middleware
+  app.use((req, _res, next) => {
+    const h = req.headers || {};
+    const token = h['csrf-token'] || h['x-csrf-token'] || h['x-xsrf-token'] || (req.body && req.body.csrfToken);
+    if (token && !h['csrf-token']) {
+      // @ts-ignore
+      req.headers['csrf-token'] = token;
+    }
+    next();
+  });
+
   // Setup CSRF protection (requires 32-character secret)
   const csrfSecret = process.env.CSRF_SECRET || "12345678901234567890123456789012"; // 32 chars
   app.use(csurf(csrfSecret, ["POST", "PUT", "PATCH", "DELETE"]));
