@@ -29,7 +29,7 @@ export default function DevToolsPage() {
           'csrf-token': csrf,
           'x-csrf-token': csrf
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, csrfToken: csrf })
       });
       if (!res.ok) { setStatus(`Export failed (${res.status})`); return; }
       const data = await res.json();
@@ -49,7 +49,7 @@ export default function DevToolsPage() {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrf, 'csrf-token': csrf, 'x-csrf-token': csrf },
-        body: JSON.stringify({ email, password, data: payload })
+        body: JSON.stringify({ email, password, data: payload, csrfToken: csrf })
       });
       if (!res.ok) { setStatus(`Import failed (${res.status})`); return; }
       setStatus('Imported');
