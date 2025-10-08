@@ -229,6 +229,9 @@ export default function Home() {
                   </span>
                   <span className="text-sm text-foreground">{username}</span>
                 </div>
+                <div className="pt-2">
+                  <a href="/api/logout" className="inline-block px-3 py-2 rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 text-sm">ログアウト</a>
+                </div>
               </div>
             </div>
           </div>

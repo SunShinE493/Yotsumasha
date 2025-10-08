@@ -35,6 +35,9 @@ export default function BattlePage() {
   // Refs to track previous question for reliable display (avoid stale closures)
   const prevWordRef = useRef<string | null>(null);
   const prevMeaningRef = useRef<string | null>(null);
+  const [finalRanking, setFinalRanking] = useState<Array<{name:string;score:number}>>([]);
+  const [finalLastWord, setFinalLastWord] = useState<string | null>(null);
+  const [finalLastMeaning, setFinalLastMeaning] = useState<string | null>(null);
 
   useEffect(()=>{
     setCanStart(Boolean(name && room && selectedJson && rangeEnd >= rangeStart));
@@ -88,11 +91,12 @@ export default function BattlePage() {
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
-          // Build ranking with medals
           const entries = Object.entries(msg.scores || {}).sort((a,b)=> (b[1]??0) - (a[1]??0));
-          const medal = ['🥇','🥈','🥉'];
-          const lines = entries.map(([n,s],i)=> `${medal[i]||' '} ${n}: ${s}`).join('\n');
-          if (entries.length) alert(`ランキング\n${lines}`);
+          setFinalRanking(entries.map(([n,s])=>({ name: n, score: Number(s) })));
+          if (msg.lastMeaning) {
+            setFinalLastMeaning(msg.lastMeaning);
+            setFinalLastWord(msg.lastWord ?? null);
+          }
           setQuestionWord(null);
           setQuestionMeaning(null);
           setQuestionId(null);
@@ -356,6 +360,25 @@ export default function BattlePage() {
                     <div className="mt-4 text-sm text-muted-foreground">
                       直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span>
                       {lastAnswerWord ? <span className="text-muted-foreground">（{lastAnswerWord}）</span> : null}
+                    </div>
+                  )}
+                  {phase==='ended' && (
+                    <div className="mt-6">
+                      <div className="font-semibold mb-2">最終ランキング</div>
+                      <div className="space-y-1 text-sm">
+                        {finalRanking.map((r, i)=> (
+                          <div key={r.name} className="flex items-center justify-between">
+                            <div>{['🥇','🥈','🥉'][i] || ' '} {r.name}</div>
+                            <div className="text-muted-foreground">{r.score}</div>
+                          </div>
+                        ))}
+                      </div>
+                      {finalLastMeaning && (
+                        <div className="mt-3 text-sm text-muted-foreground">
+                          最後の問題の答え: <span className="text-foreground font-medium">{finalLastMeaning}</span>
+                          {finalLastWord ? <span className="text-muted-foreground">（{finalLastWord}）</span> : null}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
