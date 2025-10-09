@@ -81,10 +81,11 @@ export async function registerRoutes(app) {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
       const body = req.body || {};
-      // Bulk import for multiple users
-      if (Array.isArray(body.users)) {
+      // Bulk import: support users at top-level or inside data
+      const list = Array.isArray(body.users) ? body.users : (Array.isArray(body.data?.users) ? body.data.users : null);
+      if (list) {
         let count = 0;
-        for (const entry of body.users) {
+        for (const entry of list) {
           const u = entry?.user || {};
           // Upsert user meta first (id/username/isDev/displayName)
           const up = await storage.upsertUser({
@@ -94,7 +95,9 @@ export async function registerRoutes(app) {
             displayName: u.displayName || null,
             isGuest: !!u.isGuest,
           });
-          await storage.importUserData(up.id, entry?.data || entry);
+          // Accept shapes: {data:{...}} or {reviewWords:[...]}
+          const payload = entry?.data || entry;
+          await storage.importUserData(up.id, payload);
           count++;
         }
         return res.json({ ok: true, imported: count });
@@ -112,7 +115,9 @@ export async function registerRoutes(app) {
         });
         targetId = up.id;
       }
-      await storage.importUserData(targetId, body?.data || body);
+      // Accept shapes: { data: {...} } OR { reviewWords: [...] }
+      const payload = body?.data || body;
+      await storage.importUserData(targetId, payload);
       res.json({ ok: true, userId: targetId });
     } catch (e) {
       res.status(500).json({ message: 'failed to import' });
