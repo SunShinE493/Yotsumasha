@@ -452,44 +452,89 @@ export class MemStorage {
   }
 
   async importUserData(userId, data) {
-    // restore datasets
-    if (data && data.datasetPayload && typeof data.datasetPayload === 'object') {
-      const ds = new Map();
-      for (const name of Object.keys(data.datasetPayload)) {
-        ds.set(name, data.datasetPayload[name]);
-      }
-      this.userDatasets.set(userId, ds);
+    // Normalize possible shapes
+    let payload = data || {};
+    if (Array.isArray(payload?.users)) {
+      // Pick the matching user by id or username, else first entry
+      const byId = payload.users.find((u) => u?.user?.id === userId);
+      const user = this.users.get(userId);
+      const byName = user ? payload.users.find((u) => u?.user?.username === user.username) : null;
+      const chosen = byId || byName || payload.users[0];
+      if (chosen?.data) payload = chosen.data;
+      else if (chosen?.reviewWords) payload = { reviewWords: chosen.reviewWords };
     }
-    // restore vocabulary
-    this.vocabularyWords.set(userId, new Map());
-    if (Array.isArray(data?.words)) {
-      for (const w of data.words) {
-        await this.createVocabularyWord(userId, w);
+
+    // If classic full payload provided, import fully
+    if (Array.isArray(payload?.words) || Array.isArray(payload?.sessions) || Array.isArray(payload?.progress)) {
+      // restore datasets
+      if (payload && payload.datasetPayload && typeof payload.datasetPayload === 'object') {
+        const ds = new Map();
+        for (const name of Object.keys(payload.datasetPayload)) {
+          ds.set(name, payload.datasetPayload[name]);
+        }
+        this.userDatasets.set(userId, ds);
       }
-    }
-    // restore sessions
-    this.studySessions.set(userId, new Map());
-    if (Array.isArray(data?.sessions)) {
-      const m = this.studySessions.get(userId);
-      for (const s of data.sessions) {
-        m.set(s.id || randomUUID(), { ...s });
+      // restore vocabulary
+      this.vocabularyWords.set(userId, new Map());
+      if (Array.isArray(payload?.words)) {
+        for (const w of payload.words) {
+          await this.createVocabularyWord(userId, w);
+        }
       }
+      // restore sessions
+      this.studySessions.set(userId, new Map());
+      if (Array.isArray(payload?.sessions)) {
+        const m = this.studySessions.get(userId);
+        for (const s of payload.sessions) {
+          m.set(s.id || randomUUID(), { ...s });
+        }
+      }
+      // restore progress
+      this.wordProgress.set(userId, new Map());
+      if (Array.isArray(payload?.progress)) {
+        const m = this.wordProgress.get(userId);
+        for (const p of payload.progress) {
+          m.set(p.wordId, { ...p });
+        }
+      }
+      // restore score attack
+      if (!this.scoreAttack) this.scoreAttack = new Map();
+      if (payload?.score) {
+        this.scoreAttack.set(userId, payload.score);
+      }
+      this._scheduleSave();
+      return true;
     }
-    // restore progress
-    this.wordProgress.set(userId, new Map());
-    if (Array.isArray(data?.progress)) {
+
+    // Minimal payload: reviewWords only -> append/replace review list
+    if (Array.isArray(payload?.reviewWords)) {
+      // Ensure maps exist
+      if (!this.wordProgress.has(userId)) this.wordProgress.set(userId, new Map());
       const m = this.wordProgress.get(userId);
-      for (const p of data.progress) {
-        m.set(p.wordId, { ...p });
+      for (const rw of payload.reviewWords) {
+        const wid = rw.wordId || rw?.word?.id || randomUUID();
+        if (rw.word) {
+          // upsert vocabulary for this word
+          await this.createVocabularyWord(userId, rw.word);
+        }
+        // Create/overwrite a progress entry marking as not remembered
+        m.set(wid, {
+          id: randomUUID(),
+          wordId: wid,
+          isRemembered: false,
+          attempts: 0,
+          lastStudied: new Date(),
+          sessionId: null,
+          word: rw.word,
+        });
       }
+      this.wordProgress.set(userId, m);
+      this._scheduleSave();
+      return true;
     }
-    // restore score attack
-    if (!this.scoreAttack) this.scoreAttack = new Map();
-    if (data?.score) {
-      this.scoreAttack.set(userId, data.score);
-    }
-    this._scheduleSave();
-    return true;
+
+    // Unknown shape, no-op
+    return false;
   }
 
   // --- Score Attack operations ---

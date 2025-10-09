@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function DevToolsPage() {
+  const queryClient = useQueryClient();
   const [csrf, setCsrf] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -52,6 +54,15 @@ export default function DevToolsPage() {
         body: JSON.stringify({ email, password, data: payload, csrfToken: csrf })
       });
       if (!res.ok) { setStatus(`Import failed (${res.status})`); return; }
+      // Invalidate caches so UI reflects imported data immediately
+      try {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['/api/vocabulary/review'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/vocabulary'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/score-attack/me'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/datasets'] }),
+        ]);
+      } catch {}
       setStatus('Imported');
     } catch (e) {
       setStatus('Import error');
