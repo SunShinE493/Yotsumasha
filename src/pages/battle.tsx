@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
 import { apiRequest } from '@/lib/queryClient';
 
 export default function BattlePage() {
@@ -10,7 +9,6 @@ export default function BattlePage() {
   const [room, setRoom] = useState('');
   const [name, setName] = useState('');
   const [openRooms, setOpenRooms] = useState<Array<{id:string; state:string; playerCount:number}> | null>(null);
-  const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [rangeStart, setRangeStart] = useState<number | ''>(1);
   const [rangeEnd, setRangeEnd] = useState<number | ''>(50);
   const [limitSec, setLimitSec] = useState<number | ''>(30);
@@ -43,12 +41,12 @@ export default function BattlePage() {
   useEffect(()=>{
     const isNum = (v: number | ''): v is number => typeof v === 'number' && !Number.isNaN(v);
     const ok = Boolean(
-      name && room && selectedJson &&
+      name && room &&
       isNum(rangeStart) && isNum(rangeEnd) &&
       rangeEnd >= rangeStart
     );
     setCanStart(ok);
-  },[name, room, selectedJson, rangeStart, rangeEnd]);
+  },[name, room, rangeStart, rangeEnd]);
 
   // Utility: compute ws endpoint based on current page origin
   const wsUrl = useMemo(() => {
@@ -154,7 +152,7 @@ export default function BattlePage() {
     // Load chosen range words from server-side storage for this user
     const s = Math.max(1, Number(rangeStart));
     const e = Math.max(s, Number(rangeEnd));
-    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}`);
     const words = await res.json();
     const ws = ensureSocket();
     const sendCreate = () => {
@@ -232,27 +230,7 @@ export default function BattlePage() {
                     <Input placeholder="部屋番号" value={room} onChange={(e)=>setRoom(e.target.value)} />
                   </div>
                 </div>
-                <FileUpload onUploadSuccess={(info)=>{
-                  setSelectedJson(info);
-                  // If presets exist, pick first preset as a sensible default
-                  if (info.presets && info.presets.length > 0) {
-                    setRangeStart(info.presets[0].start);
-                    setRangeEnd(info.presets[0].end);
-                  } else {
-                    setRangeStart(1);
-                    setRangeEnd(Math.min(20, info.wordCount));
-                  }
-                }} />
-                {selectedJson?.presets?.length ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {selectedJson.presets.map((p)=> (
-                      <Button key={p.label} variant="outline" size="sm" onClick={()=>{ setRangeStart(p.start); setRangeEnd(p.end); }}>
-                        {p.label}
-                      </Button>
-                    ))}
-                    <Button variant="secondary" size="sm" onClick={()=>{ setRangeStart(1); setRangeEnd(selectedJson.wordCount); }}>全範囲</Button>
-                  </div>
-                ) : null}
+                {/* JSON選択を一旦無効化し、現在の単語データを使用します */}
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
@@ -282,9 +260,7 @@ export default function BattlePage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {selectedJson ? `${selectedJson.name} / ${selectedJson.wordCount}語` : 'ファイル未選択'}
-                  </div>
+                  <div className="text-sm text-muted-foreground">現在の単語データを使用</div>
                   <Button className="mt-2" onClick={handleCreate} disabled={!canStart}>部屋を作成</Button>
                 </div>
                 {phase === 'lobby' && (
