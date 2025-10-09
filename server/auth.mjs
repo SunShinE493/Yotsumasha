@@ -100,9 +100,9 @@ export function setupAuth(app) {
   // Setup CSRF protection (requires 32-character secret)
   const csrfSecret = process.env.CSRF_SECRET || "12345678901234567890123456789012"; // 32 chars
   const csrfMiddleware = csurf(csrfSecret, ["POST", "PUT", "PATCH", "DELETE"]);
-  // Allow basic-dev-auth bypass for admin export/import and profile updates (stability)
+  // Allow basic-dev-auth bypass for admin export/import and profile/backup updates (stability)
   app.use((req, res, next) => {
-    const bypassPaths = new Set(['/api/admin/export', '/api/admin/import', '/api/profile']);
+    const bypassPaths = new Set(['/api/admin/export', '/api/admin/import', '/api/profile', '/api/admin/backup/gist']);
     if (bypassPaths.has(req.path)) {
       const envUser = process.env.BACKUP_ADMIN_EMAIL;
       const envPass = process.env.BACKUP_ADMIN_PASSWORD;

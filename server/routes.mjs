@@ -8,6 +8,7 @@ import {
   studyConfigSchema, 
   insertWordProgressSchema 
 } from "../shared/schema.mjs";
+import fetch from "node-fetch";
 
 export async function registerRoutes(app) {
   // Setup authentication middleware
@@ -74,6 +75,40 @@ export async function registerRoutes(app) {
       return res.json(data);
     } catch (e) {
       res.status(500).json({ message: 'failed to export' });
+    }
+  });
+
+  // Backup to GitHub Gist (UIから実行用)。環境変数: GIST_TOKEN, GIST_ID, GIST_FILE(optional)
+  app.post('/api/admin/backup/gist', optionalAuthentication, async (req, res) => {
+    try {
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      const token = process.env.GIST_TOKEN;
+      const gistId = process.env.GIST_ID;
+      const file = process.env.GIST_FILE || 'backup.json';
+      if (!token || !gistId) return res.status(400).json({ message: 'Gist env not configured' });
+
+      // 既存の完全エクスポート（全ユーザー・最小形 or 指定形）。ここではご提示フォーマットに合わせ、reviewWords含む最小出力を採用
+      const all = await storage.exportAllUsersData();
+
+      const payload = {
+        files: { [file]: { content: JSON.stringify(all, null, 2) } }
+      };
+      const r = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        return res.status(500).json({ message: 'Failed to update gist', status: r.status, body: text });
+      }
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ message: 'backup failed' });
     }
   });
 

@@ -69,6 +69,22 @@ export default function DevToolsPage() {
     }
   };
 
+  const doBackupToGist = async () => {
+    try {
+      setStatus('Backing up to Gist...');
+      const res = await fetch('/api/admin/backup/gist', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) { setStatus(`Backup failed (${res.status})`); return; }
+      setStatus('Backed up to Gist');
+    } catch (e) {
+      setStatus('Backup error');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
@@ -120,6 +136,7 @@ export default function DevToolsPage() {
                   setStatus('Exported (full)');
                 } catch (e) { setStatus('Export error'); }
               }}>Export FULL (me)</Button>
+              <Button variant="outline" onClick={doBackupToGist}>Backup to Gist</Button>
             </div>
             <div className="grid gap-2">
               <label className="text-sm text-muted-foreground">Exported JSON</label>
