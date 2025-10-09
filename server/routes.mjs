@@ -6,7 +6,9 @@ import { setupAuth, isAuthenticated, optionalAuthentication } from "./auth.mjs";
 import { 
   vocabularyFileSchema, 
   studyConfigSchema, 
-  insertWordProgressSchema 
+  insertWordProgressSchema,
+  rankingSubmitSchema,
+  profileUpdateSchema,
 } from "../shared/schema.mjs";
 
 export async function registerRoutes(app) {
@@ -232,6 +234,60 @@ export async function registerRoutes(app) {
       res.json(reviewWords);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch review words" });
+    }
+  });
+
+  // Update/get player profile name
+  app.get('/api/profile', optionalAuthentication, async (req, res) => {
+    try {
+      const profile = await storage.getProfile(req.userId);
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch profile' });
+    }
+  });
+
+  app.put('/api/profile', optionalAuthentication, async (req, res) => {
+    try {
+      const body = profileUpdateSchema.parse(req.body);
+      const updated = await storage.updatePlayerName(req.userId, body.playerName);
+      res.json({ id: updated.id, playerName: updated.playerName });
+    } catch (error) {
+      const message = error?.message || 'Failed to update profile';
+      res.status(400).json({ message });
+    }
+  });
+
+  // Submit a ranking entry
+  app.post('/api/rankings', optionalAuthentication, async (req, res) => {
+    try {
+      const body = rankingSubmitSchema.parse(req.body);
+      const row = await storage.submitRanking(req.userId, body);
+      res.json(row);
+    } catch (error) {
+      res.status(400).json({ message: 'Invalid ranking submission' });
+    }
+  });
+
+  // List rankings (by metric)
+  app.get('/api/rankings', optionalAuthentication, async (req, res) => {
+    try {
+      const metric = req.query.metric || 'maxCombo';
+      const limit = req.query.limit ? parseInt(req.query.limit) : 50;
+      const rows = await storage.listRankings({ metric, limit });
+      res.json(rows);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to list rankings' });
+    }
+  });
+
+  // Export user data (profile and rankings)
+  app.get('/api/export', optionalAuthentication, async (req, res) => {
+    try {
+      const data = await storage.exportUserData(req.userId);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to export data' });
     }
   });
 

@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   const { user, isLoading: isUserLoading } = useAuth();
@@ -36,6 +37,28 @@ export default function Home() {
   const [completedSession, setCompletedSession] =
     useState<StudySessionType | null>(null);
   const [showUserInfo, setShowUserInfo] = useState<boolean>(false);
+  const [playerName, setPlayerName] = useState<string>("");
+  const [isSavingName, setIsSavingName] = useState<boolean>(false);
+  const [rankMetric, setRankMetric] = useState<"maxCombo" | "correctCount" | "scorePerMinute">("maxCombo");
+  const { data: rankings = [], refetch: refetchRankings } = useQuery<any[]>({
+    queryKey: ["/api/rankings", rankMetric],
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/rankings?metric=${rankMetric}`);
+      return res.json();
+    },
+  });
+  const { data: profile } = useQuery<{ id: string; playerName: string | null } | null>({
+    queryKey: ["/api/profile", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/profile", undefined, userId || undefined);
+      return res.json();
+    },
+  });
+
+  useEffect(() => {
+    if (profile && typeof profile.playerName === "string") setPlayerName(profile.playerName);
+  }, [profile]);
 
   const { data: reviewWords = [], isLoading: isReviewWordsLoading } = useQuery<
     (WordProgress & { word: VocabularyWord })[]
@@ -91,6 +114,24 @@ export default function Home() {
     if (sessionData) {
       setCompletedSession(sessionData);
       setCurrentSession(null);
+      // submit ranking
+      (async () => {
+        try {
+          if (!userId) return;
+          const body = {
+            sourceFile: sessionData.sourceFile,
+            startRange: sessionData.startRange,
+            endRange: sessionData.endRange,
+            correctCount: sessionData.correctCount,
+            maxCombo: sessionData.maxCombo || 0,
+            durationMs: sessionData.durationMs || 1,
+          };
+          await apiRequest("POST", "/api/rankings", body, userId);
+          refetchRankings();
+        } catch (e) {
+          // no-op
+        }
+      })();
 
       queryClient.invalidateQueries({ queryKey: ["/api/vocabulary/review"] });
       queryClient.invalidateQueries({ queryKey: ["/api/vocabulary"] });
@@ -227,7 +268,7 @@ export default function Home() {
       {showUserInfo && (
         <div className="bg-card border-b border-border shadow-sm">
           <div className="max-w-4xl mx-auto px-4 py-4">
-            <div className="bg-muted rounded-lg p-4">
+            <div className="bg-muted rounded-lg p-4 space-y-4">
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 ユーザー情報
               </h3>
@@ -247,6 +288,51 @@ export default function Home() {
                     ユーザー名:
                   </span>
                   <span className="text-sm text-foreground">{username}</span>
+                </div>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">プレイヤー名</label>
+                  <div className="flex gap-2">
+                    <input
+                      className="h-10 px-3 rounded-md border bg-background w-full"
+                      value={playerName || ""}
+                      maxLength={32}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      placeholder="ランキング表示名"
+                    />
+                    <Button
+                      onClick={async () => {
+                        if (!userId) return;
+                        setIsSavingName(true);
+                        try {
+                          await apiRequest("PUT", "/api/profile", { playerName }, userId);
+                          await refetchRankings();
+                        } finally {
+                          setIsSavingName(false);
+                        }
+                      }}
+                      disabled={isSavingName || !playerName}
+                    >保存</Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">データ引き継ぎ（エクスポート）</label>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      if (!userId) return;
+                      const res = await apiRequest("GET", "/api/export", undefined, userId);
+                      const data = await res.json();
+                      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `export-${userId}.json`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >エクスポート</Button>
                 </div>
               </div>
             </div>
@@ -282,6 +368,65 @@ export default function Home() {
               isReviewWordsLoading={isReviewWordsLoading}
               onStartReview={() => handleStartReview()}
             />
+            {/* Ranking Board */}
+            <Card>
+              <CardHeader>
+                <CardTitle>ランキング</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <Tabs value={rankMetric} onValueChange={(v) => setRankMetric(v as any)}>
+                    <TabsList>
+                      <TabsTrigger value="maxCombo">最大コンボ</TabsTrigger>
+                      <TabsTrigger value="correctCount">正解数</TabsTrigger>
+                      <TabsTrigger value="scorePerMinute">1分あたりスコア</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-muted-foreground">
+                        <th className="py-2 pr-2">順位</th>
+                        <th className="py-2 pr-2">プレイヤー</th>
+                        <th className="py-2 pr-2">JSON名</th>
+                        <th className="py-2 pr-2">範囲</th>
+                        <th className="py-2 pr-2">正解</th>
+                        <th className="py-2 pr-2">最大コンボ</th>
+                        <th className="py-2 pr-2">1分あたり</th>
+                        <th className="py-2 pr-2">時間</th>
+                        <th className="py-2 pr-2">日時</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rankings.map((r: any, idx: number) => {
+                        const apm = r.durationMs > 0 ? Math.round((r.correctCount * 60000) / r.durationMs) : 0;
+                        const durationSec = Math.round((r.durationMs || 0) / 1000);
+                        const date = r.createdAt ? new Date(r.createdAt) : null;
+                        return (
+                          <tr key={r.id} className="border-b border-border">
+                            <td className="py-2 pr-2">{idx + 1}</td>
+                            <td className="py-2 pr-2">{r.playerName || "未設定"}</td>
+                            <td className="py-2 pr-2">{r.sourceFile || "-"}</td>
+                            <td className="py-2 pr-2">{r.startRange}-{r.endRange}</td>
+                            <td className="py-2 pr-2">{r.correctCount}</td>
+                            <td className="py-2 pr-2">{r.maxCombo}</td>
+                            <td className="py-2 pr-2">{apm}</td>
+                            <td className="py-2 pr-2">{durationSec}s</td>
+                            <td className="py-2 pr-2">{date ? date.toLocaleString() : ""}</td>
+                          </tr>
+                        );
+                      })}
+                      {rankings.length === 0 && (
+                        <tr>
+                          <td colSpan={9} className="py-6 text-center text-muted-foreground">まだランキングがありません</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
           </>
         )}
       </main>

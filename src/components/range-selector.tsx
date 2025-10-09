@@ -82,10 +82,8 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
       questionCount: questionCount === -1 ? Number(endRange) - Number(startRange) + 1 : questionCount,
       order,
       reviewOnly,
-      // プリセットが設定されている場合のみ sourceFile を渡す
-      ...(selectedJson?.presets && selectedJson.presets.length > 0
-        ? { sourceFile: selectedJson.name }
-        : {}),
+      // いつもJSON名を渡す（ランキングに表示するため）
+      ...(selectedJson ? { sourceFile: selectedJson.name } : {}),
     };
 
     createSessionMutation.mutate(config);

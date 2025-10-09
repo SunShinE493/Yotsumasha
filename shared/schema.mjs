@@ -37,3 +37,21 @@ export const insertWordProgressSchema = z.object({
   isRemembered: z.boolean(),
   attempts: z.number().optional(),
 });
+
+// Ranking and Profile schemas
+export const rankingSubmitSchema = z.object({
+  // session context
+  sourceFile: z.string().optional(),
+  startRange: z.number().min(1),
+  endRange: z.number().min(1),
+  // performance
+  correctCount: z.number().min(0),
+  maxCombo: z.number().min(0),
+  durationMs: z.number().min(1),
+  // optional client timestamp
+  createdAt: z.string().optional(),
+});
+
+export const profileUpdateSchema = z.object({
+  playerName: z.string().min(1).max(32),
+});

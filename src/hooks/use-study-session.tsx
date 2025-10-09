@@ -19,6 +19,9 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
   const [incorrectWords, setIncorrectWords] = useState<VocabularyWord[]>([]);
   const [hasCompleted, setHasCompleted] = useState(false);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
+  const [startTime] = useState<number>(() => Date.now());
+  const [currentCombo, setCurrentCombo] = useState<number>(0);
+  const [maxCombo, setMaxCombo] = useState<number>(0);
 
   const updateSessionMutation = useMutation({
     mutationFn: async (sessionData: StudySession) => {
@@ -65,6 +68,7 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
   useEffect(() => {
     if (isComplete && !hasCompleted) {
       setHasCompleted(true);
+      const durationMs = Math.max(1, Date.now() - startTime);
       const completedSessionData = {
         ...initialSession,
         correctCount,
@@ -72,6 +76,8 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
         isCompleted: true,
         words: studyWords,
         incorrectWords,
+        durationMs,
+        maxCombo,
       };
 
       if (!initialSession.id.startsWith('review-')) {
@@ -90,8 +96,14 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
     if (isRemembered) {
       setCorrectCount(prev => prev + 1);
       setCorrectWords(prev => [...prev, currentWord]);
+      setCurrentCombo(prev => {
+        const next = prev + 1;
+        setMaxCombo(m => (next > m ? next : m));
+        return next;
+      });
     } else {
       setIncorrectCount(prev => prev + 1);
+      setCurrentCombo(0);
       if (!incorrectWords.some(word => word.id === currentWord.id)) {
         setIncorrectWords(prev => [...prev, currentWord]);
       }
@@ -100,6 +112,7 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
   };
 
   const handleEarlyFinish = () => {
+    const durationMs = Math.max(1, Date.now() - startTime);
     const completedSessionData = {
       ...initialSession,
       correctCount,
@@ -107,6 +120,8 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
       isCompleted: true,
       words: studyWords,
       incorrectWords,
+      durationMs,
+      maxCombo,
     };
     if (!initialSession.id.startsWith('review-')) {
       updateSessionMutation.mutate(completedSessionData);

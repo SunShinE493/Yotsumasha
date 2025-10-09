@@ -14,6 +14,11 @@ export class MemStorage {
     this.wordProgress = new Map(); // userId -> Map<compositeKey, progress>
     this.nextWordIndex = new Map(); // userId -> nextIndex
 
+    // Rankings: store globally (per mode) and per metric
+    // We'll keep a flat array of entries; in-memory only
+    // entry: { id, userId, playerName, sourceFile, startRange, endRange, correctCount, maxCombo, durationMs, createdAt }
+    this.rankings = [];
+
     // Session store for authentication
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
@@ -69,6 +74,7 @@ export class MemStorage {
       ...userData,
       id: userData.id,
       username: userData.username || userData.email || null,
+      playerName: userData.playerName || existingUser?.playerName || null,
       email: userData.email || null,
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
@@ -79,6 +85,19 @@ export class MemStorage {
     };
     this.users.set(user.id, user);
     return user;
+  }
+
+  async updatePlayerName(userId, playerName) {
+    const user = this.users.get(userId) || { id: userId, isGuest: this.isGuestUser(userId) };
+    const updated = { ...user, playerName, updatedAt: new Date() };
+    this.users.set(userId, updated);
+    return updated;
+  }
+
+  async getProfile(userId) {
+    const user = this.users.get(userId);
+    if (!user) return { id: userId, playerName: null, isGuest: this.isGuestUser(userId) };
+    return { id: user.id, playerName: user.playerName || null, isGuest: !!user.isGuest };
   }
 
   async getVocabularyWords(userId) {
@@ -276,6 +295,51 @@ export class MemStorage {
     };
     userProgress.set(progressId, updatedProgress);
     return updatedProgress;
+  }
+
+  // Rankings
+  async submitRanking(userId, entry) {
+    const user = this.users.get(userId);
+    const playerName = user?.playerName || user?.username || (this.isGuestUser(userId) ? 'ゲスト' : '未設定');
+    const row = {
+      id: randomUUID(),
+      userId,
+      playerName,
+      sourceFile: entry.sourceFile || null,
+      startRange: entry.startRange,
+      endRange: entry.endRange,
+      correctCount: entry.correctCount,
+      maxCombo: entry.maxCombo,
+      durationMs: entry.durationMs,
+      createdAt: entry.createdAt ? new Date(entry.createdAt) : new Date(),
+    };
+    this.rankings.push(row);
+    return row;
+  }
+
+  async listRankings({ metric = 'maxCombo', limit = 50 } = {}) {
+    // metric: 'maxCombo' | 'correctCount' | 'scorePerMinute'
+    const sorted = [...this.rankings].sort((a, b) => {
+      if (metric === 'correctCount') return b.correctCount - a.correctCount;
+      if (metric === 'scorePerMinute') {
+        const apmA = a.durationMs > 0 ? (a.correctCount * 60000) / a.durationMs : 0;
+        const apmB = b.durationMs > 0 ? (b.correctCount * 60000) / b.durationMs : 0;
+        return apmB - apmA;
+      }
+      // default maxCombo
+      return b.maxCombo - a.maxCombo;
+    });
+    return sorted.slice(0, limit);
+  }
+
+  async exportUserData(userId) {
+    // Export minimal profile and rankings by this user
+    const profile = await this.getProfile(userId);
+    const userRankings = this.rankings.filter(r => r.userId === userId);
+    return {
+      profile,
+      rankings: userRankings,
+    };
   }
 }
 

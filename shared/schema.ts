@@ -131,12 +131,29 @@ export type StudySession = typeof studySessions.$inferSelect & {
   words?: VocabularyWord[];
   progress?: WordProgress[];
   incorrectWords?: VocabularyWord[];
+  // client-only extended fields for score attack/ranking context
+  durationMs?: number;
+  maxCombo?: number;
 };
 export type InsertStudySession = z.infer<typeof insertStudySessionSchema>;
 export type WordProgress = typeof wordProgress.$inferSelect;
 export type InsertWordProgress = z.infer<typeof insertWordProgressSchema>;
 export type VocabularyFile = z.infer<typeof vocabularyFileSchema>;
 export type StudyConfig = z.infer<typeof studyConfigSchema>;
+
+// Ranking entry type (runtime only, in-memory on server)
+export type RankingEntry = {
+  id: string;
+  userId: string;
+  playerName: string | null;
+  sourceFile: string | null;
+  startRange: number;
+  endRange: number;
+  correctCount: number;
+  maxCombo: number;
+  durationMs: number;
+  createdAt: Date;
+};
 
 // User types
 export type User = typeof users.$inferSelect;
