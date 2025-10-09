@@ -168,7 +168,8 @@ export class MemStorage {
   async updateUserProfile(userId, { displayName }) {
     const user = this.users.get(userId);
     if (!user) return null;
-    user.displayName = typeof displayName === 'string' ? displayName : user.displayName;
+    const sanitized = (typeof displayName === 'string' && displayName.trim().length > 0) ? displayName.trim() : null;
+    user.displayName = sanitized;
     user.updatedAt = new Date();
     this.users.set(userId, user);
     this._scheduleSave();
@@ -554,7 +555,7 @@ export class MemStorage {
     if (!this.scoreAttackRuns.has(userId)) this.scoreAttackRuns.set(userId, []);
     const list = this.scoreAttackRuns.get(userId);
     const user = this.users.get(userId);
-    const playerName = user?.displayName || user?.username || '匿名';
+    const playerName = user?.displayName || '名無しさん';
     const record = {
       playerName,
       userId,

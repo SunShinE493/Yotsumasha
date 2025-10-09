@@ -18,6 +18,7 @@ export default function ScorePage() {
   const [answer, setAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [correct, setCorrect] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [skips, setSkips] = useState(0);
   const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
@@ -83,7 +84,7 @@ export default function ScorePage() {
       score,
       mistakes,
       skips,
-      correctCount: (score > 0 ? Math.floor(score / 100) : 0),
+      correctCount: correct,
     };
     setResult(summary);
     try {
@@ -103,6 +104,7 @@ export default function ScorePage() {
       const next = (idx + 1) % words.length;
       setScore((s) => s + 100 + combo * 10);
       setCombo((c) => c + 1);
+      setCorrect((c)=>c+1);
       setIdx(next);
       setAnswer('');
       if (current?.meaning) setLastAnswer(current.meaning);
