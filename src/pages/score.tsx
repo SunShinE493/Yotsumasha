@@ -38,6 +38,7 @@ export default function ScorePage() {
   }>(null);
   const [remaining, setRemaining] = useState(0);
   const timerRef = useRef<number | null>(null);
+  const finalizedRef = useRef<boolean>(false);
 
   const current = words[idx];
 
@@ -56,18 +57,21 @@ export default function ScorePage() {
     setIdx(0);
     setScore(0);
     setCombo(0);
+    setCorrect(0);
     setMistakes(0);
     setSkips(0);
     setFlash('none');
     setResult(null);
     setRemaining(Number(limitSec) || 60);
     setIsPlaying(true);
+    finalizedRef.current = false;
     if (timerRef.current) window.clearInterval(timerRef.current);
     timerRef.current = window.setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) {
           if (timerRef.current) window.clearInterval(timerRef.current);
-          finishGame();
+          // Ensure finalization runs even if UI re-renders
+          void finalizeGame('timeout');
           return 0;
         }
         return r - 1;
@@ -75,15 +79,16 @@ export default function ScorePage() {
     }, 1000);
   };
 
-  const finishGame = async () => {
-    setIsPlaying(false);
+  async function finalizeGame(reason: 'timeout'|'manual') {
+    if (finalizedRef.current) return;
+    finalizedRef.current = true;
     const currentWord = words[idx];
     const summary = {
       fileName: selectedJson?.name ?? null,
       start: rangeStart,
       end: rangeEnd,
       limit: Number(limitSec) || 0,
-      maxCombo: combo, // this is current; compute max below
+      maxCombo: combo,
       score,
       mistakes,
       skips,
@@ -92,13 +97,18 @@ export default function ScorePage() {
       lastMeaning: currentWord?.meaning ?? null,
     };
     setResult(summary);
+    setIsPlaying(false);
     try {
       await apiRequest('POST', '/api/score-attack/submit', { score, summary });
-      // Record review entries for mistakes and skips
-      if (currentWord) {
-        try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false, word: { id: currentWord.id, word: currentWord.word, meaning: currentWord.meaning } }); } catch {}
-      }
     } catch {}
+    // Only time-out should add last question to review per request
+    if (reason === 'timeout' && currentWord) {
+      try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false, word: { id: currentWord.id, word: currentWord.word, meaning: currentWord.meaning } }); } catch {}
+    }
+  }
+
+  const finishGame = async () => {
+    await finalizeGame('manual');
   };
 
   const submitAnswer = async () => {
