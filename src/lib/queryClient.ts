@@ -40,10 +40,9 @@ export async function apiRequest(
   // Add CSRF token for state-changing requests
   if (method !== 'GET') {
     const csrfToken = await getCsrfToken();
-    // tiny-csrf validates header 'csrf-token' matching cookie
+    // Send both header and body token to satisfy environments/proxies
     headers['csrf-token'] = csrfToken;
-    // Keep body unchanged to avoid schema mismatches
-    requestBody = { ...body };
+    requestBody = { ...body, _csrf: csrfToken };
   }
 
   const options: RequestInit = {
