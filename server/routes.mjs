@@ -80,8 +80,40 @@ export async function registerRoutes(app) {
   app.post('/api/admin/import', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
-      await storage.importUserData(req.userId, req.body?.data || {});
-      res.json({ ok: true });
+      const body = req.body || {};
+      // Bulk import for multiple users
+      if (Array.isArray(body.users)) {
+        let count = 0;
+        for (const entry of body.users) {
+          const u = entry?.user || {};
+          // Upsert user meta first (id/username/isDev/displayName)
+          const up = await storage.upsertUser({
+            id: u.id,
+            username: u.username || u.email || null,
+            isDev: !!u.isDev,
+            displayName: u.displayName || null,
+            isGuest: !!u.isGuest,
+          });
+          await storage.importUserData(up.id, entry?.data || entry);
+          count++;
+        }
+        return res.json({ ok: true, imported: count });
+      }
+      // Single import; allow specifying target user in payload
+      const userMeta = body.user || body.data?.user;
+      let targetId = req.userId;
+      if (userMeta) {
+        const up = await storage.upsertUser({
+          id: userMeta.id,
+          username: userMeta.username || userMeta.email || null,
+          isDev: !!userMeta.isDev,
+          displayName: userMeta.displayName || null,
+          isGuest: !!userMeta.isGuest,
+        });
+        targetId = up.id;
+      }
+      await storage.importUserData(targetId, body?.data || body);
+      res.json({ ok: true, userId: targetId });
     } catch (e) {
       res.status(500).json({ message: 'failed to import' });
     }
