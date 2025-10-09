@@ -39,6 +39,15 @@ export default function ScorePage() {
   const [remaining, setRemaining] = useState(0);
   const timerRef = useRef<number | null>(null);
   const finalizedRef = useRef<boolean>(false);
+  const scoreRef = useRef<number>(0);
+  const comboRef = useRef<number>(0);
+  const correctRef = useRef<number>(0);
+  const idxRef = useRef<number>(0);
+  const wordsRef = useRef<Array<{ id: string; word: string; meaning: string }>>([]);
+  const selectedJsonRef = useRef<SelectedJsonInfo | null>(null);
+  const rangeStartRef = useRef<number | ''>(1);
+  const rangeEndRef = useRef<number | ''>(50);
+  const limitSecRef = useRef<number | ''>(60);
 
   const current = words[idx];
 
@@ -53,16 +62,16 @@ export default function ScorePage() {
     const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
     const list = await res.json();
     const shuffled = [...list].sort(() => Math.random() - 0.5);
-    setWords(shuffled);
-    setIdx(0);
-    setScore(0);
-    setCombo(0);
-    setCorrect(0);
+    setWords(shuffled); wordsRef.current = shuffled;
+    setIdx(0); idxRef.current = 0;
+    setScore(0); scoreRef.current = 0;
+    setCombo(0); comboRef.current = 0;
+    setCorrect(0); correctRef.current = 0;
     setMistakes(0);
     setSkips(0);
     setFlash('none');
     setResult(null);
-    setRemaining(Number(limitSec) || 60);
+    setRemaining(Number(limitSec) || 60); limitSecRef.current = limitSec;
     setIsPlaying(true);
     finalizedRef.current = false;
     if (timerRef.current) window.clearInterval(timerRef.current);
@@ -70,8 +79,7 @@ export default function ScorePage() {
       setRemaining((r) => {
         if (r <= 1) {
           if (timerRef.current) window.clearInterval(timerRef.current);
-          // Ensure finalization runs even if UI re-renders
-          void finalizeGame('timeout');
+          // Just set to 0; finalize via effect to avoid stale closures
           return 0;
         }
         return r - 1;
@@ -82,24 +90,24 @@ export default function ScorePage() {
   async function finalizeGame(reason: 'timeout'|'manual') {
     if (finalizedRef.current) return;
     finalizedRef.current = true;
-    const currentWord = words[idx];
+    const currentWord = wordsRef.current[idxRef.current];
     const summary = {
-      fileName: selectedJson?.name ?? null,
-      start: rangeStart,
-      end: rangeEnd,
-      limit: Number(limitSec) || 0,
-      maxCombo: combo,
-      score,
+      fileName: selectedJsonRef.current?.name ?? null,
+      start: Number(rangeStartRef.current) as number,
+      end: Number(rangeEndRef.current) as number,
+      limit: Number(limitSecRef.current) || 0,
+      maxCombo: comboRef.current,
+      score: scoreRef.current,
       mistakes,
       skips,
-      correctCount: correct,
+      correctCount: correctRef.current,
       lastWord: currentWord?.word ?? null,
       lastMeaning: currentWord?.meaning ?? null,
     };
     setResult(summary);
     setIsPlaying(false);
     try {
-      await apiRequest('POST', '/api/score-attack/submit', { score, summary });
+      await apiRequest('POST', '/api/score-attack/submit', { score: scoreRef.current, summary });
     } catch {}
     // Only time-out should add last question to review per request
     if (reason === 'timeout' && currentWord) {
@@ -116,10 +124,10 @@ export default function ScorePage() {
     const ok = answer.trim() === String(current.meaning||'').trim();
     if (ok) {
       const next = (idx + 1) % words.length;
-      setScore((s) => s + 100 + combo * 10);
-      setCombo((c) => c + 1);
-      setCorrect((c)=>c+1);
-      setIdx(next);
+      setScore((s) => { const v = s + 100 + combo * 10; scoreRef.current = v; return v; });
+      setCombo((c) => { const v = c + 1; comboRef.current = v; return v; });
+      setCorrect((c)=>{ const v = c + 1; correctRef.current = v; return v; });
+      setIdx(next); idxRef.current = next;
       setAnswer('');
       if (current?.meaning) setLastAnswer(current.meaning);
       setFlash('green'); setTimeout(()=>setFlash('none'), 120);
@@ -140,12 +148,30 @@ export default function ScorePage() {
     setFlash('red');
     setTimeout(()=>setFlash('none'), 200);
     const next = (idx + 1) % words.length;
-    setIdx(next);
+    setIdx(next); idxRef.current = next;
     setAnswer('');
     if (current?.meaning) setLastAnswer(current.meaning);
     // Save to review
     try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false, word: { id: current.id, word: current.word, meaning: current.meaning } }); } catch {}
   };
+
+  // keep refs in sync for values not set via closures
+  useEffect(()=>{ wordsRef.current = words; }, [words]);
+  useEffect(()=>{ idxRef.current = idx; }, [idx]);
+  useEffect(()=>{ scoreRef.current = score; }, [score]);
+  useEffect(()=>{ comboRef.current = combo; }, [combo]);
+  useEffect(()=>{ correctRef.current = correct; }, [correct]);
+  useEffect(()=>{ selectedJsonRef.current = selectedJson; }, [selectedJson]);
+  useEffect(()=>{ rangeStartRef.current = rangeStart; }, [rangeStart]);
+  useEffect(()=>{ rangeEndRef.current = rangeEnd; }, [rangeEnd]);
+  useEffect(()=>{ limitSecRef.current = limitSec; }, [limitSec]);
+
+  // finalize via effect to avoid stale interval closures
+  useEffect(()=>{
+    if (isPlaying && remaining === 0) {
+      void finalizeGame('timeout');
+    }
+  }, [remaining, isPlaying]);
 
   return (
     <div className="min-h-screen bg-background">
