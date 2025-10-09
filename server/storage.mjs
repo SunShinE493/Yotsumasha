@@ -454,6 +454,21 @@ export class MemStorage {
     };
   }
 
+  // Full export including all user data
+  async exportUserDataFull(userId) {
+    const words = await this.getVocabularyWords(userId);
+    const sessions = Array.from((this.studySessions.get(userId) || new Map()).values());
+    const progress = Array.from((this.wordProgress.get(userId) || new Map()).values());
+    const datasets = await this.listDatasets(userId);
+    const dsMap = this.userDatasets.get(userId) || new Map();
+    const datasetPayload = {};
+    for (const [name, arr] of dsMap.entries()) {
+      datasetPayload[name] = arr;
+    }
+    const score = this.scoreAttack?.get(userId) || null;
+    return { words, sessions, progress, datasets, datasetPayload, score };
+  }
+
   async exportAllUsersData() {
     const result = [];
     // Collect known users from the users map only (minimal and safe)
@@ -461,6 +476,19 @@ export class MemStorage {
       const userId = user.id;
       const minimal = await this.exportUserData(userId);
       result.push(minimal);
+    }
+    return { users: result };
+  }
+
+  async exportAllUsersDataFull() {
+    const result = [];
+    for (const user of this.users.values()) {
+      const userId = user.id;
+      const data = await this.exportUserDataFull(userId);
+      result.push({
+        user: { id: user.id, username: user.username, displayName: user.displayName || null, isDev: !!user.isDev },
+        data,
+      });
     }
     return { users: result };
   }

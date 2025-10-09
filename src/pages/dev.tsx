@@ -97,7 +97,7 @@ export default function DevToolsPage() {
                   const res = await fetch('/api/admin/export', {
                     method: 'POST', credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, all: true })
+                    body: JSON.stringify({ email, password, all: true, full: true })
                   });
                   if (!res.ok) { setStatus(`Export all failed (${res.status})`); return; }
                   const data = await res.json();
@@ -106,6 +106,20 @@ export default function DevToolsPage() {
                   setStatus('Exported all users');
                 } catch (e) { setStatus('Export all error'); }
               }}>Export ALL Users</Button>
+              <Button variant="outline" onClick={async ()=>{
+                try {
+                  setStatus('Exporting (full)...');
+                  const res = await fetch('/api/admin/export', {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, full: true })
+                  });
+                  if (!res.ok) { setStatus(`Export failed (${res.status})`); return; }
+                  const data = await res.json();
+                  setExportJson(JSON.stringify(data, null, 2));
+                  setStatus('Exported (full)');
+                } catch (e) { setStatus('Export error'); }
+              }}>Export FULL (me)</Button>
             </div>
             <div className="grid gap-2">
               <label className="text-sm text-muted-foreground">Exported JSON</label>
