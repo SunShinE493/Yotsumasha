@@ -31,6 +31,7 @@ export default function ScorePage() {
     score: number;
     mistakes: number;
     skips: number;
+    correctCount?: number;
   }>(null);
   const [remaining, setRemaining] = useState(0);
   const timerRef = useRef<number | null>(null);
@@ -82,10 +83,11 @@ export default function ScorePage() {
       score,
       mistakes,
       skips,
+      correctCount: (score > 0 ? Math.floor(score / 100) : 0),
     };
     setResult(summary);
     try {
-      await apiRequest('POST', '/api/score-attack/submit', { score });
+      await apiRequest('POST', '/api/score-attack/submit', { score, summary });
       // Record review entries for mistakes and skips
       const currentWord = words[idx];
       if (currentWord) {

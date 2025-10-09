@@ -295,11 +295,24 @@ export async function registerRoutes(app) {
   app.post('/api/score-attack/submit', optionalAuthentication, async (req, res) => {
     try {
       const userId = req.userId;
-      const { score } = req.body || {};
+      const { score, summary } = req.body || {};
       if (typeof score !== 'number' || score < 0) {
         return res.status(400).json({ message: 'Invalid score' });
       }
       const record = await storage.saveScoreAttack(userId, score);
+      // Optionally record run for rankings
+      if (summary && typeof summary === 'object') {
+        const payload = {
+          score: Number(score),
+          maxCombo: Number(summary.maxCombo)||0,
+          correctCount: Number(summary.correctCount)||0,
+          fileName: summary.fileName || null,
+          start: Number(summary.start)||0,
+          end: Number(summary.end)||0,
+          limit: Number(summary.limit)||0,
+        };
+        await storage.addScoreAttackRun(userId, payload);
+      }
       res.json(record);
     } catch (error) {
       res.status(500).json({ message: 'Failed to save score' });
@@ -313,6 +326,31 @@ export async function registerRoutes(app) {
       res.json(record);
     } catch (error) {
       res.status(500).json({ message: 'Failed to load score' });
+    }
+  });
+
+  // Rankings API
+  app.get('/api/rankings', optionalAuthentication, async (req, res) => {
+    try {
+      const metric = String(req.query.metric || 'ppm'); // 'ppm' | 'combo' | 'correct'
+      const period = String(req.query.period || 'overall'); // 'overall' | 'weekly' | 'monthly'
+      const source = req.query.source ? String(req.query.source) : undefined;
+      const list = await storage.getScoreAttackRankings({ metric, period, source });
+      res.json(list);
+    } catch (e) {
+      res.status(500).json({ message: 'Failed to load rankings' });
+    }
+  });
+
+  // User profile update (display name)
+  app.post('/api/profile', optionalAuthentication, async (req, res) => {
+    try {
+      const { displayName } = req.body || {};
+      const user = await storage.updateUserProfile(req.userId, { displayName });
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      res.json({ ok: true, user: { id: user.id, username: user.username, displayName: user.displayName } });
+    } catch (e) {
+      res.status(500).json({ message: 'Failed to update profile' });
     }
   });
 

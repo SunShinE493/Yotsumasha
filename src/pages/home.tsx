@@ -36,6 +36,10 @@ export default function Home() {
   const [completedSession, setCompletedSession] =
     useState<StudySessionType | null>(null);
   const [showUserInfo, setShowUserInfo] = useState<boolean>(false);
+  const [displayName, setDisplayName] = useState<string>("");
+  useEffect(()=>{
+    if (user?.displayName) setDisplayName(user.displayName);
+  }, [user?.displayName]);
 
   const { data: reviewWords = [], isLoading: isReviewWordsLoading } = useQuery<
     (WordProgress & { word: VocabularyWord })[]
@@ -229,7 +233,23 @@ export default function Home() {
                   </span>
                   <span className="text-sm text-foreground">{username}</span>
                 </div>
-                <div className="pt-2">
+                <div className="pt-2 space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-user-tag text-primary"></i>
+                    <span className="text-sm text-muted-foreground">プレイヤー名</span>
+                    <input className="px-2 py-1 rounded bg-background border border-border text-sm text-foreground flex-1"
+                      placeholder="表示名"
+                      value={displayName}
+                      onChange={(e)=>setDisplayName(e.target.value)}
+                    />
+                    <Button size="sm" onClick={async ()=>{
+                      try {
+                        await apiRequest('POST','/api/profile',{ displayName });
+                        toast({ title: '保存しました', description: 'プレイヤー名を更新しました' });
+                        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+                      } catch { toast({ title: '保存に失敗しました', variant: 'destructive' }); }
+                    }}>保存</Button>
+                  </div>
                   <a href="/api/logout" className="inline-block px-3 py-2 rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 text-sm">ログアウト</a>
                 </div>
               </div>

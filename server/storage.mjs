@@ -21,6 +21,7 @@ export class MemStorage {
 
     // Score attack: userId -> record
     this.scoreAttack = new Map();
+    this.scoreAttackRuns = new Map(); // userId -> Array<run>
 
     // Session store for authentication
     this.sessionStore = new MemoryStore({
@@ -82,6 +83,7 @@ export class MemStorage {
       nextWordIndex: Array.from(this.nextWordIndex.entries()),
       userDatasets: Array.from(this.userDatasets.entries()).map(([uid, map]) => [uid, Array.from(map.entries())]),
       scoreAttack: Array.from(this.scoreAttack.entries()),
+      scoreAttackRuns: Array.from(this.scoreAttackRuns.entries()),
     };
   }
 
@@ -94,6 +96,7 @@ export class MemStorage {
       this.nextWordIndex = new Map(data?.nextWordIndex || []);
       this.userDatasets = new Map((data?.userDatasets || []).map(([uid, entries]) => [uid, new Map(entries || [])]));
       this.scoreAttack = new Map(data?.scoreAttack || []);
+      this.scoreAttackRuns = new Map((data?.scoreAttackRuns || []).map(([uid, arr]) => [uid, Array.isArray(arr) ? arr : []]));
     } catch (e) {
       console.error('[Persist] populate failed:', e?.message || e);
     }
@@ -158,6 +161,16 @@ export class MemStorage {
       updatedAt: new Date(),
     };
     this.users.set(user.id, user);
+    this._scheduleSave();
+    return user;
+  }
+
+  async updateUserProfile(userId, { displayName }) {
+    const user = this.users.get(userId);
+    if (!user) return null;
+    user.displayName = typeof displayName === 'string' ? displayName : user.displayName;
+    user.updatedAt = new Date();
+    this.users.set(userId, user);
     this._scheduleSave();
     return user;
   }
@@ -435,7 +448,7 @@ export class MemStorage {
       word: rw.word ? { id: rw.word.id, word: rw.word.word, meaning: rw.word.meaning } : undefined,
     }));
     return {
-      user: { id: userId, username: user?.username || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId) },
+      user: { id: userId, username: user?.username || null, displayName: user?.displayName || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId) },
       reviewWords: compact,
     };
   }
@@ -535,6 +548,54 @@ export class MemStorage {
 
     // Unknown shape, no-op
     return false;
+  }
+
+  async addScoreAttackRun(userId, run) {
+    if (!this.scoreAttackRuns.has(userId)) this.scoreAttackRuns.set(userId, []);
+    const list = this.scoreAttackRuns.get(userId);
+    const user = this.users.get(userId);
+    const playerName = user?.displayName || user?.username || '匿名';
+    const record = {
+      playerName,
+      userId,
+      score: Number(run.score)||0,
+      maxCombo: Number(run.maxCombo)||0,
+      correctCount: Number(run.correctCount)||0,
+      fileName: run.fileName || null,
+      start: Number(run.start)||0,
+      end: Number(run.end)||0,
+      limit: Number(run.limit)||0,
+      ppm: (Number(run.limit) > 0 ? (Number(run.score) / (Number(run.limit)/60)) : 0),
+      createdAt: new Date(),
+    };
+    list.push(record);
+    this.scoreAttackRuns.set(userId, list);
+    this._scheduleSave();
+    return record;
+  }
+
+  async getScoreAttackRankings({ metric = 'ppm', period = 'overall', source }) {
+    // Collect all runs
+    const all = [];
+    for (const [uid, arr] of this.scoreAttackRuns.entries()) {
+      for (const r of arr) {
+        all.push(r);
+      }
+    }
+    const now = new Date();
+    const withinPeriod = (d) => {
+      if (period === 'overall') return true;
+      const diffMs = now - new Date(d);
+      const dayMs = 24*60*60*1000;
+      if (period === 'weekly') return diffMs <= 7*dayMs;
+      if (period === 'monthly') return diffMs <= 30*dayMs;
+      return true;
+    };
+    let filtered = all.filter(r => withinPeriod(r.createdAt));
+    if (source) filtered = filtered.filter(r => r.fileName === source);
+    const key = metric === 'combo' ? 'maxCombo' : (metric === 'correct' ? 'correctCount' : 'ppm');
+    filtered.sort((a,b) => (b[key]||0) - (a[key]||0));
+    return filtered.slice(0, 100);
   }
 
   // --- Score Attack operations ---
