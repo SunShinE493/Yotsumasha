@@ -1,4 +1,6 @@
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
+import fs from "fs";
+import path from "path";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 
@@ -24,6 +26,77 @@ export class MemStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
     });
+
+    // Persistence
+    this.persistDir = path.join(process.cwd(), 'data');
+    this.persistPath = path.join(this.persistDir, 'memstorage.json');
+    this._saveTimer = null;
+  }
+
+  _stableUserId(username) {
+    try {
+      const h = createHash('sha256').update(String(username||'unknown')).digest('hex').slice(0, 16);
+      return `user_${h}`;
+    } catch {
+      return `user_${randomUUID()}`;
+    }
+  }
+
+  _scheduleSave() {
+    if (this._saveTimer) return;
+    this._saveTimer = setTimeout(() => {
+      this._saveTimer = null;
+      this._saveNow();
+    }, 500);
+  }
+
+  _saveNow() {
+    try {
+      if (!fs.existsSync(this.persistDir)) fs.mkdirSync(this.persistDir, { recursive: true });
+      const obj = this._toSerializable();
+      fs.writeFileSync(this.persistPath, JSON.stringify(obj));
+    } catch (e) {
+      console.error('[Persist] save failed:', e?.message || e);
+    }
+  }
+
+  async loadFromDisk() {
+    try {
+      if (!fs.existsSync(this.persistPath)) return false;
+      const raw = fs.readFileSync(this.persistPath, 'utf-8');
+      const data = JSON.parse(raw);
+      this._fromSerializable(data);
+      return true;
+    } catch (e) {
+      console.error('[Persist] load failed:', e?.message || e);
+      return false;
+    }
+  }
+
+  _toSerializable() {
+    return {
+      users: Array.from(this.users.values()),
+      vocabularyWords: Array.from(this.vocabularyWords.entries()).map(([uid, map]) => [uid, Array.from(map.values())]),
+      studySessions: Array.from(this.studySessions.entries()).map(([uid, map]) => [uid, Array.from(map.values())]),
+      wordProgress: Array.from(this.wordProgress.entries()).map(([uid, map]) => [uid, Array.from(map.values())]),
+      nextWordIndex: Array.from(this.nextWordIndex.entries()),
+      userDatasets: Array.from(this.userDatasets.entries()).map(([uid, map]) => [uid, Array.from(map.entries())]),
+      scoreAttack: Array.from(this.scoreAttack.entries()),
+    };
+  }
+
+  _fromSerializable(data) {
+    try {
+      this.users = new Map((data?.users || []).map(u => [u.id, u]));
+      this.vocabularyWords = new Map((data?.vocabularyWords || []).map(([uid, arr]) => [uid, new Map((arr||[]).map(w => [w.id, w]))]));
+      this.studySessions = new Map((data?.studySessions || []).map(([uid, arr]) => [uid, new Map((arr||[]).map(s => [s.id, s]))]));
+      this.wordProgress = new Map((data?.wordProgress || []).map(([uid, arr]) => [uid, new Map((arr||[]).map(p => [p.wordId, p]))]));
+      this.nextWordIndex = new Map(data?.nextWordIndex || []);
+      this.userDatasets = new Map((data?.userDatasets || []).map(([uid, entries]) => [uid, new Map(entries || [])]));
+      this.scoreAttack = new Map(data?.scoreAttack || []);
+    } catch (e) {
+      console.error('[Persist] populate failed:', e?.message || e);
+    }
   }
 
   // User operations - Referenced from blueprint:javascript_auth_all_persistance integration
@@ -41,7 +114,7 @@ export class MemStorage {
   }
 
   async createUser(userData) {
-    const id = randomUUID();
+    const id = this._stableUserId(userData.username);
     const user = {
       id,
       username: userData.username,
@@ -51,6 +124,7 @@ export class MemStorage {
       updatedAt: new Date(),
     };
     this.users.set(id, user);
+    this._scheduleSave();
     return user;
   }
 
@@ -73,7 +147,7 @@ export class MemStorage {
     const existingUser = this.users.get(userData.id);
     const user = {
       ...userData,
-      id: userData.id,
+      id: userData.id || this._stableUserId(userData.username),
       username: userData.username || userData.email || null,
       email: userData.email || null,
       firstName: userData.firstName || null,
@@ -84,6 +158,7 @@ export class MemStorage {
       updatedAt: new Date(),
     };
     this.users.set(user.id, user);
+    this._scheduleSave();
     return user;
   }
 
@@ -115,6 +190,7 @@ export class MemStorage {
       this.vocabularyWords.set(userId, new Map());
     }
     this.vocabularyWords.get(userId).set(id, word);
+    this._scheduleSave();
     return word;
   }
 
@@ -124,6 +200,7 @@ export class MemStorage {
       const word = await this.createVocabularyWord(userId, insertWord);
       words.push(word);
     }
+    this._scheduleSave();
     return words;
   }
 
@@ -132,6 +209,7 @@ export class MemStorage {
       this.vocabularyWords.get(userId).clear();
     }
     this.nextWordIndex.set(userId, 1);
+    this._scheduleSave();
   }
 
   // --- User datasets library ---
@@ -154,6 +232,7 @@ export class MemStorage {
       createdAt: w.createdAt || new Date(),
     }));
     map.set(name, normalized);
+    this._scheduleSave();
     return { name, count: normalized.length };
   }
 
@@ -170,6 +249,7 @@ export class MemStorage {
     for (const w of arr) {
       await this.createVocabularyWord(userId, w);
     }
+    this._scheduleSave();
     return { applied: true, count: arr.length };
   }
 
@@ -189,6 +269,7 @@ export class MemStorage {
       this.studySessions.set(userId, new Map());
     }
     this.studySessions.get(userId).set(id, session);
+    this._scheduleSave();
     return session;
   }
 
@@ -232,6 +313,7 @@ export class MemStorage {
     }
 
     userSessions.set(id, updatedSession);
+    this._scheduleSave();
     return updatedSession;
   }
 
@@ -260,6 +342,7 @@ export class MemStorage {
       };
       userProgress.set(insertProgress.wordId, updatedProgress);
       console.log(`[DEBUG] Updated progress for wordId: ${insertProgress.wordId}`);
+      this._scheduleSave();
       return updatedProgress;
     } else {
       // If no progress exists, create a new entry.
@@ -274,6 +357,7 @@ export class MemStorage {
       userProgress.set(insertProgress.wordId, newProgress);
       this.wordProgress.set(userId, userProgress);
       console.log(`[DEBUG] Created new progress for wordId: ${insertProgress.wordId}`);
+      this._scheduleSave();
       return newProgress;
     }
   }
@@ -336,6 +420,7 @@ export class MemStorage {
       lastStudied: new Date()
     };
     userProgress.set(progressId, updatedProgress);
+    this._scheduleSave();
     return updatedProgress;
   }
 
@@ -403,6 +488,7 @@ export class MemStorage {
     if (data?.score) {
       this.scoreAttack.set(userId, data.score);
     }
+    this._scheduleSave();
     return true;
   }
 
@@ -415,6 +501,7 @@ export class MemStorage {
       updatedAt: new Date(),
     };
     this.scoreAttack.set(userId, record);
+    this._scheduleSave();
     return record;
   }
 

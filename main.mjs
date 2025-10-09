@@ -85,6 +85,8 @@ async function runWebserver(){
   
   // Register routes with auth system
   try {
+    // Load persisted in-memory data before wiring routes
+    try { await storage.loadFromDisk?.(); } catch {}
     await registerRoutes(app);
     console.log("Routes registered successfully");
   } catch (error) {
