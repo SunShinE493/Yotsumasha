@@ -33,6 +33,8 @@ export default function ScorePage() {
     mistakes: number;
     skips: number;
     correctCount?: number;
+    lastWord?: string | null;
+    lastMeaning?: string | null;
   }>(null);
   const [remaining, setRemaining] = useState(0);
   const timerRef = useRef<number | null>(null);
@@ -75,6 +77,7 @@ export default function ScorePage() {
 
   const finishGame = async () => {
     setIsPlaying(false);
+    const currentWord = words[idx];
     const summary = {
       fileName: selectedJson?.name ?? null,
       start: rangeStart,
@@ -85,12 +88,13 @@ export default function ScorePage() {
       mistakes,
       skips,
       correctCount: correct,
+      lastWord: currentWord?.word ?? null,
+      lastMeaning: currentWord?.meaning ?? null,
     };
     setResult(summary);
     try {
       await apiRequest('POST', '/api/score-attack/submit', { score, summary });
       // Record review entries for mistakes and skips
-      const currentWord = words[idx];
       if (currentWord) {
         try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false, word: { id: currentWord.id, word: currentWord.word, meaning: currentWord.meaning } }); } catch {}
       }
@@ -235,6 +239,9 @@ export default function ScorePage() {
                 <div className="flex justify-between"><span className="text-muted-foreground">スコア</span><span className="text-foreground">{score}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">間違い</span><span className="text-foreground">{mistakes}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">スキップ</span><span className="text-foreground">{skips}</span></div>
+                {result.lastMeaning ? (
+                  <div className="flex justify-between sm:col-span-2"><span className="text-muted-foreground">最後の問題の答え</span><span className="text-foreground">{result.lastMeaning} {result.lastWord ? `（${result.lastWord}）` : ''}</span></div>
+                ) : null}
               </div>
               <div className="flex gap-2">
                 <Button onClick={startGame}>もう一度</Button>
