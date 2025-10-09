@@ -62,7 +62,7 @@ export default function BattlePage() {
     if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) return wsRef.current;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
-    ws.onmessage = (ev) => {
+    ws.onmessage = async (ev) => {
       try {
         const msg = JSON.parse(ev.data);
         if (msg.type === 'error') {
