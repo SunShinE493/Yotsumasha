@@ -85,6 +85,25 @@ export default function DevToolsPage() {
     }
   };
 
+  const doFetchFromGist = async () => {
+    try {
+      setStatus('Fetching from Gist...');
+      const res = await fetch('/api/admin/backup/gist/fetch', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) { setStatus(`Fetch failed (${res.status})`); return; }
+      const data = await res.json();
+      setExportJson(data.content || '');
+      setImportJson(data.content || '');
+      setStatus('Fetched from Gist');
+    } catch (e) {
+      setStatus('Fetch error');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
@@ -137,6 +156,7 @@ export default function DevToolsPage() {
                 } catch (e) { setStatus('Export error'); }
               }}>Export FULL (me)</Button>
               <Button variant="outline" onClick={doBackupToGist}>Backup to Gist</Button>
+              <Button variant="outline" onClick={doFetchFromGist}>Fetch from Gist</Button>
             </div>
             <div className="grid gap-2">
               <label className="text-sm text-muted-foreground">Exported JSON</label>

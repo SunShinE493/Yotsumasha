@@ -112,6 +112,35 @@ export async function registerRoutes(app) {
     }
   });
 
+  // Fetch backup from Gist (UIから取得)
+  app.post('/api/admin/backup/gist/fetch', optionalAuthentication, async (req, res) => {
+    try {
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      const token = process.env.GIST_TOKEN;
+      const gistId = process.env.GIST_ID;
+      const file = process.env.GIST_FILE || 'backup.json';
+      if (!gistId) return res.status(400).json({ message: 'Gist env not configured' });
+
+      const r = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'GET',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          'Accept': 'application/vnd.github+json',
+        }
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        return res.status(500).json({ message: 'Failed to fetch gist', status: r.status, body: text });
+      }
+      const data = await r.json();
+      const content = data?.files?.[file]?.content;
+      if (!content) return res.status(404).json({ message: 'File not found in gist' });
+      res.json({ content });
+    } catch (e) {
+      res.status(500).json({ message: 'fetch failed' });
+    }
+  });
+
   app.post('/api/admin/import', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
