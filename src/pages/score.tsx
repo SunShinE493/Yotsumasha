@@ -89,7 +89,7 @@ export default function ScorePage() {
       // Record review entries for mistakes and skips
       const currentWord = words[idx];
       if (currentWord) {
-        try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false }); } catch {}
+        try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false, word: { id: currentWord.id, word: currentWord.word, meaning: currentWord.meaning } }); } catch {}
       }
     } catch {}
   };

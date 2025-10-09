@@ -89,7 +89,7 @@ export function setupAuth(app) {
   // Normalize CSRF header names from clients before CSRF middleware
   app.use((req, _res, next) => {
     const h = req.headers || {};
-    const token = h['csrf-token'] || h['x-csrf-token'] || h['x-xsrf-token'] || (req.body && req.body.csrfToken);
+    const token = h['csrf-token'] || h['x-csrf-token'] || h['x-xsrf-token'] || (req.body && (req.body._csrf || req.body.csrfToken));
     if (token && !h['csrf-token']) {
       // @ts-ignore
       req.headers['csrf-token'] = token;
