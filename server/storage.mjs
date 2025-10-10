@@ -451,7 +451,7 @@ export class MemStorage {
     const score = this.scoreAttack?.get(userId) || null;
     const scoreRuns = Array.isArray(this.scoreAttackRuns?.get(userId)) ? this.scoreAttackRuns.get(userId) : [];
     return {
-      user: { id: userId, username: user?.username || null, displayName: user?.displayName || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId) },
+      user: { id: userId, username: user?.username || null, displayName: user?.displayName || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId), passwordHash: user?.password || null },
       reviewWords: compact,
       score,
       scoreRuns,
@@ -500,7 +500,7 @@ export class MemStorage {
       const data = await this.exportUserDataFull(uid);
       const meta = this.users.get(uid) || null;
       result.push({
-        user: { id: uid, username: meta?.username || null, displayName: meta?.displayName || null, isDev: !!meta?.isDev },
+        user: { id: uid, username: meta?.username || null, displayName: meta?.displayName || null, isDev: !!meta?.isDev, passwordHash: meta?.password || null },
         data,
       });
     }

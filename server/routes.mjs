@@ -194,13 +194,15 @@ export async function registerRoutes(app) {
         let count = 0;
         for (const entry of list) {
           const u = entry?.user || {};
-          // Upsert user meta first (id/username/isDev/displayName)
+          // Upsert user meta first (id/username/isDev/displayName/passwordHash)
           const up = await storage.upsertUser({
             id: u.id,
             username: u.username || u.email || null,
             isDev: !!u.isDev,
             displayName: u.displayName || null,
             isGuest: !!u.isGuest,
+            // Accept hashed password under passwordHash (preferred) or password (compat)
+            ...(u.passwordHash ? { password: u.passwordHash } : (u.password ? { password: u.password } : {})),
           });
           // Accept shapes: {data:{...}} or {reviewWords:[...]}
           const payload = entry?.data || entry;
@@ -219,6 +221,7 @@ export async function registerRoutes(app) {
           isDev: !!userMeta.isDev,
           displayName: userMeta.displayName || null,
           isGuest: !!userMeta.isGuest,
+          ...(userMeta.passwordHash ? { password: userMeta.passwordHash } : (userMeta.password ? { password: userMeta.password } : {})),
         });
         targetId = up.id;
       }
