@@ -448,9 +448,11 @@ export class MemStorage {
       wordId: rw.word?.id || rw.wordId,
       word: rw.word ? { id: rw.word.id, word: rw.word.word, meaning: rw.word.meaning } : undefined,
     }));
+    const score = this.scoreAttack?.get(userId) || null;
     return {
       user: { id: userId, username: user?.username || null, displayName: user?.displayName || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId) },
       reviewWords: compact,
+      score,
     };
   }
 
@@ -548,7 +550,7 @@ export class MemStorage {
       return true;
     }
 
-    // Minimal payload: reviewWords only -> append/replace review list
+    // Minimal payload: reviewWords and/or score
     if (Array.isArray(payload?.reviewWords)) {
       // Ensure maps exist
       if (!this.wordProgress.has(userId)) this.wordProgress.set(userId, new Map());
@@ -571,6 +573,19 @@ export class MemStorage {
         });
       }
       this.wordProgress.set(userId, m);
+      // Also restore score attack record if provided
+      if (payload?.score) {
+        if (!this.scoreAttack) this.scoreAttack = new Map();
+        this.scoreAttack.set(userId, payload.score);
+      }
+      this._scheduleSave();
+      return true;
+    }
+
+    // Minimal payload: score only
+    if (payload?.score) {
+      if (!this.scoreAttack) this.scoreAttack = new Map();
+      this.scoreAttack.set(userId, payload.score);
       this._scheduleSave();
       return true;
     }
