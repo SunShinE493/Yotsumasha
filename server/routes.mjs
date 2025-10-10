@@ -9,11 +9,15 @@ import {
   insertWordProgressSchema 
 } from "../shared/schema.mjs";
 import fetch from "node-fetch";
+import { WebSocketServer } from "ws";
 import bcrypt from "bcrypt";
 
 export async function registerRoutes(app) {
   // Setup authentication middleware
   setupAuth(app);
+
+  // --- Realtime battle (rooms state shared for HTTP list + WS) ---
+  const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer, cleanupTimer, lastCorrectBy }
 
   // Guest access route - allows users to continue without login
   app.post('/api/guest/continue', (req, res) => {
@@ -286,14 +290,14 @@ export async function registerRoutes(app) {
   });
 
   // --- Open rooms listing for battle ---
-  // Provide a lightweight endpoint that lists room IDs and player counts
-  app.get('/api/battle/rooms', (req, res) => {
+  app.get('/api/battle/rooms', (_req, res) => {
     try {
-      // Expose indirectly via storage/session map on server; since rooms are in main.mjs,
-      // use a global publisher -- for simplicity, return 501 if not available in this module.
-      res.status(501).json({ message: 'rooms listing not available on this route handler' });
+      const list = Array.from(rooms.entries())
+        .filter(([, r]) => r && (r.state === 'waiting' || r.state === 'running'))
+        .map(([id, r]) => ({ id, state: r.state, playerCount: r.players?.size || 0, timeLimit: r.timeLimit, maxQuestions: r.maxQuestions || r.words?.length || 0 }));
+      res.json(list);
     } catch (e) {
-      res.status(500).json({ message: 'failed' });
+      res.status(500).json({ message: 'failed to list rooms' });
     }
   });
 
@@ -588,5 +592,156 @@ export async function registerRoutes(app) {
   });
 
   const httpServer = createServer(app);
+
+  // --- WebSocket Real-time Battle on same server ---
+  const wss = new WebSocketServer({ server: httpServer });
+
+  function broadcast(roomId, payload) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    const data = JSON.stringify(payload);
+    for (const ws of room.players.values()) {
+      try { ws.send(data); } catch {}
+    }
+    if (room.host) { try { room.host.send(data); } catch {} }
+  }
+
+  function toScores(room) {
+    const out = {};
+    for (const [n, s] of room.scores.entries()) out[n] = s;
+    return out;
+  }
+
+  function scheduleRoomCleanup(roomId) {
+    const r = rooms.get(roomId);
+    if (!r) return;
+    if (r.cleanupTimer) { try { clearTimeout(r.cleanupTimer); } catch {} }
+    r.cleanupTimer = setTimeout(() => {
+      const target = rooms.get(roomId);
+      if (!target) return;
+      if (target.state === 'ended' || (target.players && target.players.size === 0)) {
+        if (target.timer) { try { clearTimeout(target.timer); } catch {} }
+        rooms.delete(roomId);
+      }
+    }, 60_000);
+  }
+
+  function scheduleQuestionTimer(roomId) {
+    const r = rooms.get(roomId);
+    if (!r || r.state !== 'running') return;
+    if (r.timer) clearTimeout(r.timer);
+    r.timer = setTimeout(() => {
+      const room = rooms.get(roomId);
+      if (!room || room.state !== 'running') return;
+      room.asked = (room.asked || 0) + 1;
+      if (room.maxQuestions && room.asked >= room.maxQuestions) {
+        const lastQ = room.words[room.idx];
+        room.state = 'ended';
+        if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+        broadcast(roomId, { type: 'end', scores: toScores(room), endReason: 'timeout', lastId: lastQ?.id ?? null, lastWord: lastQ?.word ?? null, lastMeaning: lastQ?.meaning ?? null });
+        scheduleRoomCleanup(roomId);
+        return;
+      }
+      const prevQ = room.words[room.idx];
+      room.idx = (room.idx + 1) % room.words.length;
+      const nq = room.words[room.idx];
+      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, timeLimit: room.timeLimit, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
+      scheduleQuestionTimer(roomId);
+    }, (rooms.get(roomId)?.timeLimit || 30) * 1000);
+  }
+
+  function startRoom(roomId) {
+    const room = rooms.get(roomId);
+    if (!room || room.state !== 'waiting') return;
+    room.state = 'running';
+    room.idx = 0; room.asked = 0;
+    if (room.timer) clearTimeout(room.timer);
+    const q = room.words[room.idx];
+    broadcast(roomId, { type: 'question', index: room.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
+    scheduleQuestionTimer(roomId);
+  }
+
+  wss.on('connection', (ws) => {
+    ws.on('message', (raw) => {
+      let msg; try { msg = JSON.parse(raw.toString()); } catch { return; }
+      const { type } = msg || {};
+      if (type === 'create') {
+        const { room, name, limitSec, words, questionCount } = msg;
+        if (!room || !name || !Array.isArray(words) || !words.length) { ws.send(JSON.stringify({ type: 'error', message: 'invalid_create' })); return; }
+        if (rooms.has(room)) { ws.send(JSON.stringify({ type: 'error', message: 'room_exists' })); return; }
+        let normalized = words.map(w => ({ id: String(w.id||''), word: String(w.word||''), meaning: String(w.meaning||'') })).filter(w => w.word && w.meaning);
+        normalized = normalized.sort(() => Math.random() - 0.5);
+        const maxQuestions = Math.max(1, Math.min(Number(questionCount)||normalized.length, normalized.length));
+        const r = {
+          host: ws,
+          timeLimit: Math.max(5, Number(limitSec)||30),
+          words: normalized,
+          maxQuestions,
+          asked: 0,
+          state: 'waiting',
+          players: new Map(),
+          scores: new Map(),
+          idx: 0,
+          timer: null,
+          cleanupTimer: null,
+          lastCorrectBy: null,
+        };
+        rooms.set(room, r);
+        ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions });
+      } else if (type === 'join') {
+        const { room, name } = msg; const r = rooms.get(room);
+        if (!r) { ws.send(JSON.stringify({ type: 'error', message: 'room_not_found' })); return; }
+        if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
+        // 途中参加: waiting でも running でも参加可
+        r.players.set(name, ws); r.scores.set(name, 0);
+        ws._room = room; ws._name = name;
+        // 既存プレイヤーにロビー更新
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+        // 参加者に現在の状態を即送信
+        if (r.state === 'running') {
+          const q = r.words[r.idx];
+          ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
+          ws.send(JSON.stringify({ type: 'question', index: r.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } }));
+        }
+      } else if (type === 'start') {
+        const { room } = msg; const r = rooms.get(room);
+        if (!r) return; if (ws !== r.host) return; startRoom(room);
+      } else if (type === 'answer') {
+        const { room, name, text } = msg; const r = rooms.get(room);
+        if (!r || r.state !== 'running') return;
+        const q = r.words[r.idx]; if (!q) return;
+        const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        if (ok) {
+          r.lastCorrectBy = name;
+          const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
+          r.asked = (r.asked || 0) + 1;
+          broadcast(room, { type: 'answered', by: name });
+          if (r.maxQuestions && r.asked >= r.maxQuestions) {
+            r.state = 'ended'; if (r.timer) { clearTimeout(r.timer); r.timer = null; }
+            broadcast(room, { type: 'end', scores: toScores(r) });
+            scheduleRoomCleanup(room);
+            return;
+          }
+          const prevQ = r.words[r.idx];
+          r.idx = (r.idx + 1) % r.words.length;
+          const nq = r.words[r.idx];
+          broadcast(room, { type: 'score', scores: toScores(r) });
+          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, prevAnswerer: r.lastCorrectBy || null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          r.lastCorrectBy = null;
+          scheduleQuestionTimer(room);
+        }
+      }
+    });
+    ws.on('close', () => {
+      const room = ws._room; const name = ws._name;
+      if (!room || !rooms.has(room)) return;
+      const r = rooms.get(room);
+      if (r.players.has(name)) r.players.delete(name);
+      if (r.players.size === 0) { if (r.timer) clearTimeout(r.timer); rooms.delete(room); }
+      else { broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) }); }
+    });
+  });
+
   return httpServer;
 }
