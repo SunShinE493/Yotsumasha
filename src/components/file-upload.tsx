@@ -155,12 +155,20 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
         const data = JSON.parse(content);
         processJsonData(data, file.name);
       } catch (error) {
+        const message = error instanceof Error ? error.message : "ファイルの形式が正しくありません";
         toast({
           title: "ファイル読み込みエラー",
-          description: error instanceof Error ? error.message : "ファイルの形式が正しくありません",
+          description: message,
           variant: "destructive",
         });
       }
+    };
+    reader.onerror = () => {
+      toast({
+        title: "ファイル読み込みエラー",
+        description: reader.error?.message || 'ファイルの読み込みに失敗しました',
+        variant: "destructive",
+      });
     };
     reader.readAsText(file);
   };

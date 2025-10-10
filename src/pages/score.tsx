@@ -59,8 +59,14 @@ export default function ScorePage() {
     // Fetch words from server storage (FileUpload already saved them)
     const s = Math.max(1, Number(rangeStart));
     const e = Math.max(s, Number(rangeEnd));
-    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
-    const list = await res.json();
+    let list: Array<{ id: string; word: string; meaning: string }> = [];
+    try {
+      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+      list = await res.json();
+    } catch (err: any) {
+      alert(`問題データの読み込みに失敗しました: ${err?.message || err}`);
+      return;
+    }
     const shuffled = [...list].sort(() => Math.random() - 0.5);
     setWords(shuffled); wordsRef.current = shuffled;
     setIdx(0); idxRef.current = 0;

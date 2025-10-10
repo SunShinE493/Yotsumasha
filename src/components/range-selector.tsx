@@ -48,10 +48,10 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
     onSuccess: (session) => {
       onStartSession(session);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "セッション作成エラー",
-        description: "セッションの作成に失敗しました。",
+        description: error?.message || "セッションの作成に失敗しました。",
         variant: "destructive",
       });
     }

@@ -154,8 +154,14 @@ export default function BattlePage() {
     // Load chosen range words from server-side storage for this user
     const s = Math.max(1, Number(rangeStart));
     const e = Math.max(s, Number(rangeEnd));
-    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
-    const words = await res.json();
+    let words: any[] = [];
+    try {
+      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+      words = await res.json();
+    } catch (err: any) {
+      alert(`問題データの読み込みに失敗しました: ${err?.message || err}`);
+      return;
+    }
     const ws = ensureSocket();
     const sendCreate = () => {
       ws.send(JSON.stringify({ type: 'create', room, name, limitSec, questionCount, words }));
