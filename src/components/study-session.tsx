@@ -25,7 +25,7 @@ interface StudySessionProps {
 }
 
 export function StudySession({ session, onComplete, onBack }: StudySessionProps) {
-  const [fontSizeClass, setFontSizeClass] = useState('text-3xl');
+  const [fontSizePx, setFontSizePx] = useState<number>(28); // 初期28px相当
   const [rotationCount, setRotationCount] = useState(0);
   const [isEarlyFinishDialogOpen, setIsEarlyFinishDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -209,7 +209,8 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
                 word={currentWord}
                 rotationCount={rotationCount}
                 onFlip={handleFlip}
-                fontSizeClass={fontSizeClass}
+                fontSizeClass={''}
+                fontSizePx={fontSizePx}
               />
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <Button
@@ -256,27 +257,9 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
                 </Button>
               </div>
               <div className="mt-4 flex items-center justify-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFontSizeClass('text-2xl')}
-                >
-                  -A
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFontSizeClass('text-3xl')}
-                >
-                  A
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFontSizeClass('text-4xl')}
-                >
-                  +A
-                </Button>
+                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v)=>Math.max(10, v-3))}>-A</Button>
+                <div className="text-xs text-muted-foreground">{fontSizePx}px</div>
+                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v)=>v+3)}>+A</Button>
               </div>
               {rotationCount % 2 === 0 && (
                 <p className="text-center text-sm text-muted-foreground mt-4">

@@ -5,10 +5,11 @@ interface VocabularyCardProps {
   word: VocabularyWord;
   rotationCount: number;
   onFlip: () => void;
-  fontSizeClass: string;
+  fontSizeClass?: string;
+  fontSizePx?: number;
 }
 
-export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass }: VocabularyCardProps) {
+export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fontSizePx }: VocabularyCardProps) {
   return (
     <div 
       className="relative h-64 cursor-pointer touch-target"
@@ -24,8 +25,12 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass }: V
         <div className="card-front bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center">
           <div className="space-y-4">
             <div className="text-sm text-primary-foreground/80 font-medium">単語</div>
-            <div className={`${fontSizeClass} font-bold text-primary-foreground`} data-testid="text-word">
-                {word.word}
+            <div
+              className={`${fontSizeClass || ''} font-bold text-primary-foreground`}
+              style={fontSizePx ? { fontSize: `${fontSizePx}px`, lineHeight: 1.25 } : undefined}
+              data-testid="text-word"
+            >
+              {word.word}
             </div>
             {word.category && (
               <div className="text-sm text-primary-foreground/80" data-testid="text-category">
@@ -42,7 +47,11 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass }: V
         <div className="card-back bg-gradient-to-br from-accent to-muted rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center">
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground font-medium">意味</div>
-            <div className="text-2xl font-bold text-foreground" data-testid="text-meaning">
+            <div
+              className="font-bold text-foreground"
+              style={fontSizePx ? { fontSize: `${Math.max(12, fontSizePx - 2)}px`, lineHeight: 1.4 } : undefined}
+              data-testid="text-meaning"
+            >
               {word.meaning}
             </div>
             {word.example && (

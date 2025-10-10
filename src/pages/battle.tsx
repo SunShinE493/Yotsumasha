@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function BattlePage() {
   const { toast } = useToast();
+  const [fontSizePx, setFontSizePx] = useState<number>(24);
   const [mode, setMode] = useState<'host'|'join'|null>(null);
   const [room, setRoom] = useState('');
   const [name, setName] = useState('');
@@ -380,8 +381,17 @@ export default function BattlePage() {
                   <div className="text-sm">残り時間: {remaining ?? '-'}s</div>
                 </div>
                 <div className="rounded-lg border border-border p-6 bg-card">
-                  <div className="text-sm text-muted-foreground mb-1">問題:</div>
-                  <div className="text-2xl font-semibold text-foreground">{questionWord ?? (phase==='ended' ? '終了しました' : '...')}</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">問題:</div>
+                    <div className="flex items-center gap-2">
+                      <button className="text-xs px-2 py-0.5 rounded border" onClick={()=>setFontSizePx(v=>Math.max(10, v-3))}>-A</button>
+                      <span className="text-[10px] text-muted-foreground">{fontSizePx}px</span>
+                      <button className="text-xs px-2 py-0.5 rounded border" onClick={()=>setFontSizePx(v=>v+3)}>+A</button>
+                    </div>
+                  </div>
+                  <div className="font-semibold text-foreground" style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.25 }}>
+                    {questionWord ?? (phase==='ended' ? '終了しました' : '...')}
+                  </div>
                 </div>
 
                 {phase === 'running' && (

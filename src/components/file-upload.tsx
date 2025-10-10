@@ -106,15 +106,21 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       throw new Error("JSONファイルは配列形式である必要があります");
     }
 
+    const normalizeMultiline = (s: any) => {
+      if (typeof s !== 'string') return s;
+      // Replace literal \r\n and \n sequences with real newlines
+      return s.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n');
+    };
+
     const words = data.map(item => {
       if (!item.word || !item.meaning) {
         throw new Error("各単語にはwordとmeaningフィールドが必要です");
       }
       return {
-        word: item.word,
-        meaning: item.meaning,
-        category: item.category || "未分類",
-        example: item.example,
+        word: normalizeMultiline(item.word),
+        meaning: normalizeMultiline(item.meaning),
+        category: normalizeMultiline(item.category) || "未分類",
+        example: normalizeMultiline(item.example),
         difficulty: item.difficulty || 1,
       };
     });
