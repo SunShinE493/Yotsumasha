@@ -696,8 +696,12 @@ export async function registerRoutes(app) {
         // 途中参加: waiting でも running でも参加可
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
-        // 既存プレイヤーにロビー更新
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+        // 既存プレイヤーにロビー/参加者更新
+        if (r.state === 'running') {
+          broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
+        } else {
+          broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+        }
         // 参加者に現在の状態を即送信
         if (r.state === 'running') {
           const q = r.words[r.idx];
@@ -739,7 +743,10 @@ export async function registerRoutes(app) {
       const r = rooms.get(room);
       if (r.players.has(name)) r.players.delete(name);
       if (r.players.size === 0) { if (r.timer) clearTimeout(r.timer); rooms.delete(room); }
-      else { broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) }); }
+      else {
+        if (r.state === 'running') broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
+        else broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+      }
     });
   });
 

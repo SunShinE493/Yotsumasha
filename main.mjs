@@ -229,13 +229,15 @@ async function runWebserver(){
         // Allow mid-join when running as well
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
-        // Notify lobby update to everyone
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
-        // If already running, send current state to the new joiner
+        // If running, avoid sending a full 'lobby' that might reset timers/ui; send minimal players update instead
         if (r.state === 'running') {
+          broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
           const q = r.words[r.idx];
           ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
           ws.send(JSON.stringify({ type: 'question', index: r.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } }));
+        } else {
+          // waiting state: send full lobby to all
+          broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
         }
       } else if (type === 'start') {
         const { room } = msg; const r = rooms.get(room);
