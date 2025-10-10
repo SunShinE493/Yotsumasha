@@ -9,6 +9,7 @@ import {
   insertWordProgressSchema 
 } from "../shared/schema.mjs";
 import fetch from "node-fetch";
+import bcrypt from "bcrypt";
 
 export async function registerRoutes(app) {
   // Setup authentication middleware
@@ -231,6 +232,29 @@ export async function registerRoutes(app) {
       res.json({ ok: true, userId: targetId });
     } catch (e) {
       res.status(500).json({ message: 'failed to import' });
+    }
+  });
+
+  // --- Admin: Reset a user's password (hash and set) ---
+  app.post('/api/admin/user/reset-password', optionalAuthentication, async (req, res) => {
+    try {
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      const { username, userId, newPassword } = req.body || {};
+      if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
+        return res.status(400).json({ message: 'invalid newPassword' });
+      }
+      let target = null;
+      if (userId) {
+        target = await storage.getUser(userId);
+      } else if (username) {
+        target = await storage.getUserByUsername(username);
+      }
+      if (!target) return res.status(404).json({ message: 'user not found' });
+      const hashed = await bcrypt.hash(newPassword, 12);
+      await storage.upsertUser({ id: target.id, username: target.username, password: hashed });
+      res.json({ ok: true, userId: target.id });
+    } catch (e) {
+      res.status(500).json({ message: 'failed to reset password' });
     }
   });
 

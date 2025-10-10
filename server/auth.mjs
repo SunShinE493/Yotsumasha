@@ -18,7 +18,10 @@ passport.use(
       if (!user) {
         return done(null, false);
       }
-      
+      // Guard: if no stored hash, treat as invalid credentials (avoid bcrypt error)
+      if (!user.password || typeof user.password !== 'string' || user.password.length === 0) {
+        return done(null, false);
+      }
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
         return done(null, false);

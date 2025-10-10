@@ -157,6 +157,10 @@ export class MemStorage {
       lastName: userData.lastName || null,
       profileImageUrl: userData.profileImageUrl || null,
       isGuest: userData.isGuest || false,
+      // Preserve existing hashed password if not provided in upsert payload
+      password: (userData.password !== undefined && userData.password !== null)
+        ? userData.password
+        : (existingUser?.password ?? null),
       createdAt: existingUser?.createdAt || new Date(),
       updatedAt: new Date(),
     };
