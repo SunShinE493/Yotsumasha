@@ -476,10 +476,14 @@ export class MemStorage {
 
   async exportAllUsersData() {
     const result = [];
-    // Collect known users from the users map only (minimal and safe)
-    for (const user of this.users.values()) {
-      const userId = user.id;
-      const minimal = await this.exportUserData(userId);
+    // Collect union of user IDs from users map and score-related maps (to include guests/data-only users)
+    const userIds = new Set();
+    for (const user of this.users.values()) userIds.add(user.id);
+    for (const [uid] of this.scoreAttack.entries()) userIds.add(uid);
+    for (const [uid] of this.scoreAttackRuns.entries()) userIds.add(uid);
+
+    for (const uid of userIds) {
+      const minimal = await this.exportUserData(uid);
       result.push(minimal);
     }
     return { users: result };
@@ -487,11 +491,16 @@ export class MemStorage {
 
   async exportAllUsersDataFull() {
     const result = [];
-    for (const user of this.users.values()) {
-      const userId = user.id;
-      const data = await this.exportUserDataFull(userId);
+    const userIds = new Set();
+    for (const user of this.users.values()) userIds.add(user.id);
+    for (const [uid] of this.scoreAttack.entries()) userIds.add(uid);
+    for (const [uid] of this.scoreAttackRuns.entries()) userIds.add(uid);
+
+    for (const uid of userIds) {
+      const data = await this.exportUserDataFull(uid);
+      const meta = this.users.get(uid) || null;
       result.push({
-        user: { id: user.id, username: user.username, displayName: user.displayName || null, isDev: !!user.isDev },
+        user: { id: uid, username: meta?.username || null, displayName: meta?.displayName || null, isDev: !!meta?.isDev },
         data,
       });
     }
@@ -507,8 +516,17 @@ export class MemStorage {
       const user = this.users.get(userId);
       const byName = user ? payload.users.find((u) => u?.user?.username === user.username) : null;
       const chosen = byId || byName || payload.users[0];
-      if (chosen?.data) payload = chosen.data;
-      else if (chosen?.reviewWords) payload = { reviewWords: chosen.reviewWords };
+      if (chosen?.data) {
+        payload = chosen.data;
+      } else {
+        const minimal = {};
+        if (Array.isArray(chosen?.reviewWords)) minimal.reviewWords = chosen.reviewWords;
+        if (chosen?.score) minimal.score = chosen.score;
+        if (Array.isArray(chosen?.scoreRuns) || Array.isArray(chosen?.scoreAttackRuns)) {
+          minimal.scoreRuns = Array.isArray(chosen.scoreRuns) ? chosen.scoreRuns : chosen.scoreAttackRuns;
+        }
+        payload = minimal;
+      }
     }
 
     // If classic full payload provided, import fully
