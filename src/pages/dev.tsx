@@ -92,13 +92,28 @@ export default function DevToolsPage() {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, apply: true })
       });
       if (!res.ok) { setStatus(`Fetch failed (${res.status})`); return; }
       const data = await res.json();
-      setExportJson(data.content || '');
-      setImportJson(data.content || '');
-      setStatus('Fetched from Gist');
+      if (data && data.applied) {
+        setStatus('Fetched from Gist and applied to storage');
+        // Optionally clear textareas since data was applied
+        setExportJson(data.content || exportJson);
+        setImportJson(data.content || importJson);
+        try {
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ['/api/vocabulary/review'] }),
+            queryClient.invalidateQueries({ queryKey: ['/api/vocabulary'] }),
+            queryClient.invalidateQueries({ queryKey: ['/api/score-attack/me'] }),
+            queryClient.invalidateQueries({ queryKey: ['/api/datasets'] }),
+          ]);
+        } catch {}
+      } else {
+        setExportJson(data.content || '');
+        setImportJson(data.content || '');
+        setStatus('Fetched from Gist');
+      }
     } catch (e) {
       setStatus('Fetch error');
     }

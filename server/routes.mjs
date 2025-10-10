@@ -135,7 +135,50 @@ export async function registerRoutes(app) {
       const data = await r.json();
       const content = data?.files?.[file]?.content;
       if (!content) return res.status(404).json({ message: 'File not found in gist' });
-      res.json({ content });
+      // Optional: apply immediately into storage
+      if (req.body && req.body.apply === true) {
+        try {
+          const parsed = JSON.parse(content);
+          // Bulk import if { users: [...] }
+          if (Array.isArray(parsed?.users)) {
+            let count = 0;
+            for (const entry of parsed.users) {
+              const u = entry?.user || {};
+              const up = await storage.upsertUser({
+                id: u.id,
+                username: u.username || u.email || null,
+                isDev: !!u.isDev,
+                displayName: u.displayName || null,
+                isGuest: !!u.isGuest,
+              });
+              const payload = entry?.data || entry;
+              await storage.importUserData(up.id, payload);
+              count++;
+            }
+            return res.json({ ok: true, applied: true, imported: count });
+          }
+          // Single import
+          const userMeta = parsed.user || parsed.data?.user;
+          let targetId = req.userId;
+          if (userMeta) {
+            const up = await storage.upsertUser({
+              id: userMeta.id,
+              username: userMeta.username || userMeta.email || null,
+              isDev: !!userMeta.isDev,
+              displayName: userMeta.displayName || null,
+              isGuest: !!userMeta.isGuest,
+            });
+            targetId = up.id;
+          }
+          const payload = parsed?.data || parsed;
+          await storage.importUserData(targetId, payload);
+          return res.json({ ok: true, applied: true, userId: targetId });
+        } catch (e) {
+          return res.status(400).json({ message: 'Failed to apply fetched content', error: e?.message || String(e) });
+        }
+      }
+      // Default: just return content (no apply)
+      res.json({ content, applied: false });
     } catch (e) {
       res.status(500).json({ message: 'fetch failed' });
     }
