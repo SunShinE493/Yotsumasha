@@ -224,11 +224,19 @@ async function runWebserver(){
       } else if (type === 'join') {
         const { room, name } = msg;
         const r = rooms.get(room);
-        if (!r || r.state !== 'waiting') { ws.send(JSON.stringify({ type: 'error', message: 'room_not_available' })); return; }
+        if (!r) { ws.send(JSON.stringify({ type: 'error', message: 'room_not_found' })); return; }
         if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
+        // Allow mid-join when running as well
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
+        // Notify lobby update to everyone
         broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+        // If already running, send current state to the new joiner
+        if (r.state === 'running') {
+          const q = r.words[r.idx];
+          ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
+          ws.send(JSON.stringify({ type: 'question', index: r.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } }));
+        }
       } else if (type === 'start') {
         const { room } = msg; const r = rooms.get(room);
         if (!r) return; if (ws !== r.host) return; startRoom(room);
