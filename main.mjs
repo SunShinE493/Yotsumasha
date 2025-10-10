@@ -102,14 +102,17 @@ async function runWebserver(){
   app.get('/api/battle/rooms', (_req, res) => {
     try {
       const list = Array.from(rooms.entries())
-        .filter(([, r]) => r && (r.state === 'waiting' || r.state === 'running'))
+        .filter(([, r]) => !!r)
         .map(([id, r]) => ({
           id,
           state: r.state,
           playerCount: r.players?.size || 0,
           timeLimit: r.timeLimit,
           maxQuestions: r.maxQuestions || r.words?.length || 0,
-        }));
+        }))
+        // Prefer waiting rooms first, then running
+        .sort((a, b) => (a.state === 'waiting' ? -1 : 1) - (b.state === 'waiting' ? -1 : 1));
+      res.set('Cache-Control', 'no-store');
       res.json(list);
     } catch (e) {
       res.status(500).json({ message: 'failed to list rooms' });
@@ -278,10 +281,21 @@ async function runWebserver(){
       const r = rooms.get(room);
       if (r.players.has(name)) r.players.delete(name);
       if (r.players.size === 0) {
-        if (r.timer) clearTimeout(r.timer);
-        rooms.delete(room);
+        if (r.timer) { try { clearTimeout(r.timer); } catch {} }
+        // Keep ended rooms listed for 60s; if running and last disconnect, end room gracefully
+        if (r.state === 'running') {
+          r.state = 'ended';
+          broadcast(room, { type: 'end', scores: toScores(r) });
+        }
+        // leave in map for a short time to be listed as ended with 0 players
+        setTimeout(() => { if (rooms.get(room) === r && r.players.size === 0) rooms.delete(room); }, 60_000);
       } else {
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+        // Only broadcast participant list change; do NOT send 'lobby' during running
+        if (r.state === 'running') {
+          broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
+        } else {
+          broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+        }
       }
     });
   });

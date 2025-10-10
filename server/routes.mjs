@@ -290,15 +290,9 @@ export async function registerRoutes(app) {
   });
 
   // --- Open rooms listing for battle ---
-  app.get('/api/battle/rooms', (_req, res) => {
-    try {
-      const list = Array.from(rooms.entries())
-        .filter(([, r]) => r && (r.state === 'waiting' || r.state === 'running'))
-        .map(([id, r]) => ({ id, state: r.state, playerCount: r.players?.size || 0, timeLimit: r.timeLimit, maxQuestions: r.maxQuestions || r.words?.length || 0 }));
-      res.json(list);
-    } catch (e) {
-      res.status(500).json({ message: 'failed to list rooms' });
-    }
+  app.get('/api/battle/rooms', (_req, _res, next) => {
+    // Defer to upstream route (main server) so both don't conflict
+    return next();
   });
 
   // Upload vocabulary JSON file
