@@ -108,12 +108,32 @@ export class MemStorage {
   }
 
   async getUserByUsername(username) {
+    let chosen = undefined;
     for (const user of this.users.values()) {
-      if (user.username === username) {
-        return user;
+      if (user.username !== username) continue;
+      if (!chosen) { chosen = user; continue; }
+      const chosenHasHash = !!(chosen.password && typeof chosen.password === 'string' && chosen.password.length > 0);
+      const userHasHash = !!(user.password && typeof user.password === 'string' && user.password.length > 0);
+      if (!chosenHasHash && userHasHash) {
+        chosen = user;
+        continue;
+      }
+      if (chosenHasHash === userHasHash) {
+        const chosenUpdated = new Date(chosen.updatedAt || 0).getTime();
+        const userUpdated = new Date(user.updatedAt || 0).getTime();
+        if (userUpdated > chosenUpdated) {
+          chosen = user;
+        }
       }
     }
-    return undefined;
+    // Migration: if record uses passwordHash and missing password, migrate in-place
+    if (chosen && (!chosen.password || chosen.password.length === 0) && typeof chosen.passwordHash === 'string' && chosen.passwordHash.length > 0) {
+      const migrated = { ...chosen, password: chosen.passwordHash, passwordHash: undefined, updatedAt: new Date() };
+      this.users.set(migrated.id, migrated);
+      this._scheduleSave();
+      return migrated;
+    }
+    return chosen;
   }
 
   async createUser(userData) {

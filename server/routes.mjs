@@ -145,12 +145,20 @@ export async function registerRoutes(app) {
             let count = 0;
             for (const entry of parsed.users) {
               const u = entry?.user || {};
+              // Normalize password to hashed form
+              let normalizedPassword = null;
+              if (typeof u.passwordHash === 'string' && u.passwordHash.length > 0) {
+                normalizedPassword = u.passwordHash;
+              } else if (typeof u.password === 'string' && u.password.length > 0) {
+                normalizedPassword = u.password.startsWith('$2') ? u.password : await bcrypt.hash(u.password, 12);
+              }
               const up = await storage.upsertUser({
                 id: u.id,
                 username: u.username || u.email || null,
                 isDev: !!u.isDev,
                 displayName: u.displayName || null,
                 isGuest: !!u.isGuest,
+                ...(normalizedPassword ? { password: normalizedPassword } : {}),
               });
               const payload = entry?.data || entry;
               await storage.importUserData(up.id, payload);
@@ -162,12 +170,19 @@ export async function registerRoutes(app) {
           const userMeta = parsed.user || parsed.data?.user;
           let targetId = req.userId;
           if (userMeta) {
+            let normalizedPassword = null;
+            if (typeof userMeta.passwordHash === 'string' && userMeta.passwordHash.length > 0) {
+              normalizedPassword = userMeta.passwordHash;
+            } else if (typeof userMeta.password === 'string' && userMeta.password.length > 0) {
+              normalizedPassword = userMeta.password.startsWith('$2') ? userMeta.password : await bcrypt.hash(userMeta.password, 12);
+            }
             const up = await storage.upsertUser({
               id: userMeta.id,
               username: userMeta.username || userMeta.email || null,
               isDev: !!userMeta.isDev,
               displayName: userMeta.displayName || null,
               isGuest: !!userMeta.isGuest,
+              ...(normalizedPassword ? { password: normalizedPassword } : {}),
             });
             targetId = up.id;
           }
@@ -195,6 +210,13 @@ export async function registerRoutes(app) {
         let count = 0;
         for (const entry of list) {
           const u = entry?.user || {};
+          // Normalize password: prefer passwordHash; if plain password provided, hash it; if hashed ($2*) keep as is
+          let normalizedPassword = null;
+          if (typeof u.passwordHash === 'string' && u.passwordHash.length > 0) {
+            normalizedPassword = u.passwordHash;
+          } else if (typeof u.password === 'string' && u.password.length > 0) {
+            normalizedPassword = u.password.startsWith('$2') ? u.password : await bcrypt.hash(u.password, 12);
+          }
           // Upsert user meta first (id/username/isDev/displayName/passwordHash)
           const up = await storage.upsertUser({
             id: u.id,
@@ -202,8 +224,7 @@ export async function registerRoutes(app) {
             isDev: !!u.isDev,
             displayName: u.displayName || null,
             isGuest: !!u.isGuest,
-            // Accept hashed password under passwordHash (preferred) or password (compat)
-            ...(u.passwordHash ? { password: u.passwordHash } : (u.password ? { password: u.password } : {})),
+            ...(normalizedPassword ? { password: normalizedPassword } : {}),
           });
           // Accept shapes: {data:{...}} or {reviewWords:[...]}
           const payload = entry?.data || entry;
@@ -216,13 +237,19 @@ export async function registerRoutes(app) {
       const userMeta = body.user || body.data?.user;
       let targetId = req.userId;
       if (userMeta) {
+        let normalizedPassword = null;
+        if (typeof userMeta.passwordHash === 'string' && userMeta.passwordHash.length > 0) {
+          normalizedPassword = userMeta.passwordHash;
+        } else if (typeof userMeta.password === 'string' && userMeta.password.length > 0) {
+          normalizedPassword = userMeta.password.startsWith('$2') ? userMeta.password : await bcrypt.hash(userMeta.password, 12);
+        }
         const up = await storage.upsertUser({
           id: userMeta.id,
           username: userMeta.username || userMeta.email || null,
           isDev: !!userMeta.isDev,
           displayName: userMeta.displayName || null,
           isGuest: !!userMeta.isGuest,
-          ...(userMeta.passwordHash ? { password: userMeta.passwordHash } : (userMeta.password ? { password: userMeta.password } : {})),
+          ...(normalizedPassword ? { password: normalizedPassword } : {}),
         });
         targetId = up.id;
       }
