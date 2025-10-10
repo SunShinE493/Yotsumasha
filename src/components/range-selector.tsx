@@ -82,8 +82,8 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
       questionCount: questionCount === -1 ? Number(endRange) - Number(startRange) + 1 : questionCount,
       order,
       reviewOnly,
-      // プリセットが設定されている場合のみ sourceFile を渡す
-      ...(selectedJson?.presets && selectedJson.presets.length > 0
+      // 内蔵ファイルかつプリセットが設定されている場合のみ sourceFile を渡す（外部アップロードはメモリの語彙を使用）
+      ...(selectedJson?.isBuiltin && selectedJson.presets && selectedJson.presets.length > 0
         ? { sourceFile: selectedJson.name }
         : {}),
     };

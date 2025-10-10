@@ -86,6 +86,7 @@ export interface SelectedJsonInfo {
   name: string;
   wordCount: number;
   presets: { start: number; end: number; label: string }[];
+  isBuiltin: boolean; // 内蔵ファイル選択かどうか（外部アップロードはfalse）
 }
 
 interface FileUploadProps {
@@ -99,8 +100,8 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // processJsonData関数は変更なし
-  const processJsonData = (data: any[], fileName: string) => {
+  // 内蔵/外部を区別して処理する
+  const processJsonData = (data: any[], fileName: string, isBuiltin: boolean = false) => {
     if (!Array.isArray(data)) {
       throw new Error("JSONファイルは配列形式である必要があります");
     }
@@ -125,6 +126,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
           name: fileName,
           wordCount: words.length,
           presets: preset ? preset.presets : [],
+          isBuiltin,
         };
 
         onUploadSuccess(selectedFile);
@@ -178,8 +180,8 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
 
     const selectedData = availableJsonFiles[value as keyof typeof availableJsonFiles];
     if (selectedData) {
-      // 取得した値（ファイル名）を直接 processJsonData に渡す
-      processJsonData(selectedData, value);
+      // 内蔵JSONの選択時は isBuiltin=true を付与
+      processJsonData(selectedData, value, true);
     }
   };
 

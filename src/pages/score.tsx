@@ -63,7 +63,8 @@ export default function ScorePage() {
     const e = Math.max(s, Number(rangeEnd));
     let list: Array<{ id: string; word: string; meaning: string }> = [];
     try {
-      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+      const useSource = Boolean(selectedJson?.isBuiltin && selectedJson?.presets?.length);
+      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (useSource ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
       list = await res.json();
     } catch (err: any) {
       toast({

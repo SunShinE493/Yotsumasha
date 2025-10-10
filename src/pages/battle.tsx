@@ -158,7 +158,8 @@ export default function BattlePage() {
     const e = Math.max(s, Number(rangeEnd));
     let words: any[] = [];
     try {
-      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+      const useSource = Boolean(selectedJson?.isBuiltin && selectedJson?.presets?.length);
+      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (useSource ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
       words = await res.json();
     } catch (err: any) {
       toast({
