@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
 import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 export default function BattlePage() {
+  const { toast } = useToast();
   const [mode, setMode] = useState<'host'|'join'|null>(null);
   const [room, setRoom] = useState('');
   const [name, setName] = useState('');
@@ -159,7 +161,11 @@ export default function BattlePage() {
       const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
       words = await res.json();
     } catch (err: any) {
-      alert(`問題データの読み込みに失敗しました: ${err?.message || err}`);
+      toast({
+        title: '読み込みエラー',
+        description: String(err?.message || err || '問題データの読み込みに失敗しました'),
+        variant: 'destructive',
+      });
       return;
     }
     const ws = ensureSocket();

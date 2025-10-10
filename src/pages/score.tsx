@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
 import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ScorePage() {
+  const { toast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [rangeStart, setRangeStart] = useState<number | ''>(1);
@@ -64,7 +66,11 @@ export default function ScorePage() {
       const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
       list = await res.json();
     } catch (err: any) {
-      alert(`問題データの読み込みに失敗しました: ${err?.message || err}`);
+      toast({
+        title: '読み込みエラー',
+        description: String(err?.message || err || '問題データの読み込みに失敗しました'),
+        variant: 'destructive',
+      });
       return;
     }
     const shuffled = [...list].sort(() => Math.random() - 0.5);
