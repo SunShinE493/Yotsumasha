@@ -449,10 +449,12 @@ export class MemStorage {
       word: rw.word ? { id: rw.word.id, word: rw.word.word, meaning: rw.word.meaning } : undefined,
     }));
     const score = this.scoreAttack?.get(userId) || null;
+    const scoreRuns = Array.isArray(this.scoreAttackRuns?.get(userId)) ? this.scoreAttackRuns.get(userId) : [];
     return {
       user: { id: userId, username: user?.username || null, displayName: user?.displayName || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId) },
       reviewWords: compact,
       score,
+      scoreRuns,
     };
   }
 
@@ -468,7 +470,8 @@ export class MemStorage {
       datasetPayload[name] = arr;
     }
     const score = this.scoreAttack?.get(userId) || null;
-    return { words, sessions, progress, datasets, datasetPayload, score };
+    const scoreRuns = Array.isArray(this.scoreAttackRuns?.get(userId)) ? this.scoreAttackRuns.get(userId) : [];
+    return { words, sessions, progress, datasets, datasetPayload, score, scoreRuns };
   }
 
   async exportAllUsersData() {
@@ -546,6 +549,12 @@ export class MemStorage {
       if (payload?.score) {
         this.scoreAttack.set(userId, payload.score);
       }
+      // restore score attack runs
+      if (Array.isArray(payload?.scoreRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreRuns);
+      } else if (Array.isArray(payload?.scoreAttackRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreAttackRuns);
+      }
       this._scheduleSave();
       return true;
     }
@@ -578,6 +587,12 @@ export class MemStorage {
         if (!this.scoreAttack) this.scoreAttack = new Map();
         this.scoreAttack.set(userId, payload.score);
       }
+      // Restore score runs if provided
+      if (Array.isArray(payload?.scoreRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreRuns);
+      } else if (Array.isArray(payload?.scoreAttackRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreAttackRuns);
+      }
       this._scheduleSave();
       return true;
     }
@@ -586,6 +601,14 @@ export class MemStorage {
     if (payload?.score) {
       if (!this.scoreAttack) this.scoreAttack = new Map();
       this.scoreAttack.set(userId, payload.score);
+      this._scheduleSave();
+      return true;
+    }
+
+    // Minimal payload: scoreRuns only
+    if (Array.isArray(payload?.scoreRuns) || Array.isArray(payload?.scoreAttackRuns)) {
+      const runs = Array.isArray(payload?.scoreRuns) ? payload.scoreRuns : payload.scoreAttackRuns;
+      this.scoreAttackRuns.set(userId, runs);
       this._scheduleSave();
       return true;
     }
