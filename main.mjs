@@ -109,6 +109,7 @@ async function runWebserver(){
           playerCount: r.players?.size || 0,
           timeLimit: r.timeLimit,
           maxQuestions: r.maxQuestions || r.words?.length || 0,
+          players: Array.from(r.players.keys()),
         }))
         // Prefer waiting rooms first, then running
         .sort((a, b) => (a.state === 'waiting' ? -1 : 1) - (b.state === 'waiting' ? -1 : 1));
@@ -250,12 +251,12 @@ async function runWebserver(){
         if (!r || r.state !== 'running') return;
         const q = r.words[r.idx]; if (!q) return;
         const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        // Notify all about the answer attempt with content (correct or not)
+        broadcast(room, { type: 'answered', by: name, text: String(text||''), correct: !!ok });
         if (ok) {
           r.lastCorrectBy = name;
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
           r.asked = (r.asked || 0) + 1;
-          // notify who answered
-          broadcast(room, { type: 'answered', by: name });
           if (r.maxQuestions && r.asked >= r.maxQuestions) {
             r.state = 'ended';
             if (r.timer) { clearTimeout(r.timer); r.timer = null; }
@@ -271,7 +272,7 @@ async function runWebserver(){
           r.lastCorrectBy = null;
           scheduleQuestionTimer(room);
         } else {
-          // wrong answer -> add to review list for this user if possible (requires session mapping; skipped here)
+          // wrong answer: keep same question; do nothing else
         }
       }
     });

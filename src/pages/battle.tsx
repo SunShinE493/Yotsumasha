@@ -33,6 +33,7 @@ export default function BattlePage() {
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
   const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
+  const selfNameRef = useRef<string>('');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [lastAnswerWord, setLastAnswerWord] = useState<string | null>(null);
   const [lastAnswerer, setLastAnswerer] = useState<string | null>(null);
@@ -113,9 +114,14 @@ export default function BattlePage() {
         } else if (msg.type === 'players') {
           setPlayers(Array.isArray(msg.players) ? msg.players : []);
         } else if (msg.type === 'answered') {
-          // someone answered correctly -> flash effect
-          setFlash('green'); setTimeout(()=>setFlash('none'), 200);
-          if (typeof msg.by === 'string') setLastAnsweredBy(msg.by);
+          // correct/incorrect visual cue per client
+          const by = typeof msg.by === 'string' ? msg.by : null;
+          if (by && by === selfNameRef.current && msg.correct) {
+            setFlash('green'); setTimeout(()=>setFlash('none'), 200);
+          } else if (by && by !== selfNameRef.current && msg.correct) {
+            setFlash('red'); setTimeout(()=>setFlash('none'), 200);
+          }
+          if (typeof msg.by === 'string') setLastAnsweredBy(`${msg.by}: ${String(msg.text || '')}`);
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
@@ -185,6 +191,7 @@ export default function BattlePage() {
     }
     const ws = ensureSocket();
     const sendCreate = () => {
+      selfNameRef.current = name;
       ws.send(JSON.stringify({ type: 'create', room, name, limitSec, questionCount, words }));
       setMode('host');
     };
@@ -196,6 +203,7 @@ export default function BattlePage() {
     if (!name || !room) return;
     const ws = ensureSocket();
     ws.onopen = () => {
+      selfNameRef.current = name;
       ws.send(JSON.stringify({ type: 'join', room, name }));
     };
   };
@@ -359,7 +367,7 @@ export default function BattlePage() {
                   {Array.isArray(openRooms) && openRooms.map(r => (
                     <div key={r.id} className="rounded-md border border-border bg-background px-3 py-2">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span></div>
+                        <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span> {Array.isArray((r as any).players) && (r as any).players.length>0 ? <span className="text-xs text-muted-foreground ml-2">[{(r as any).players.join(', ')}]</span> : null}</div>
                         <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
                       </div>
                       {Number(r.playerCount) === 0 && (
