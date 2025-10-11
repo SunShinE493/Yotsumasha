@@ -27,6 +27,7 @@ export default function BattlePage() {
   const [phase, setPhase] = useState<'idle'|'lobby'|'running'|'ended'>('idle');
   const [players, setPlayers] = useState<string[]>([]);
   const [lastAnsweredBy, setLastAnsweredBy] = useState<string | null>(null);
+  const [lastAnswerByName, setLastAnswerByName] = useState<Record<string, string>>({});
   const [questionWord, setQuestionWord] = useState<string | null>(null);
   const [questionMeaning, setQuestionMeaning] = useState<string | null>(null);
   const [questionId, setQuestionId] = useState<string | null>(null);
@@ -121,7 +122,10 @@ export default function BattlePage() {
           } else if (by && by !== selfNameRef.current && msg.correct) {
             setFlash('red'); setTimeout(()=>setFlash('none'), 200);
           }
-          if (typeof msg.by === 'string') setLastAnsweredBy(`${msg.by}: ${String(msg.text || '')}`);
+          if (typeof msg.by === 'string') {
+            setLastAnsweredBy(`${msg.by}: ${String(msg.text || '')}`);
+            setLastAnswerByName(prev => ({ ...prev, [msg.by]: String(msg.text || '') }));
+          }
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
@@ -406,7 +410,7 @@ export default function BattlePage() {
                   <div className="text-sm text-muted-foreground">部屋: {room}</div>
                   <div className="text-sm">残り時間: {remaining ?? '-'}s</div>
                 </div>
-                <div className="text-xs text-muted-foreground">参加者: {players.join(', ') || '---'}</div>
+                {/* participants label removed per request */}
                 <div className="rounded-lg border border-border p-6 bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-sm text-muted-foreground">問題:</div>
@@ -432,12 +436,10 @@ export default function BattlePage() {
                   <div className="font-semibold mb-2">スコア</div>
                   <div className="grid sm:grid-cols-2 gap-2">
                     {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
-                      <div key={n} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
+                      <div key={n} className="flex items-center rounded-md border border-border bg-background px-3 py-2">
                         <div className="text-foreground">{n}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {lastAnsweredBy === n ? (<span className="mr-2 inline-block rounded bg-secondary px-1.5 py-0.5">正解！</span>) : null}
-                        </div>
-                        <div className="text-sm text-muted-foreground">{sc}</div>
+                        <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ?? ''}</div>
+                        <div className="text-sm text-muted-foreground tabular-nums">{sc}</div>
                       </div>
                     ))}
                   </div>
