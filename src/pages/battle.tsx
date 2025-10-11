@@ -24,6 +24,7 @@ export default function BattlePage() {
   const wsRef = useRef<WebSocket | null>(null);
   const [phase, setPhase] = useState<'idle'|'lobby'|'running'|'ended'>('idle');
   const [players, setPlayers] = useState<string[]>([]);
+  const [lastAnsweredBy, setLastAnsweredBy] = useState<string | null>(null);
   const [questionWord, setQuestionWord] = useState<string | null>(null);
   const [questionMeaning, setQuestionMeaning] = useState<string | null>(null);
   const [questionId, setQuestionId] = useState<string | null>(null);
@@ -100,9 +101,12 @@ export default function BattlePage() {
           prevMeaningRef.current = msg.meaning ?? null;
         } else if (msg.type === 'score') {
           setScores(msg.scores || {});
+        } else if (msg.type === 'players') {
+          setPlayers(Array.isArray(msg.players) ? msg.players : []);
         } else if (msg.type === 'answered') {
           // someone answered correctly -> flash effect
           setFlash('green'); setTimeout(()=>setFlash('none'), 200);
+          if (typeof msg.by === 'string') setLastAnsweredBy(msg.by);
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
@@ -216,7 +220,7 @@ export default function BattlePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-[linear-gradient(to_bottom,transparent_0,transparent_calc(100%-2rem)),radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.06),transparent_60%)]">
       <header className="bg-card border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">リアルタイム対戦 🧠⚡</h1>
@@ -380,6 +384,7 @@ export default function BattlePage() {
                   <div className="text-sm text-muted-foreground">部屋: {room}</div>
                   <div className="text-sm">残り時間: {remaining ?? '-'}s</div>
                 </div>
+                <div className="text-xs text-muted-foreground">参加者: {players.join(', ') || '---'}</div>
                 <div className="rounded-lg border border-border p-6 bg-card">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-sm text-muted-foreground">問題:</div>
@@ -407,6 +412,9 @@ export default function BattlePage() {
                     {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
                       <div key={n} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
                         <div className="text-foreground">{n}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {lastAnsweredBy === n ? (<span className="mr-2 inline-block rounded bg-secondary px-1.5 py-0.5">正解！</span>) : null}
+                        </div>
                         <div className="text-sm text-muted-foreground">{sc}</div>
                       </div>
                     ))}
