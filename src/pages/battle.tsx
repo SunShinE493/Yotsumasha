@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function BattlePage() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [fontSizePx, setFontSizePx] = useState<number>(24);
   const [mode, setMode] = useState<'host'|'join'|null>(null);
   const [room, setRoom] = useState('');
@@ -53,6 +55,13 @@ export default function BattlePage() {
     );
     setCanStart(ok);
   },[name, room, selectedJson, rangeStart, rangeEnd]);
+
+  // Prefill display name if available
+  useEffect(() => {
+    if (!name && user?.displayName) {
+      setName(user.displayName);
+    }
+  }, [user?.displayName, name]);
 
   // Utility: compute ws endpoint based on current page origin
   const wsUrl = useMemo(() => {
@@ -348,9 +357,14 @@ export default function BattlePage() {
                 <AutoRoomsList onUpdate={(list)=>setOpenRooms(list)} intervalMs={5000} />
                 <div className="grid gap-2">
                   {Array.isArray(openRooms) && openRooms.map(r => (
-                    <div key={r.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
-                      <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span></div>
-                      <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
+                    <div key={r.id} className="rounded-md border border-border bg-background px-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span></div>
+                        <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
+                      </div>
+                      {Number(r.playerCount) === 0 && (
+                        <div className="mt-1 text-[11px] text-muted-foreground">誰もいないこの部屋はもうすぐ削除されます</div>
+                      )}
                     </div>
                   ))}
                   {Array.isArray(openRooms) && openRooms.length === 0 && (
