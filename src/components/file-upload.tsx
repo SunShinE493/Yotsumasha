@@ -40,7 +40,7 @@ const FILE_PRESETS = {
   presets: [
   { start: 1, end: 73, label: "倫理Ⅰ1-73" },
     { start: 74, end: 221, label: "倫理Ⅱ74-221" },
-    { start: 222, end: 338, label: "倫理Ⅲ222-338" },
+    { start: 222, end: 384, label: "倫理Ⅲ222-384" },
   ],
   },
   "seikei.json":{
