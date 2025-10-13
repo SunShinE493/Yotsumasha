@@ -28,6 +28,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
   const [fontSizePx, setFontSizePx] = useState<number>(28); // 初期28px相当
   const [rotationCount, setRotationCount] = useState(0);
   const [rotationDeg, setRotationDeg] = useState(0);
+  const [rotationTurn, setRotationTurn] = useState(0);
   const [isEarlyFinishDialogOpen, setIsEarlyFinishDialogOpen] = useState(false);
   const { toast } = useToast();
   const userId = useUserId();
@@ -88,6 +89,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     // Tap: always advance rotation forward
     setRotationCount(prevCount => prevCount + 1);
     setRotationDeg(prev => prev + 180);
+    setRotationTurn(prev => prev + 0.5);
   };
 
   const handleMarkWord = (isRemembered: boolean) => {
@@ -96,9 +98,11 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     if (isRemembered) {
       setRotationCount(prev => prev + 1);
       setRotationDeg(prev => prev + 180);
+      setRotationTurn(prev => prev + 0.5);
     } else {
       setRotationCount(0);
       setRotationDeg(0);
+      setRotationTurn(0);
     }
     setTimeout(() => {
       markWord(isRemembered);
@@ -125,6 +129,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     // スキップ時は回転をリセット
     setRotationCount(0);
     setRotationDeg(0);
+    setRotationTurn(0);
     markWord(false);
   };
 
@@ -226,6 +231,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
                 fontSizeClass={''}
                 fontSizePx={fontSizePx}
                 rotationDeg={rotationDeg}
+                rotationTurn={rotationTurn}
               />
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <Button
