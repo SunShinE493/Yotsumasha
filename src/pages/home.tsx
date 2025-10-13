@@ -293,17 +293,14 @@ export default function Home() {
       {/* --- */}
 
       {/* Floating Action Button */}
-      {selectedJson &&
-        selectedJson.wordCount > 0 &&
-        !currentSession &&
-        !completedSession && (
+      {reviewWords && (
           <div className="fixed bottom-6 right-6">
             <button
               onClick={handleQuickStart}
               disabled={startSessionMutation.isPending}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg shadow-lg hover:bg-primary/90 transition-all hover:scale-105 flex items-center gap-2 group"
               data-testid="button-quick-start"
-              title="クイック学習開始（最初の20語をランダムで学習）"
+              title="復習開始（復習リストをランダムで学習）"
             >
               {startSessionMutation.isPending ? (
                 <i className="fas fa-spinner fa-spin text-xl"></i>
@@ -311,7 +308,7 @@ export default function Home() {
                 <i className="fas fa-play text-xl group-hover:scale-110 transition-transform"></i>
               )}
               <span className="font-mono">
-                ランダム20問
+                復習
                 <br />
                 開始
               </span>
