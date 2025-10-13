@@ -114,6 +114,8 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
 
   const handleSkip = () => {
     if (!currentWord) return;
+    // スキップ時は回転をリセット
+    setRotationCount(0);
     markWord(false);
   };
 
