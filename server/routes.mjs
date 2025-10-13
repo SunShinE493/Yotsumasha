@@ -71,8 +71,13 @@ export async function registerRoutes(app) {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
       const full = req.body && req.body.full === true;
+      const incorrectOnly = req.body && req.body.incorrectOnly === true;
       // If "all" flag is provided, export all users' data
       if (req.body && req.body.all === true) {
+        if (incorrectOnly) {
+          const all = await storage.exportAllUsersIncorrectOnly();
+          return res.json(all);
+        }
         const all = full ? await storage.exportAllUsersDataFull() : await storage.exportAllUsersData();
         return res.json(all);
       }

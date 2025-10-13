@@ -513,6 +513,24 @@ export class MemStorage {
     return { users: result };
   }
 
+  // Export only incorrect problem data per user (minimal) for all users
+  async exportAllUsersIncorrectOnly() {
+    const result = [];
+    for (const user of this.users.values()) {
+      const userId = user.id;
+      const reviewWords = await this.getReviewWords(userId);
+      const compact = (reviewWords || []).map((rw) => ({
+        wordId: rw.word?.id || rw.wordId,
+        word: rw.word ? { id: rw.word.id, word: rw.word.word, meaning: rw.word.meaning } : undefined,
+      }));
+      result.push({
+        user: { id: userId, username: user?.username || null },
+        reviewWords: compact,
+      });
+    }
+    return { users: result };
+  }
+
   async exportAllUsersDataFull() {
     const result = [];
     const userIds = new Set();
@@ -677,7 +695,17 @@ export class MemStorage {
       ppm: (Number(run.limit) > 0 ? (Number(run.score) / (Number(run.limit)/60)) : 0),
       createdAt: new Date(),
     };
-    list.push(record);
+    // Deduplicate by (userId, fileName, start, end, limit) keeping the best score
+    const keyMatches = (r) => r.userId === record.userId && r.fileName === record.fileName && r.start === record.start && r.end === record.end && r.limit === record.limit;
+    const idx = list.findIndex(keyMatches);
+    if (idx >= 0) {
+      // If new score is higher, replace
+      if ((record.score||0) > (list[idx].score||0)) {
+        list[idx] = record;
+      }
+    } else {
+      list.push(record);
+    }
     this.scoreAttackRuns.set(userId, list);
     this._scheduleSave();
     return record;
@@ -702,9 +730,17 @@ export class MemStorage {
     };
     let filtered = all.filter(r => withinPeriod(r.createdAt));
     if (source) filtered = filtered.filter(r => r.fileName === source);
+    // Deduplicate per (userId,fileName,start,end,limit) by highest score
+    const bestByKey = new Map();
+    for (const r of filtered) {
+      const k = `${r.userId}|${r.fileName||''}|${r.start}|${r.end}|${r.limit}`;
+      const prev = bestByKey.get(k);
+      if (!prev || (r.score||0) > (prev.score||0)) bestByKey.set(k, r);
+    }
+    const deduped = Array.from(bestByKey.values());
     const key = metric === 'combo' ? 'maxCombo' : (metric === 'correct' ? 'correctCount' : 'ppm');
-    filtered.sort((a,b) => (b[key]||0) - (a[key]||0));
-    return filtered.slice(0, 100);
+    deduped.sort((a,b) => (b[key]||0) - (a[key]||0));
+    return deduped.slice(0, 100);
   }
 
   // --- Score Attack operations ---
