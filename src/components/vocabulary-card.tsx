@@ -7,9 +7,10 @@ interface VocabularyCardProps {
   onFlip: () => void;
   fontSizeClass?: string;
   fontSizePx?: number;
+  rotationDeg?: number;
 }
 
-export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fontSizePx }: VocabularyCardProps) {
+export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fontSizePx, rotationDeg }: VocabularyCardProps) {
   return (
     <div 
       className="relative h-64 cursor-pointer touch-target"
@@ -19,7 +20,7 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fon
       {/* card-flip に style プロパティで回転角度を直接適用 */}
       <div 
         className="card-flip relative w-full h-full"
-        style={{ transform: `rotateY(${rotationCount * 180}deg)` }}
+        style={{ transform: `rotateY(${rotationDeg !== undefined ? rotationDeg : rotationCount * 180}deg)` }}
       >
         {/* Front of Card (Word) */}
         <div className="card-front bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center">
