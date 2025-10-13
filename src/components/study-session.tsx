@@ -84,11 +84,14 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
   });
 
   const handleFlip = () => {
+    // Tap: always advance rotation forward
     setRotationCount(prevCount => prevCount + 1);
   };
 
   const handleMarkWord = (isRemembered: boolean) => {
-    setRotationCount(0);
+    // 覚えた: 同一方向に回転（+1）し次へ
+    // 覚えていない: 回転をリセット（0）して次へ
+    setRotationCount(prev => (isRemembered ? prev + 1 : 0));
     setTimeout(() => {
       markWord(isRemembered);
     },200);

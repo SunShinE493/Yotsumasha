@@ -12,6 +12,7 @@ export default function DevToolsPage() {
   const [exportJson, setExportJson] = useState<string>('');
   const [importJson, setImportJson] = useState<string>('');
   const [status, setStatus] = useState<string>('');
+  const [incorrectOnly, setIncorrectOnly] = useState<boolean>(false);
 
   useEffect(() => {
     fetch('/api/csrf', { credentials: 'same-origin' })
@@ -147,7 +148,7 @@ export default function DevToolsPage() {
                   const res = await fetch('/api/admin/export', {
                     method: 'POST', credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, all: true, full: true })
+                    body: JSON.stringify({ email, password, all: true, ...(incorrectOnly ? { incorrectOnly: true } : { full: true }) })
                   });
                   if (!res.ok) { setStatus(`Export all failed (${res.status})`); return; }
                   const data = await res.json();
@@ -156,6 +157,10 @@ export default function DevToolsPage() {
                   setStatus('Exported all users');
                 } catch (e) { setStatus('Export all error'); }
               }}>Export ALL Users</Button>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input type="checkbox" checked={incorrectOnly} onChange={(e)=>setIncorrectOnly(e.target.checked)} />
+                間違えた問題のみ（ALL）
+              </label>
               <Button variant="outline" onClick={async ()=>{
                 try {
                   setStatus('Exporting (full)...');
