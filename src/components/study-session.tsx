@@ -26,9 +26,9 @@ interface StudySessionProps {
 
 export function StudySession({ session, onComplete, onBack }: StudySessionProps) {
   const [fontSizePx, setFontSizePx] = useState<number>(28); // 初期28px相当
-  const [rotationCount, setRotationCount] = useState(0);
-  const [rotationDeg, setRotationDeg] = useState(0);
-  const [rotationTurn, setRotationTurn] = useState(0);
+  // New flip model: use flipKey/resetKey to drive right-rotation only
+  const [flipKey, setFlipKey] = useState(0);
+  const [resetKey, setResetKey] = useState(0);
   const [isEarlyFinishDialogOpen, setIsEarlyFinishDialogOpen] = useState(false);
   const { toast } = useToast();
   const userId = useUserId();
@@ -86,23 +86,17 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
   });
 
   const handleFlip = () => {
-    // Tap: always advance rotation forward
-    setRotationCount(prevCount => prevCount + 1);
-    setRotationDeg(prev => prev + 180);
-    setRotationTurn(prev => prev + 0.5);
+    // Tap: increment flipKey to trigger a right-rotation animation in card
+    setFlipKey((v) => v + 1);
   };
 
   const handleMarkWord = (isRemembered: boolean) => {
     // 覚えた: 同一方向に回転（+1）し次へ
     // 覚えていない: 回転をリセット（0）して次へ
     if (isRemembered) {
-      setRotationCount(prev => prev + 1);
-      setRotationDeg(prev => prev + 180);
-      setRotationTurn(prev => prev + 0.5);
+      setFlipKey((v) => v + 1);
     } else {
-      setRotationCount(0);
-      setRotationDeg(0);
-      setRotationTurn(0);
+      setResetKey((v) => v + 1);
     }
     setTimeout(() => {
       markWord(isRemembered);
@@ -127,9 +121,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
   const handleSkip = () => {
     if (!currentWord) return;
     // スキップ時は回転をリセット
-    setRotationCount(0);
-    setRotationDeg(0);
-    setRotationTurn(0);
+    setResetKey((v) => v + 1);
     markWord(false);
   };
 
@@ -226,12 +218,11 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
             <>
               <VocabularyCard
                 word={currentWord}
-                rotationCount={rotationCount}
                 onFlip={handleFlip}
                 fontSizeClass={''}
                 fontSizePx={fontSizePx}
-                rotationDeg={rotationDeg}
-                rotationTurn={rotationTurn}
+                flipKey={flipKey}
+                resetKey={resetKey}
               />
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <Button
