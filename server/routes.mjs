@@ -399,13 +399,12 @@ export async function registerRoutes(app) {
 
       words = words.slice(0, config.questionCount);
 
-      const reviewWords = await storage.getReviewWords(userId);
-
+      // For regular study sessions, do NOT mix in review list into the session words.
+      // Expose current review list separately only when needed by client.
       const sessionWithWords = {
         ...session,
         words,
         progress: [],
-        incorrectWords: reviewWords,
       };
 
       res.json(sessionWithWords);
