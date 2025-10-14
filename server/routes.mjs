@@ -393,14 +393,24 @@ export async function registerRoutes(app) {
         words = await storage.getVocabularyWordsInRange(userId, config.startRange, config.endRange);
       }
 
+      // Fetch current review list to either exclude or use exclusively
+      const reviewProgress = await storage.getReviewWords(userId);
+      if (config.reviewOnly) {
+        const reviewOnlyWords = reviewProgress
+          .map((rp) => rp.word)
+          .filter((w) => w && w.id && w.word && w.meaning);
+        words = reviewOnlyWords;
+      } else {
+        const reviewIds = new Set(reviewProgress.map((rp) => rp.word?.id || rp.wordId));
+        words = (words || []).filter((w) => !reviewIds.has(w.id));
+      }
+
       if (config.order === "random") {
         words = words.sort(() => Math.random() - 0.5);
       }
 
       words = words.slice(0, config.questionCount);
 
-      // For regular study sessions, do NOT mix in review list into the session words.
-      // Expose current review list separately only when needed by client.
       const sessionWithWords = {
         ...session,
         words,
