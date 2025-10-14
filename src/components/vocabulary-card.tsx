@@ -3,44 +3,15 @@ import type { VocabularyWord } from "@shared/schema";
 
 interface VocabularyCardProps {
   word: VocabularyWord;
+  rotationCount: number;
   onFlip: () => void;
   fontSizeClass?: string;
   fontSizePx?: number;
-  flipKey?: number;   // increment to trigger a right-rotation flip
-  resetKey?: number;  // increment to reset orientation to front
+  rotationDeg?: number;
+  rotationTurn?: number; // 0.5 turn per flip when provided
 }
 
-export function VocabularyCard({ word, onFlip, fontSizeClass, fontSizePx, flipKey, resetKey }: VocabularyCardProps) {
-  const [baseDeg, setBaseDeg] = useState(0);       // 0 or 180; persistent orientation
-  const [animDeg, setAnimDeg] = useState(0);       // 0 -> 180 for each flip
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Trigger a right-rotation flip on flipKey change
-  useEffect(() => {
-    if (flipKey === undefined) return;
-    setIsAnimating(true);
-    // Start animation 0 -> 180deg (always right rotation)
-    setAnimDeg(180);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flipKey]);
-
-  // Reset orientation to front on resetKey change
-  useEffect(() => {
-    if (resetKey === undefined) return;
-    setIsAnimating(false);
-    setBaseDeg(0);
-    setAnimDeg(0);
-  }, [resetKey]);
-
-  const handleTransitionEnd = () => {
-    if (!isAnimating) return;
-    // Commit the flip and rebase to 0 without visual jump
-    setIsAnimating(false);
-    setBaseDeg((prev) => (prev + 180) % 360);
-    setAnimDeg(0);
-  };
-
-  const totalDeg = baseDeg + animDeg;
+export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fontSizePx, rotationDeg, rotationTurn }: VocabularyCardProps) {
 
   return (
     <div 
@@ -51,8 +22,7 @@ export function VocabularyCard({ word, onFlip, fontSizeClass, fontSizePx, flipKe
       {/* card-flip に style プロパティで回転角度を直接適用 */}
       <div 
         className="card-flip relative w-full h-full"
-        style={{ transform: `rotateY(${totalDeg}deg)`, transition: isAnimating ? 'transform 0.3s ease-in-out' : 'none' }}
-        onTransitionEnd={handleTransitionEnd}
+        style={{ transform: rotationTurn !== undefined ? `rotateY(${rotationTurn}turn)` : `rotateY(${rotationDeg !== undefined ? rotationDeg : rotationCount * 180}deg)` }}
       >
         {/* Front of Card (Word) */}
         <div className="card-front bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center">
