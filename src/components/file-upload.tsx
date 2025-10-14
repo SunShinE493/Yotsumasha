@@ -132,7 +132,8 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       };
     });
 
-    uploadMutation.mutate({ words, replace: !isBuiltin }, {
+    // Always replace the current vocabulary with the newly loaded JSON
+    uploadMutation.mutate({ words, replace: true }, {
       onSuccess: () => {
         const preset = FILE_PRESETS[fileName as keyof typeof FILE_PRESETS];
         const selectedFile: SelectedJsonInfo = {
