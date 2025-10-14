@@ -21,20 +21,19 @@ function ensureKatex(): Promise<any> {
         link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css';
         document.head.appendChild(link);
       }
-      // Inject script
-      const scriptId = 'katex-script';
-      if (document.getElementById(scriptId)) {
-        const tryReady = () => (window.katex ? resolve(window.katex) : setTimeout(tryReady, 30));
-        tryReady();
-      } else {
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js';
-        script.async = true;
-        script.onload = () => resolve(window.katex);
-        script.onerror = reject;
-        document.head.appendChild(script);
-      }
+      const ensureScript = (id: string, src: string) => new Promise<void>((res, rej) => {
+        if (document.getElementById(id)) return res();
+        const s = document.createElement('script');
+        s.id = id; s.src = src; s.async = true; s.onload = () => res(); s.onerror = rej; document.head.appendChild(s);
+      });
+      // Load KaTeX core, then mhchem extension for \ce
+      ensureScript('katex-script', 'https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js')
+        .then(() => ensureScript('katex-mhchem', 'https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/mhchem.min.js'))
+        .then(() => {
+          const tryReady = () => (window.katex ? resolve(window.katex) : setTimeout(tryReady, 30));
+          tryReady();
+        })
+        .catch(reject);
     } catch (e) {
       reject(e);
     }
