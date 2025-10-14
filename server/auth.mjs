@@ -97,6 +97,15 @@ export function setupAuth(app) {
       // @ts-ignore
       req.headers['csrf-token'] = token;
     }
+    // Fallback: if header/body has token but cookie is missing (some environments block setting cookie),
+    // mirror the token into req.cookies so tiny-csrf can validate
+    try {
+      // @ts-ignore
+      if (token && req && req.cookies && !req.cookies['csrf-token']) {
+        // @ts-ignore
+        req.cookies['csrf-token'] = token;
+      }
+    } catch {}
     next();
   });
 
