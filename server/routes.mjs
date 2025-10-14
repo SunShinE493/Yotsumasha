@@ -305,8 +305,13 @@ export async function registerRoutes(app) {
     try {
       const { words } = vocabularyFileSchema.parse(req.body);
       const userId = req.userId;
+      const replace = !!req.body?.replace;
 
-      // Append words without clearing existing vocabulary to preserve review and prior datasets
+      // If replace flag is provided, clear existing vocabulary first
+      if (replace) {
+        await storage.clearVocabularyWords(userId);
+      }
+      // Append words without clearing (default behavior)
       const createdWords = await storage.createVocabularyWords(userId, words);
 
       res.json({

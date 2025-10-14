@@ -125,7 +125,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       };
     });
 
-    uploadMutation.mutate(words, {
+    uploadMutation.mutate({ words, replace: !isBuiltin }, {
       onSuccess: () => {
         const preset = FILE_PRESETS[fileName as keyof typeof FILE_PRESETS];
         const selectedFile: SelectedJsonInfo = {
@@ -218,8 +218,8 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   };
 
   const uploadMutation = useMutation({
-    mutationFn: async (words: any[]) => {
-      const response = await apiRequest("POST", "/api/vocabulary/upload", { words });
+    mutationFn: async (payload: { words: any[]; replace?: boolean }) => {
+      const response = await apiRequest("POST", "/api/vocabulary/upload", payload);
       return response.json();
     },
     onSuccess: (data, variables) => {},
