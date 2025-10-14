@@ -24,45 +24,45 @@ import { cn } from "@/lib/utils";
 
 // JSONファイルごとのクイック設定の範囲のみを定義
 const FILE_PRESETS = {
-  "koumin.json": {
+  "公民.json": {
     presets: [
       { start: 1, end: 157, label: "公共Ⅱ1-157" },
       { start: 158, end: 262, label: "公共Ⅲ158-262" },
       { start: 263, end: 471, label: "公共Ⅳ263－471" },
     ],
   },
-  "koumin2.json": {
+  "公民2.json": {
     presets: [
       { start: 1, end: 202, label: "公共Ⅴ1-202" },
     ],
   },
-  "rinri.json": {
+  "倫理.json": {
   presets: [
   { start: 1, end: 73, label: "倫理Ⅰ1-73" },
     { start: 74, end: 221, label: "倫理Ⅱ74-221" },
     { start: 222, end: 384, label: "倫理Ⅲ222-384" },
   ],
   },
-  "seikei.json":{
+  "政経.json":{
     presets: [
       { start: 1, end: 53, label: "政経Ⅰ1-53" },
       
     ]
   },
-  "chiri.json":{
+  "地理.json":{
     presets: [
       { start: 1, end: 180, label: "地理Ⅰ1-180" },
       { start: 181, end: 340, label: "地理Ⅱ181-340" },
       { start: 341, end: 440, label: "地理Ⅲ341-440" },
     ]
   },
-  "chiri2.json":{
+  "地理2.json":{
     presets: [
       { start: 1, end: 100, label: "地理Ⅳ1-100" },
       { start: 181, end: 400, label: "地理Ⅴ101-400" },
     ]
   },
-  "chemistry.json":{
+  "化学.json":{
     presets: [
       { start: 1, end: 108, label: "化学Ⅲ1-108" },
     ]
