@@ -88,8 +88,11 @@ export function MathText({ text }: { text: string }) {
 
   const content = useMemo(() => {
     if (!text) return text;
-    if (!window.katex) return text;
-    return renderSegments(text, window.katex);
+    // Pre-normalize common JSON-escape pitfalls: "\text" becomes tab + "ext" if not double-escaped
+    // Replace TAB + 'ext' -> '\text'
+    const normalized = text.replace(/\t(?:ext)/g, '\\text');
+    if (!window.katex) return normalized;
+    return renderSegments(normalized, window.katex);
   }, [text, ready]);
 
   return <>{content}</>;
