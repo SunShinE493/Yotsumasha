@@ -81,7 +81,7 @@ import chemistry from "./data/chemistry.json";
 const availableJsonFiles = {
   "koumin.json": koumin,
   "koumin2.json": koumin2,
-  "runri.json": rinri,
+  "ruiri.json": rinri,
   "seikei.json": seikei,
   "chiri.json":chiri,
   "chiri2.json":chiri2,
