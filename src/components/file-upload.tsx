@@ -61,6 +61,11 @@ const FILE_PRESETS = {
       { start: 1, end: 100, label: "地理Ⅳ1-100" },
       { start: 181, end: 400, label: "地理Ⅴ101-400" },
     ]
+  },
+  "chemistry.json":{
+    presets: [
+      { start: 1, end: 108, label: "化学Ⅲ1-108" },
+    ]
   }
 };
 
@@ -71,14 +76,16 @@ import rinri from "./data/rinri.json";
 import seikei from "./data/seikei.json";
 import chiri from "./data/chiri.json";
 import chiri2 from "./data/chiri2.json";
+import chemistry from "./data/chemistry.json";
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
-  "koumin.json": koumin,
-  "koumin2.json": koumin2,
-  "rinri.json": rinri,
-  "seikei.json": seikei,
-  "chiri.json":chiri,
-  "chiri2.json":chiri2,
+  "公民.json": koumin,
+  "公民2.json": koumin2,
+  "倫理.json": rinri,
+  "政経.json": seikei,
+  "地理.json":chiri,
+  "地理2.json":chiri2,
+  "化学.json":chemistry,
 };
 
 // 親に渡すデータの型を定義
