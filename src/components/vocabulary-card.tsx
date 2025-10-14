@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { VocabularyWord } from "@shared/schema";
+import { MathText } from "./MathText";
 
 interface VocabularyCardProps {
   word: VocabularyWord;
@@ -33,7 +34,7 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fon
               style={fontSizePx ? { fontSize: `${fontSizePx}px`, lineHeight: 1.25 } : undefined}
               data-testid="text-word"
             >
-              {word.word}
+              <MathText text={word.word} />
             </div>
             {word.category && (
               <div className="text-sm text-primary-foreground/80" data-testid="text-category">
@@ -55,7 +56,7 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fon
               style={fontSizePx ? { fontSize: `${Math.max(12, fontSizePx - 2)}px`, lineHeight: 1.4 } : undefined}
               data-testid="text-meaning"
             >
-              {word.meaning}
+              <MathText text={word.meaning} />
             </div>
             {word.example && (
               <div className="text-sm text-muted-foreground" data-testid="text-example">

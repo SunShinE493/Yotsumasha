@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
 import { apiRequest } from '@/lib/queryClient';
+import { MathText } from '@/components/MathText';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -421,7 +422,7 @@ export default function BattlePage() {
                     </div>
                   </div>
                   <div className="font-semibold text-foreground" style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.25 }}>
-                    {questionWord ?? (phase==='ended' ? '終了しました' : '...')}
+                    <MathText text={questionWord ?? (phase==='ended' ? '終了しました' : '...')} />
                   </div>
                 </div>
 

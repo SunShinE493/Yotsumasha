@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
+import { MathText } from '@/components/MathText';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -260,7 +261,7 @@ export default function ScorePage() {
                 <div>残り: <span className="text-foreground font-medium">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</span></div>
               </div>
               <div className="text-center space-y-2">
-                <div className="text-xl font-semibold">{current?.word ?? '読み込み中...'}</div>
+                <div className="text-xl font-semibold"><MathText text={current?.word ?? '読み込み中...'} /></div>
                 <div className="text-sm text-muted-foreground">意味を入力</div>
               </div>
               <div className="flex gap-2">
