@@ -21,6 +21,7 @@ export default function ScorePage() {
   const [answer, setAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [skips, setSkips] = useState(0);
@@ -44,6 +45,7 @@ export default function ScorePage() {
   const finalizedRef = useRef<boolean>(false);
   const scoreRef = useRef<number>(0);
   const comboRef = useRef<number>(0);
+  const maxComboRef = useRef<number>(0);
   const correctRef = useRef<number>(0);
   const idxRef = useRef<number>(0);
   const wordsRef = useRef<Array<{ id: string; word: string; meaning: string }>>([]);
@@ -80,6 +82,7 @@ export default function ScorePage() {
     setIdx(0); idxRef.current = 0;
     setScore(0); scoreRef.current = 0;
     setCombo(0); comboRef.current = 0;
+    setMaxCombo(0); maxComboRef.current = 0;
     setCorrect(0); correctRef.current = 0;
     setMistakes(0);
     setSkips(0);
@@ -110,7 +113,7 @@ export default function ScorePage() {
       start: Number(rangeStartRef.current) as number,
       end: Number(rangeEndRef.current) as number,
       limit: Number(limitSecRef.current) || 0,
-      maxCombo: comboRef.current,
+      maxCombo: maxComboRef.current,
       score: scoreRef.current,
       mistakes,
       skips,
@@ -139,7 +142,7 @@ export default function ScorePage() {
     if (ok) {
       const next = (idx + 1) % words.length;
       setScore((s) => { const v = s + 100 + combo * 10; scoreRef.current = v; return v; });
-      setCombo((c) => { const v = c + 1; comboRef.current = v; return v; });
+      setCombo((c) => { const v = c + 1; comboRef.current = v; if (v > maxComboRef.current) { setMaxCombo(v); maxComboRef.current = v; } return v; });
       setCorrect((c)=>{ const v = c + 1; correctRef.current = v; return v; });
       setIdx(next); idxRef.current = next;
       setAnswer('');
