@@ -439,15 +439,15 @@ export default function BattlePage() {
                     {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
                       <div key={n} className="flex items-center rounded-md border border-border bg-background px-3 py-2">
                         <div className="text-foreground">{n}</div>
-                        <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ?? ''}</div>
+                        <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ? <MathText text={lastAnswerByName[n]} /> : ''}</div>
                         <div className="text-sm text-muted-foreground tabular-nums">{sc}</div>
                       </div>
                     ))}
                   </div>
                   {lastAnswer && (
                     <div className="mt-4 text-sm text-muted-foreground">
-                      直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span>
-                      {lastAnswerWord ? <span className="text-muted-foreground">（{lastAnswerWord}）</span> : null}
+                      直前の答え: <span className="text-foreground font-medium"><MathText text={lastAnswer} /></span>
+                      {lastAnswerWord ? <span className="text-muted-foreground">（<MathText text={lastAnswerWord} />）</span> : null}
                       {lastAnswerer ? <span className="ml-2 text-xs text-muted-foreground">正解者: <span className="text-foreground font-medium">{lastAnswerer}</span></span> : null}
                     </div>
                   )}
@@ -464,8 +464,8 @@ export default function BattlePage() {
                       </div>
                       {finalLastMeaning && (
                         <div className="mt-3 text-sm text-muted-foreground">
-                          最後の問題の答え: <span className="text-foreground font-medium">{finalLastMeaning}</span>
-                          {finalLastWord ? <span className="text-muted-foreground">（{finalLastWord}）</span> : null}
+                          最後の問題の答え: <span className="text-foreground font-medium"><MathText text={finalLastMeaning} /></span>
+                          {finalLastWord ? <span className="text-muted-foreground">（<MathText text={finalLastWord} />）</span> : null}
                         </div>
                       )}
                     </div>
