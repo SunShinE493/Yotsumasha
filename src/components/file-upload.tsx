@@ -62,11 +62,26 @@ const FILE_PRESETS = {
       { start: 181, end: 400, label: "地理Ⅴ101-400" },
     ]
   },
-  "chemistry.json":{
+  "organic.json":{
     presets: [
-      { start: 1, end: 108, label: "化学Ⅲ1-108" },
+      { start: 1, end: 108, label: "有機Ⅲ1-108" },
     ]
-  }
+  },
+  "Chemistry.json":{
+      presets: [
+        { start: 1, end: 29, label: "I. 基礎と物質の構成" },
+  { start: 30, end: 60, label: "II. 原子と周期表" },
+  { start: 61, end: 95, label: "III. 化学結合と結晶" },
+  { start: 96, end: 108, label: "IV. 物質量と気体の法則" },
+  { start: 109, end: 132, label: "V. 物質の三態と溶液" },
+  { start: 133, end: 156, label: "VI. 熱化学と反応速度" },
+  { start: 157, end: 183, label: "VII. 化学平衡と酸・塩基" },
+  { start: 184, end: 211, label: "VIII. 酸化還元と電気化学" },
+  { start: 212, end: 239, label: "IX. 無機化学" },
+  { start: 240, end: 266, label: "X. 有機化学" },
+  { start: 267, end: 287, label: "XI. 高分子化合物" },
+      ]
+    }
 };
 
 // インポートするJSONファイル (実際のパスに修正してください)
@@ -76,7 +91,8 @@ import rinri from "./data/rinri.json";
 import seikei from "./data/seikei.json";
 import chiri from "./data/chiri.json";
 import chiri2 from "./data/chiri2.json";
-import chemistry from "./data/chemistry.json";
+import Chemistry from "./data/Chemistry.json";
+import organic from "./data/organic.json";
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
   "koumin.json": koumin,
@@ -85,7 +101,8 @@ const availableJsonFiles = {
   "seikei.json": seikei,
   "chiri.json":chiri,
   "chiri2.json":chiri2,
-  "chemistry.json":chemistry,
+  "organic.json":organic,
+  "Chemistry.json":Chemistry,
 };
 
 // 親に渡すデータの型を定義
