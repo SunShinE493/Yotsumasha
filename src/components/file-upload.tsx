@@ -64,7 +64,7 @@ const FILE_PRESETS = {
   },
   "organic.json":{
     presets: [
-      { start: 1, end: 108, label: "有機Ⅲ1-108" },
+      { start: 1, end: 107, label: "有機Ⅲ1-108" },
     ]
   },
   "Chemistry.json":{
