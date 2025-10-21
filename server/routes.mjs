@@ -381,6 +381,7 @@ export async function registerRoutes(app) {
       const session = await storage.createStudySession(userId, {
         startRange: config.startRange,
         endRange: config.endRange,
+        // Store requested count for traceability; will be corrected after words are resolved
         totalWords: config.questionCount,
         sourceFile: config.sourceFile,
       });
@@ -409,10 +410,18 @@ export async function registerRoutes(app) {
         words = words.sort(() => Math.random() - 0.5);
       }
 
-      words = words.slice(0, config.questionCount);
+      // Clamp to actual available words to avoid client/server count mismatches
+      const finalCount = Math.max(0, Math.min(config.questionCount, Array.isArray(words) ? words.length : 0));
+      words = (Array.isArray(words) ? words : []).slice(0, finalCount);
+
+      // Persist the actual totalWords to keep session metadata consistent
+      try {
+        await storage.updateStudySession(userId, session.id, { totalWords: words.length });
+      } catch {}
 
       const sessionWithWords = {
         ...session,
+        totalWords: words.length,
         words,
         progress: [],
       };
