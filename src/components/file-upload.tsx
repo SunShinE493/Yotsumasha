@@ -94,7 +94,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       onSuccess: () => {
         // 動的プリセット生成（特に Chemistry は Category ごと）
         let presets: { start: number; end: number; label: string }[] = [];
-        if (fileName === 'Chemistry.json') {
+        
           const categoryToIndexRange: Map<string, { start: number; end: number }[]> = new Map();
           words.forEach((w, idx) => {
             const cat = String(w.category || '未分類');
@@ -114,7 +114,6 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
             const maxEnd = Math.max(...ranges.map(r => r.end));
             return { start: minStart, end: maxEnd, label: cat };
           }).sort((a, b) => a.start - b.start);
-        }
 
         const selectedFile: SelectedJsonInfo = {
           name: fileName,
