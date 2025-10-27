@@ -22,52 +22,7 @@ import {
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// JSONファイルごとのクイック設定の範囲のみを定義
-const FILE_PRESETS = {
-  "koumin.json": {
-    presets: [
-      { start: 1, end: 157, label: "公共Ⅱ1-157" },
-      { start: 158, end: 262, label: "公共Ⅲ158-262" },
-      { start: 263, end: 471, label: "公共Ⅳ263－471" },
-    ],
-  },
-  "koumin2.json": {
-    presets: [
-      { start: 1, end: 202, label: "公共Ⅴ1-202" },
-    ],
-  },
-  "rinri.json": {
-  presets: [
-  { start: 1, end: 73, label: "倫理Ⅰ1-73" },
-    { start: 74, end: 221, label: "倫理Ⅱ74-221" },
-    { start: 222, end: 384, label: "倫理Ⅲ222-384" },
-  ],
-  },
-  "seikei.json":{
-    presets: [
-      { start: 1, end: 53, label: "政経Ⅰ1-53" },
-      
-    ]
-  },
-  "chiri.json":{
-    presets: [
-      { start: 1, end: 180, label: "地理Ⅰ1-180" },
-      { start: 181, end: 340, label: "地理Ⅱ181-340" },
-      { start: 341, end: 440, label: "地理Ⅲ341-440" },
-    ]
-  },
-  "chiri2.json":{
-    presets: [
-      { start: 1, end: 100, label: "地理Ⅳ1-100" },
-      { start: 181, end: 400, label: "地理Ⅴ101-400" },
-    ]
-  },
-  "chemistry.json":{
-    presets: [
-      { start: 1, end: 108, label: "化学Ⅲ1-108" },
-    ]
-  }
-};
+// JSONファイルごとのクイック設定は、必要に応じて動的に生成します（特に Chemistry は Category 単位）。
 
 // インポートするJSONファイル (実際のパスに修正してください)
 import koumin from "./data/koumin.json";
@@ -76,7 +31,8 @@ import rinri from "./data/rinri.json";
 import seikei from "./data/seikei.json";
 import chiri from "./data/chiri.json";
 import chiri2 from "./data/chiri2.json";
-import chemistry from "./data/chemistry.json";
+import Chemistry from "./data/Chemistry.json";
+import organic from "./data/organic.json";
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
   "koumin.json": koumin,
@@ -85,7 +41,8 @@ const availableJsonFiles = {
   "seikei.json": seikei,
   "chiri.json":chiri,
   "chiri2.json":chiri2,
-  "chemistry.json":chemistry,
+  "organic.json":organic,
+  "Chemistry.json":Chemistry,
 };
 
 // 親に渡すデータの型を定義
@@ -135,11 +92,34 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
     // Always replace the current vocabulary with the newly loaded JSON
     uploadMutation.mutate({ words, replace: true }, {
       onSuccess: () => {
-        const preset = FILE_PRESETS[fileName as keyof typeof FILE_PRESETS];
+        // 動的プリセット生成（特に Chemistry は Category ごと）
+        let presets: { start: number; end: number; label: string }[] = [];
+        if (fileName === 'Chemistry.json') {
+          const categoryToIndexRange: Map<string, { start: number; end: number }[]> = new Map();
+          words.forEach((w, idx) => {
+            const cat = String(w.category || '未分類');
+            const index1 = idx + 1; // 1-based index for users
+            const ranges = categoryToIndexRange.get(cat) || [];
+            const last = ranges[ranges.length - 1];
+            if (last && last.end === index1 - 1) {
+              last.end = index1;
+            } else {
+              ranges.push({ start: index1, end: index1 });
+            }
+            categoryToIndexRange.set(cat, ranges);
+          });
+          // Categoryごとに複数の離散レンジがあれば、最小-最大でまとめる（UI簡略化）
+          presets = Array.from(categoryToIndexRange.entries()).map(([cat, ranges]) => {
+            const minStart = Math.min(...ranges.map(r => r.start));
+            const maxEnd = Math.max(...ranges.map(r => r.end));
+            return { start: minStart, end: maxEnd, label: cat };
+          }).sort((a, b) => a.start - b.start);
+        }
+
         const selectedFile: SelectedJsonInfo = {
           name: fileName,
           wordCount: words.length,
-          presets: preset ? preset.presets : [],
+          presets,
           isBuiltin,
         };
 

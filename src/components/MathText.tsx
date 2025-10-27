@@ -7,6 +7,10 @@ declare global {
 }
 
 let katexLoading: Promise<any> | null = null;
+const KATEX_MACROS: Record<string, string> = {
+  "\\ge": "\\geq",
+  "\\le": "\\leq",
+};
 function ensureKatex(): Promise<any> {
   if (window.katex) return Promise.resolve(window.katex);
   if (katexLoading) return katexLoading;
@@ -44,27 +48,27 @@ function ensureKatex(): Promise<any> {
 function renderSegments(text: string, katex: any): Array<React.ReactNode> {
   const nodes: Array<React.ReactNode> = [];
   if (!text) return [text];
-  // First split block math $$...$$
-  const blockTokens = text.split(/(\$\$[\s\S]+?\$\$)/g);
+  // First split display math $$...$$ and \\[ ... \\]
+  const blockTokens = text.split(/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\])/g);
   for (const tok of blockTokens) {
     if (!tok) continue;
-    if (tok.startsWith('$$') && tok.endsWith('$$') && tok.length >= 4) {
+    if ((tok.startsWith('$$') && tok.endsWith('$$') && tok.length >= 4) || (tok.startsWith('\\[') && tok.endsWith('\\]') && tok.length >= 4)) {
       const expr = tok.slice(2, -2).trim();
       try {
-        const html = katex.renderToString(expr, { displayMode: true, throwOnError: false });
+        const html = katex.renderToString(expr, { displayMode: true, throwOnError: false, macros: KATEX_MACROS });
         nodes.push(<div key={nodes.length} dangerouslySetInnerHTML={{ __html: html }} />);
       } catch {
         nodes.push(<pre key={nodes.length} className="text-xs whitespace-pre-wrap">{expr}</pre>);
       }
     } else {
-      // Split inline math $...$
-      const inlineTokens = tok.split(/(\$(?:[^$]|\\\$)+?\$)/g);
+      // Split inline math $...$ and \\( ... \\)
+      const inlineTokens = tok.split(/(\$(?:[^$]|\\\$)+?\$|\\\([\s\S]+?\\\))/g);
       for (const it of inlineTokens) {
         if (!it) continue;
-        if (it.startsWith('$') && it.endsWith('$') && it.length >= 2) {
-          const expr = it.slice(1, -1).trim();
+        if ((it.startsWith('$') && it.endsWith('$') && it.length >= 2) || (it.startsWith('\\(') && it.endsWith('\\)') && it.length >= 4)) {
+          const expr = it.startsWith('$') ? it.slice(1, -1).trim() : it.slice(2, -2).trim();
           try {
-            const html = katex.renderToString(expr, { displayMode: false, throwOnError: false });
+            const html = katex.renderToString(expr, { displayMode: false, throwOnError: false, macros: KATEX_MACROS });
             nodes.push(<span key={nodes.length} dangerouslySetInnerHTML={{ __html: html }} />);
           } catch {
             nodes.push(<code key={nodes.length}>{expr}</code>);
