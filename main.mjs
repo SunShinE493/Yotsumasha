@@ -102,14 +102,18 @@ async function runWebserver(){
   app.get('/api/battle/rooms', (_req, res) => {
     try {
       const list = Array.from(rooms.entries())
-        .filter(([, r]) => r && (r.state === 'waiting' || r.state === 'running'))
+        .filter(([, r]) => !!r)
         .map(([id, r]) => ({
           id,
           state: r.state,
           playerCount: r.players?.size || 0,
           timeLimit: r.timeLimit,
           maxQuestions: r.maxQuestions || r.words?.length || 0,
-        }));
+          players: Array.from(r.players.keys()),
+        }))
+        // Prefer waiting rooms first, then running
+        .sort((a, b) => (a.state === 'waiting' ? -1 : 1) - (b.state === 'waiting' ? -1 : 1));
+      res.set('Cache-Control', 'no-store');
       res.json(list);
     } catch (e) {
       res.status(500).json({ message: 'failed to list rooms' });
@@ -224,11 +228,21 @@ async function runWebserver(){
       } else if (type === 'join') {
         const { room, name } = msg;
         const r = rooms.get(room);
-        if (!r || r.state !== 'waiting') { ws.send(JSON.stringify({ type: 'error', message: 'room_not_available' })); return; }
+        if (!r) { ws.send(JSON.stringify({ type: 'error', message: 'room_not_found' })); return; }
         if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
+        // Allow mid-join when running as well
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+        // If running, avoid sending a full 'lobby' that might reset timers/ui; send minimal players update instead
+        if (r.state === 'running') {
+          broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
+          const q = r.words[r.idx];
+          ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
+          ws.send(JSON.stringify({ type: 'question', index: r.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } }));
+        } else {
+          // waiting state: send full lobby to all
+          broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+        }
       } else if (type === 'start') {
         const { room } = msg; const r = rooms.get(room);
         if (!r) return; if (ws !== r.host) return; startRoom(room);
@@ -237,12 +251,12 @@ async function runWebserver(){
         if (!r || r.state !== 'running') return;
         const q = r.words[r.idx]; if (!q) return;
         const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        // Notify all about the answer attempt with content (correct or not)
+        broadcast(room, { type: 'answered', by: name, text: String(text||''), correct: !!ok });
         if (ok) {
           r.lastCorrectBy = name;
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
           r.asked = (r.asked || 0) + 1;
-          // notify who answered
-          broadcast(room, { type: 'answered', by: name });
           if (r.maxQuestions && r.asked >= r.maxQuestions) {
             r.state = 'ended';
             if (r.timer) { clearTimeout(r.timer); r.timer = null; }
@@ -258,7 +272,7 @@ async function runWebserver(){
           r.lastCorrectBy = null;
           scheduleQuestionTimer(room);
         } else {
-          // wrong answer -> add to review list for this user if possible (requires session mapping; skipped here)
+          // wrong answer: keep same question; do nothing else
         }
       }
     });
@@ -268,10 +282,21 @@ async function runWebserver(){
       const r = rooms.get(room);
       if (r.players.has(name)) r.players.delete(name);
       if (r.players.size === 0) {
-        if (r.timer) clearTimeout(r.timer);
-        rooms.delete(room);
+        if (r.timer) { try { clearTimeout(r.timer); } catch {} }
+        // Keep ended rooms listed for 60s; if running and last disconnect, end room gracefully
+        if (r.state === 'running') {
+          r.state = 'ended';
+          broadcast(room, { type: 'end', scores: toScores(r) });
+        }
+        // leave in map for a short time to be listed as ended with 0 players
+        setTimeout(() => { if (rooms.get(room) === r && r.players.size === 0) rooms.delete(room); }, 60_000);
       } else {
-        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+        // Only broadcast participant list change; do NOT send 'lobby' during running
+        if (r.state === 'running') {
+          broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
+        } else {
+          broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+        }
       }
     });
   });

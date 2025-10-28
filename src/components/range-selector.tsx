@@ -48,10 +48,10 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
     onSuccess: (session) => {
       onStartSession(session);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "セッション作成エラー",
-        description: "セッションの作成に失敗しました。",
+        description: error?.message || "セッションの作成に失敗しました。",
         variant: "destructive",
       });
     }
@@ -82,8 +82,8 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
       questionCount: questionCount === -1 ? Number(endRange) - Number(startRange) + 1 : questionCount,
       order,
       reviewOnly,
-      // プリセットが設定されている場合のみ sourceFile を渡す
-      ...(selectedJson?.presets && selectedJson.presets.length > 0
+      // 内蔵ファイルかつプリセットが設定されている場合のみ sourceFile を渡す（外部アップロードはメモリの語彙を使用）
+      ...(selectedJson?.isBuiltin && selectedJson.presets && selectedJson.presets.length > 0
         ? { sourceFile: selectedJson.name }
         : {}),
     };

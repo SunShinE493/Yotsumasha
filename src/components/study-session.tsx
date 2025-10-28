@@ -25,8 +25,11 @@ interface StudySessionProps {
 }
 
 export function StudySession({ session, onComplete, onBack }: StudySessionProps) {
-  const [fontSizeClass, setFontSizeClass] = useState('text-3xl');
+  const [fontSizePx, setFontSizePx] = useState<number>(28); // 初期28px相当
+  // Revert to previous rotation model
   const [rotationCount, setRotationCount] = useState(0);
+  const [rotationDeg, setRotationDeg] = useState(0);
+  const [rotationTurn, setRotationTurn] = useState(0);
   const [isEarlyFinishDialogOpen, setIsEarlyFinishDialogOpen] = useState(false);
   const { toast } = useToast();
   const userId = useUserId();
@@ -85,10 +88,22 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
 
   const handleFlip = () => {
     setRotationCount(prevCount => prevCount + 1);
+    setRotationDeg(prev => prev + 180);
+    setRotationTurn(prev => prev + 0.5);
   };
 
   const handleMarkWord = (isRemembered: boolean) => {
-    setRotationCount(0);
+    // 覚えた: 同一方向に回転（+1）し次へ
+    // 覚えていない: 回転をリセット（0）して次へ
+    if (isRemembered) {
+      setRotationCount(prev => prev + 1);
+      setRotationDeg(prev => prev + 180);
+      setRotationTurn(prev => prev + 0.5);
+    } else {
+      setRotationCount(0);
+      setRotationDeg(0);
+      setRotationTurn(0);
+    }
     setTimeout(() => {
       markWord(isRemembered);
     },200);
@@ -111,6 +126,10 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
 
   const handleSkip = () => {
     if (!currentWord) return;
+    // スキップ時は回転をリセット
+    setRotationCount(0);
+    setRotationDeg(0);
+    setRotationTurn(0);
     markWord(false);
   };
 
@@ -209,7 +228,10 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
                 word={currentWord}
                 rotationCount={rotationCount}
                 onFlip={handleFlip}
-                fontSizeClass={fontSizeClass}
+                fontSizeClass={''}
+                fontSizePx={fontSizePx}
+                rotationDeg={rotationDeg}
+                rotationTurn={rotationTurn}
               />
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <Button
@@ -256,27 +278,9 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
                 </Button>
               </div>
               <div className="mt-4 flex items-center justify-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFontSizeClass('text-2xl')}
-                >
-                  -A
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFontSizeClass('text-3xl')}
-                >
-                  A
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFontSizeClass('text-4xl')}
-                >
-                  +A
-                </Button>
+                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v)=>Math.max(10, v-3))}>-A</Button>
+                <div className="text-xs text-muted-foreground">{fontSizePx}px</div>
+                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v)=>v+3)}>+A</Button>
               </div>
               {rotationCount % 2 === 0 && (
                 <p className="text-center text-sm text-muted-foreground mt-4">

@@ -1,4 +1,5 @@
 import { readFile } from "fs/promises";
+import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -16,6 +17,8 @@ const ALLOWED_JSON_FILES = [
   'seikei.json',
   'chiri.json',
   'chiri2.json',
+  'Chemistry.json',
+  'organic.json'
 ];
 
 export async function loadVocabularyFromJson(fileName) {

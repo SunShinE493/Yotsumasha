@@ -22,47 +22,7 @@ import {
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// JSONファイルごとのクイック設定の範囲のみを定義
-const FILE_PRESETS = {
-  "koumin.json": {
-    presets: [
-      { start: 1, end: 157, label: "公共Ⅱ1-157" },
-      { start: 158, end: 262, label: "公共Ⅲ158-262" },
-      { start: 263, end: 471, label: "公共Ⅳ263－471" },
-    ],
-  },
-  "koumin2.json": {
-    presets: [
-      { start: 1, end: 202, label: "公共Ⅴ1-202" },
-    ],
-  },
-  "rinri.json": {
-  presets: [
-  { start: 1, end: 73, label: "倫理Ⅰ1-73" },
-    { start: 74, end: 221, label: "倫理Ⅱ74-221" },
-    { start: 222, end: 338, label: "倫理Ⅲ222-338" },
-  ],
-  },
-  "seikei.json":{
-    presets: [
-      { start: 1, end: 53, label: "政経Ⅰ1-53" },
-      
-    ]
-  },
-  "chiri.json":{
-    presets: [
-      { start: 1, end: 180, label: "地理Ⅰ1-180" },
-      { start: 181, end: 340, label: "地理Ⅱ181-340" },
-      { start: 341, end: 440, label: "地理Ⅲ341-440" },
-    ]
-  },
-  "chiri2.json":{
-    presets: [
-      { start: 1, end: 100, label: "地理Ⅳ1-100" },
-      { start: 181, end: 400, label: "地理Ⅴ101-400" },
-    ]
-  }
-};
+// JSONファイルごとのクイック設定は、必要に応じて動的に生成します（特に Chemistry は Category 単位）。
 
 // インポートするJSONファイル (実際のパスに修正してください)
 import koumin from "./data/koumin.json";
@@ -71,6 +31,8 @@ import rinri from "./data/rinri.json";
 import seikei from "./data/seikei.json";
 import chiri from "./data/chiri.json";
 import chiri2 from "./data/chiri2.json";
+import Chemistry from "./data/Chemistry.json";
+import organic from "./data/organic.json";
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
   "koumin.json": koumin,
@@ -79,6 +41,8 @@ const availableJsonFiles = {
   "seikei.json": seikei,
   "chiri.json":chiri,
   "chiri2.json":chiri2,
+  "organic.json":organic,
+  "Chemistry.json":Chemistry,
 };
 
 // 親に渡すデータの型を定義
@@ -86,6 +50,7 @@ export interface SelectedJsonInfo {
   name: string;
   wordCount: number;
   presets: { start: number; end: number; label: string }[];
+  isBuiltin: boolean; // 内蔵ファイル選択かどうか（外部アップロードはfalse）
 }
 
 interface FileUploadProps {
@@ -99,32 +64,63 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // processJsonData関数は変更なし
-  const processJsonData = (data: any[], fileName: string) => {
+  // 内蔵/外部を区別して処理する
+  const processJsonData = (data: any[], fileName: string, isBuiltin: boolean = false) => {
     if (!Array.isArray(data)) {
       throw new Error("JSONファイルは配列形式である必要があります");
     }
+
+    const normalizeMultiline = (s: any) => {
+      if (typeof s !== 'string') return s;
+      // Replace literal \r\n and \n sequences with real newlines
+      return s.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n');
+    };
 
     const words = data.map(item => {
       if (!item.word || !item.meaning) {
         throw new Error("各単語にはwordとmeaningフィールドが必要です");
       }
       return {
-        word: item.word,
-        meaning: item.meaning,
-        category: item.category || "未分類",
-        example: item.example,
+        word: normalizeMultiline(item.word),
+        meaning: normalizeMultiline(item.meaning),
+        category: normalizeMultiline(item.category) || "未分類",
+        example: normalizeMultiline(item.example),
         difficulty: item.difficulty || 1,
       };
     });
 
-    uploadMutation.mutate(words, {
+    // Always replace the current vocabulary with the newly loaded JSON
+    uploadMutation.mutate({ words, replace: true }, {
       onSuccess: () => {
-        const preset = FILE_PRESETS[fileName as keyof typeof FILE_PRESETS];
+        // 動的プリセット生成（特に Chemistry は Category ごと）
+        let presets: { start: number; end: number; label: string }[] = [];
+        if (fileName === 'Chemistry.json') {
+          const categoryToIndexRange: Map<string, { start: number; end: number }[]> = new Map();
+          words.forEach((w, idx) => {
+            const cat = String(w.category || '未分類');
+            const index1 = idx + 1; // 1-based index for users
+            const ranges = categoryToIndexRange.get(cat) || [];
+            const last = ranges[ranges.length - 1];
+            if (last && last.end === index1 - 1) {
+              last.end = index1;
+            } else {
+              ranges.push({ start: index1, end: index1 });
+            }
+            categoryToIndexRange.set(cat, ranges);
+          });
+          // Categoryごとに複数の離散レンジがあれば、最小-最大でまとめる（UI簡略化）
+          presets = Array.from(categoryToIndexRange.entries()).map(([cat, ranges]) => {
+            const minStart = Math.min(...ranges.map(r => r.start));
+            const maxEnd = Math.max(...ranges.map(r => r.end));
+            return { start: minStart, end: maxEnd, label: cat };
+          }).sort((a, b) => a.start - b.start);
+        }
+
         const selectedFile: SelectedJsonInfo = {
           name: fileName,
           wordCount: words.length,
-          presets: preset ? preset.presets : [],
+          presets,
+          isBuiltin,
         };
 
         onUploadSuccess(selectedFile);
@@ -155,12 +151,20 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
         const data = JSON.parse(content);
         processJsonData(data, file.name);
       } catch (error) {
+        const message = error instanceof Error ? error.message : "ファイルの形式が正しくありません";
         toast({
           title: "ファイル読み込みエラー",
-          description: error instanceof Error ? error.message : "ファイルの形式が正しくありません",
+          description: message,
           variant: "destructive",
         });
       }
+    };
+    reader.onerror = () => {
+      toast({
+        title: "ファイル読み込みエラー",
+        description: reader.error?.message || 'ファイルの読み込みに失敗しました',
+        variant: "destructive",
+      });
     };
     reader.readAsText(file);
   };
@@ -170,8 +174,8 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
 
     const selectedData = availableJsonFiles[value as keyof typeof availableJsonFiles];
     if (selectedData) {
-      // 取得した値（ファイル名）を直接 processJsonData に渡す
-      processJsonData(selectedData, value);
+      // 内蔵JSONの選択時は isBuiltin=true を付与
+      processJsonData(selectedData, value, true);
     }
   };
 
@@ -202,8 +206,8 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   };
 
   const uploadMutation = useMutation({
-    mutationFn: async (words: any[]) => {
-      const response = await apiRequest("POST", "/api/vocabulary/upload", { words });
+    mutationFn: async (payload: { words: any[]; replace?: boolean }) => {
+      const response = await apiRequest("POST", "/api/vocabulary/upload", payload);
       return response.json();
     },
     onSuccess: (data, variables) => {},

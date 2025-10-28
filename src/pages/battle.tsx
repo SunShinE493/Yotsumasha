@@ -4,8 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
 import { apiRequest } from '@/lib/queryClient';
+import { MathText } from '@/components/MathText';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function BattlePage() {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [fontSizePx, setFontSizePx] = useState<number>(24);
   const [mode, setMode] = useState<'host'|'join'|null>(null);
   const [room, setRoom] = useState('');
   const [name, setName] = useState('');
@@ -21,12 +27,15 @@ export default function BattlePage() {
   const wsRef = useRef<WebSocket | null>(null);
   const [phase, setPhase] = useState<'idle'|'lobby'|'running'|'ended'>('idle');
   const [players, setPlayers] = useState<string[]>([]);
+  const [lastAnsweredBy, setLastAnsweredBy] = useState<string | null>(null);
+  const [lastAnswerByName, setLastAnswerByName] = useState<Record<string, string>>({});
   const [questionWord, setQuestionWord] = useState<string | null>(null);
   const [questionMeaning, setQuestionMeaning] = useState<string | null>(null);
   const [questionId, setQuestionId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
   const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
+  const selfNameRef = useRef<string>('');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [lastAnswerWord, setLastAnswerWord] = useState<string | null>(null);
   const [lastAnswerer, setLastAnswerer] = useState<string | null>(null);
@@ -49,6 +58,13 @@ export default function BattlePage() {
     );
     setCanStart(ok);
   },[name, room, selectedJson, rangeStart, rangeEnd]);
+
+  // Prefill display name if available
+  useEffect(() => {
+    if (!name && user?.displayName) {
+      setName(user.displayName);
+    }
+  }, [user?.displayName, name]);
 
   // Utility: compute ws endpoint based on current page origin
   const wsUrl = useMemo(() => {
@@ -97,9 +113,20 @@ export default function BattlePage() {
           prevMeaningRef.current = msg.meaning ?? null;
         } else if (msg.type === 'score') {
           setScores(msg.scores || {});
+        } else if (msg.type === 'players') {
+          setPlayers(Array.isArray(msg.players) ? msg.players : []);
         } else if (msg.type === 'answered') {
-          // someone answered correctly -> flash effect
-          setFlash('green'); setTimeout(()=>setFlash('none'), 200);
+          // correct/incorrect visual cue per client
+          const by = typeof msg.by === 'string' ? msg.by : null;
+          if (by && by === selfNameRef.current && msg.correct) {
+            setFlash('green'); setTimeout(()=>setFlash('none'), 200);
+          } else if (by && by !== selfNameRef.current && msg.correct) {
+            setFlash('red'); setTimeout(()=>setFlash('none'), 200);
+          }
+          if (typeof msg.by === 'string') {
+            setLastAnsweredBy(`${msg.by}: ${String(msg.text || '')}`);
+            setLastAnswerByName(prev => ({ ...prev, [msg.by]: String(msg.text || '') }));
+          }
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
@@ -154,10 +181,22 @@ export default function BattlePage() {
     // Load chosen range words from server-side storage for this user
     const s = Math.max(1, Number(rangeStart));
     const e = Math.max(s, Number(rangeEnd));
-    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
-    const words = await res.json();
+    let words: any[] = [];
+    try {
+      const useSource = Boolean(selectedJson?.isBuiltin && selectedJson?.presets?.length);
+      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (useSource ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+      words = await res.json();
+    } catch (err: any) {
+      toast({
+        title: '読み込みエラー',
+        description: String(err?.message || err || '問題データの読み込みに失敗しました'),
+        variant: 'destructive',
+      });
+      return;
+    }
     const ws = ensureSocket();
     const sendCreate = () => {
+      selfNameRef.current = name;
       ws.send(JSON.stringify({ type: 'create', room, name, limitSec, questionCount, words }));
       setMode('host');
     };
@@ -169,6 +208,7 @@ export default function BattlePage() {
     if (!name || !room) return;
     const ws = ensureSocket();
     ws.onopen = () => {
+      selfNameRef.current = name;
       ws.send(JSON.stringify({ type: 'join', room, name }));
     };
   };
@@ -202,7 +242,7 @@ export default function BattlePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-[linear-gradient(to_bottom,transparent_0,transparent_calc(100%-2rem)),radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.06),transparent_60%)]">
       <header className="bg-card border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">リアルタイム対戦 🧠⚡</h1>
@@ -330,9 +370,14 @@ export default function BattlePage() {
                 <AutoRoomsList onUpdate={(list)=>setOpenRooms(list)} intervalMs={5000} />
                 <div className="grid gap-2">
                   {Array.isArray(openRooms) && openRooms.map(r => (
-                    <div key={r.id} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
-                      <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span></div>
-                      <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
+                    <div key={r.id} className="rounded-md border border-border bg-background px-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span> {Array.isArray((r as any).players) && (r as any).players.length>0 ? <span className="text-xs text-muted-foreground ml-2">[{(r as any).players.join(', ')}]</span> : null}</div>
+                        <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
+                      </div>
+                      {Number(r.playerCount) === 0 && (
+                        <div className="mt-1 text-[11px] text-muted-foreground">誰もいないこの部屋はもうすぐ削除されます</div>
+                      )}
                     </div>
                   ))}
                   {Array.isArray(openRooms) && openRooms.length === 0 && (
@@ -366,9 +411,19 @@ export default function BattlePage() {
                   <div className="text-sm text-muted-foreground">部屋: {room}</div>
                   <div className="text-sm">残り時間: {remaining ?? '-'}s</div>
                 </div>
+                {/* participants label removed per request */}
                 <div className="rounded-lg border border-border p-6 bg-card">
-                  <div className="text-sm text-muted-foreground mb-1">問題:</div>
-                  <div className="text-2xl font-semibold text-foreground">{questionWord ?? (phase==='ended' ? '終了しました' : '...')}</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">問題:</div>
+                    <div className="flex items-center gap-2">
+                      <button className="text-xs px-2 py-0.5 rounded border" onClick={()=>setFontSizePx(v=>Math.max(10, v-3))}>-A</button>
+                      <span className="text-[10px] text-muted-foreground">{fontSizePx}px</span>
+                      <button className="text-xs px-2 py-0.5 rounded border" onClick={()=>setFontSizePx(v=>v+3)}>+A</button>
+                    </div>
+                  </div>
+                  <div className="font-semibold text-foreground" style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.25 }}>
+                    <MathText text={questionWord ?? (phase==='ended' ? '終了しました' : '...')} />
+                  </div>
                 </div>
 
                 {phase === 'running' && (
@@ -382,16 +437,17 @@ export default function BattlePage() {
                   <div className="font-semibold mb-2">スコア</div>
                   <div className="grid sm:grid-cols-2 gap-2">
                     {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
-                      <div key={n} className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2">
+                      <div key={n} className="flex items-center rounded-md border border-border bg-background px-3 py-2">
                         <div className="text-foreground">{n}</div>
-                        <div className="text-sm text-muted-foreground">{sc}</div>
+                        <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ? <MathText text={lastAnswerByName[n]} /> : ''}</div>
+                        <div className="text-sm text-muted-foreground tabular-nums">{sc}</div>
                       </div>
                     ))}
                   </div>
                   {lastAnswer && (
                     <div className="mt-4 text-sm text-muted-foreground">
-                      直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span>
-                      {lastAnswerWord ? <span className="text-muted-foreground">（{lastAnswerWord}）</span> : null}
+                      直前の答え: <span className="text-foreground font-medium"><MathText text={lastAnswer} /></span>
+                      {lastAnswerWord ? <span className="text-muted-foreground">（<MathText text={lastAnswerWord} />）</span> : null}
                       {lastAnswerer ? <span className="ml-2 text-xs text-muted-foreground">正解者: <span className="text-foreground font-medium">{lastAnswerer}</span></span> : null}
                     </div>
                   )}
@@ -408,8 +464,8 @@ export default function BattlePage() {
                       </div>
                       {finalLastMeaning && (
                         <div className="mt-3 text-sm text-muted-foreground">
-                          最後の問題の答え: <span className="text-foreground font-medium">{finalLastMeaning}</span>
-                          {finalLastWord ? <span className="text-muted-foreground">（{finalLastWord}）</span> : null}
+                          最後の問題の答え: <span className="text-foreground font-medium"><MathText text={finalLastMeaning} /></span>
+                          {finalLastWord ? <span className="text-muted-foreground">（<MathText text={finalLastWord} />）</span> : null}
                         </div>
                       )}
                     </div>

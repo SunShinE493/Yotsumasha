@@ -108,12 +108,32 @@ export class MemStorage {
   }
 
   async getUserByUsername(username) {
+    let chosen = undefined;
     for (const user of this.users.values()) {
-      if (user.username === username) {
-        return user;
+      if (user.username !== username) continue;
+      if (!chosen) { chosen = user; continue; }
+      const chosenHasHash = !!(chosen.password && typeof chosen.password === 'string' && chosen.password.length > 0);
+      const userHasHash = !!(user.password && typeof user.password === 'string' && user.password.length > 0);
+      if (!chosenHasHash && userHasHash) {
+        chosen = user;
+        continue;
+      }
+      if (chosenHasHash === userHasHash) {
+        const chosenUpdated = new Date(chosen.updatedAt || 0).getTime();
+        const userUpdated = new Date(user.updatedAt || 0).getTime();
+        if (userUpdated > chosenUpdated) {
+          chosen = user;
+        }
       }
     }
-    return undefined;
+    // Migration: if record uses passwordHash and missing password, migrate in-place
+    if (chosen && (!chosen.password || chosen.password.length === 0) && typeof chosen.passwordHash === 'string' && chosen.passwordHash.length > 0) {
+      const migrated = { ...chosen, password: chosen.passwordHash, passwordHash: undefined, updatedAt: new Date() };
+      this.users.set(migrated.id, migrated);
+      this._scheduleSave();
+      return migrated;
+    }
+    return chosen;
   }
 
   async createUser(userData) {
@@ -157,6 +177,10 @@ export class MemStorage {
       lastName: userData.lastName || null,
       profileImageUrl: userData.profileImageUrl || null,
       isGuest: userData.isGuest || false,
+      // Preserve existing hashed password if not provided in upsert payload
+      password: (userData.password !== undefined && userData.password !== null)
+        ? userData.password
+        : (existingUser?.password ?? null),
       createdAt: existingUser?.createdAt || new Date(),
       updatedAt: new Date(),
     };
@@ -448,9 +472,13 @@ export class MemStorage {
       wordId: rw.word?.id || rw.wordId,
       word: rw.word ? { id: rw.word.id, word: rw.word.word, meaning: rw.word.meaning } : undefined,
     }));
+    const score = this.scoreAttack?.get(userId) || null;
+    const scoreRuns = Array.isArray(this.scoreAttackRuns?.get(userId)) ? this.scoreAttackRuns.get(userId) : [];
     return {
-      user: { id: userId, username: user?.username || null, displayName: user?.displayName || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId) },
+      user: { id: userId, username: user?.username || null, displayName: user?.displayName || null, isDev: !!user?.isDev, isGuest: this.isGuestUser(userId), passwordHash: user?.password || null },
       reviewWords: compact,
+      score,
+      scoreRuns,
     };
   }
 
@@ -466,27 +494,55 @@ export class MemStorage {
       datasetPayload[name] = arr;
     }
     const score = this.scoreAttack?.get(userId) || null;
-    return { words, sessions, progress, datasets, datasetPayload, score };
+    const scoreRuns = Array.isArray(this.scoreAttackRuns?.get(userId)) ? this.scoreAttackRuns.get(userId) : [];
+    return { words, sessions, progress, datasets, datasetPayload, score, scoreRuns };
   }
 
   async exportAllUsersData() {
     const result = [];
-    // Collect known users from the users map only (minimal and safe)
+    // Collect union of user IDs from users map and score-related maps (to include guests/data-only users)
+    const userIds = new Set();
+    for (const user of this.users.values()) userIds.add(user.id);
+    for (const [uid] of this.scoreAttack.entries()) userIds.add(uid);
+    for (const [uid] of this.scoreAttackRuns.entries()) userIds.add(uid);
+
+    for (const uid of userIds) {
+      const minimal = await this.exportUserData(uid);
+      result.push(minimal);
+    }
+    return { users: result };
+  }
+
+  // Export only incorrect problem data per user (minimal) for all users
+  async exportAllUsersIncorrectOnly() {
+    const result = [];
     for (const user of this.users.values()) {
       const userId = user.id;
-      const minimal = await this.exportUserData(userId);
-      result.push(minimal);
+      const reviewWords = await this.getReviewWords(userId);
+      const compact = (reviewWords || []).map((rw) => ({
+        wordId: rw.word?.id || rw.wordId,
+        word: rw.word ? { id: rw.word.id, word: rw.word.word, meaning: rw.word.meaning } : undefined,
+      }));
+      result.push({
+        user: { id: userId, username: user?.username || null },
+        reviewWords: compact,
+      });
     }
     return { users: result };
   }
 
   async exportAllUsersDataFull() {
     const result = [];
-    for (const user of this.users.values()) {
-      const userId = user.id;
-      const data = await this.exportUserDataFull(userId);
+    const userIds = new Set();
+    for (const user of this.users.values()) userIds.add(user.id);
+    for (const [uid] of this.scoreAttack.entries()) userIds.add(uid);
+    for (const [uid] of this.scoreAttackRuns.entries()) userIds.add(uid);
+
+    for (const uid of userIds) {
+      const data = await this.exportUserDataFull(uid);
+      const meta = this.users.get(uid) || null;
       result.push({
-        user: { id: user.id, username: user.username, displayName: user.displayName || null, isDev: !!user.isDev },
+        user: { id: uid, username: meta?.username || null, displayName: meta?.displayName || null, isDev: !!meta?.isDev, passwordHash: meta?.password || null },
         data,
       });
     }
@@ -502,8 +558,17 @@ export class MemStorage {
       const user = this.users.get(userId);
       const byName = user ? payload.users.find((u) => u?.user?.username === user.username) : null;
       const chosen = byId || byName || payload.users[0];
-      if (chosen?.data) payload = chosen.data;
-      else if (chosen?.reviewWords) payload = { reviewWords: chosen.reviewWords };
+      if (chosen?.data) {
+        payload = chosen.data;
+      } else {
+        const minimal = {};
+        if (Array.isArray(chosen?.reviewWords)) minimal.reviewWords = chosen.reviewWords;
+        if (chosen?.score) minimal.score = chosen.score;
+        if (Array.isArray(chosen?.scoreRuns) || Array.isArray(chosen?.scoreAttackRuns)) {
+          minimal.scoreRuns = Array.isArray(chosen.scoreRuns) ? chosen.scoreRuns : chosen.scoreAttackRuns;
+        }
+        payload = minimal;
+      }
     }
 
     // If classic full payload provided, import fully
@@ -544,11 +609,17 @@ export class MemStorage {
       if (payload?.score) {
         this.scoreAttack.set(userId, payload.score);
       }
+      // restore score attack runs
+      if (Array.isArray(payload?.scoreRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreRuns);
+      } else if (Array.isArray(payload?.scoreAttackRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreAttackRuns);
+      }
       this._scheduleSave();
       return true;
     }
 
-    // Minimal payload: reviewWords only -> append/replace review list
+    // Minimal payload: reviewWords and/or score
     if (Array.isArray(payload?.reviewWords)) {
       // Ensure maps exist
       if (!this.wordProgress.has(userId)) this.wordProgress.set(userId, new Map());
@@ -571,6 +642,33 @@ export class MemStorage {
         });
       }
       this.wordProgress.set(userId, m);
+      // Also restore score attack record if provided
+      if (payload?.score) {
+        if (!this.scoreAttack) this.scoreAttack = new Map();
+        this.scoreAttack.set(userId, payload.score);
+      }
+      // Restore score runs if provided
+      if (Array.isArray(payload?.scoreRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreRuns);
+      } else if (Array.isArray(payload?.scoreAttackRuns)) {
+        this.scoreAttackRuns.set(userId, payload.scoreAttackRuns);
+      }
+      this._scheduleSave();
+      return true;
+    }
+
+    // Minimal payload: score only
+    if (payload?.score) {
+      if (!this.scoreAttack) this.scoreAttack = new Map();
+      this.scoreAttack.set(userId, payload.score);
+      this._scheduleSave();
+      return true;
+    }
+
+    // Minimal payload: scoreRuns only
+    if (Array.isArray(payload?.scoreRuns) || Array.isArray(payload?.scoreAttackRuns)) {
+      const runs = Array.isArray(payload?.scoreRuns) ? payload.scoreRuns : payload.scoreAttackRuns;
+      this.scoreAttackRuns.set(userId, runs);
       this._scheduleSave();
       return true;
     }
@@ -597,7 +695,17 @@ export class MemStorage {
       ppm: (Number(run.limit) > 0 ? (Number(run.score) / (Number(run.limit)/60)) : 0),
       createdAt: new Date(),
     };
-    list.push(record);
+    // Deduplicate by (userId, fileName, start, end, limit) keeping the best score
+    const keyMatches = (r) => r.userId === record.userId && r.fileName === record.fileName && r.start === record.start && r.end === record.end && r.limit === record.limit;
+    const idx = list.findIndex(keyMatches);
+    if (idx >= 0) {
+      // If new score is higher, replace
+      if ((record.score||0) > (list[idx].score||0)) {
+        list[idx] = record;
+      }
+    } else {
+      list.push(record);
+    }
     this.scoreAttackRuns.set(userId, list);
     this._scheduleSave();
     return record;
@@ -622,9 +730,17 @@ export class MemStorage {
     };
     let filtered = all.filter(r => withinPeriod(r.createdAt));
     if (source) filtered = filtered.filter(r => r.fileName === source);
+    // Deduplicate per (userId,fileName,start,end,limit) by highest score
+    const bestByKey = new Map();
+    for (const r of filtered) {
+      const k = `${r.userId}|${r.fileName||''}|${r.start}|${r.end}|${r.limit}`;
+      const prev = bestByKey.get(k);
+      if (!prev || (r.score||0) > (prev.score||0)) bestByKey.set(k, r);
+    }
+    const deduped = Array.from(bestByKey.values());
     const key = metric === 'combo' ? 'maxCombo' : (metric === 'correct' ? 'correctCount' : 'ppm');
-    filtered.sort((a,b) => (b[key]||0) - (a[key]||0));
-    return filtered.slice(0, 100);
+    deduped.sort((a,b) => (b[key]||0) - (a[key]||0));
+    return deduped.slice(0, 100);
   }
 
   // --- Score Attack operations ---

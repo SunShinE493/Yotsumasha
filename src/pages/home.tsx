@@ -165,7 +165,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-[linear-gradient(to_bottom,transparent_0,transparent_calc(100%-2rem)),radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.06),transparent_60%)]">
       {/* Header */}
       <header className="bg-card border-b border-border shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -293,17 +293,14 @@ export default function Home() {
       {/* --- */}
 
       {/* Floating Action Button */}
-      {selectedJson &&
-        selectedJson.wordCount > 0 &&
-        !currentSession &&
-        !completedSession && (
+      {reviewWords && (
           <div className="fixed bottom-6 right-6">
             <button
               onClick={handleQuickStart}
               disabled={startSessionMutation.isPending}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg shadow-lg hover:bg-primary/90 transition-all hover:scale-105 flex items-center gap-2 group"
               data-testid="button-quick-start"
-              title="クイック学習開始（最初の20語をランダムで学習）"
+              title="復習開始（復習リストをランダムで学習）"
             >
               {startSessionMutation.isPending ? (
                 <i className="fas fa-spinner fa-spin text-xl"></i>
@@ -311,7 +308,7 @@ export default function Home() {
                 <i className="fas fa-play text-xl group-hover:scale-110 transition-transform"></i>
               )}
               <span className="font-mono">
-                ランダム20問
+                復習
                 <br />
                 開始
               </span>

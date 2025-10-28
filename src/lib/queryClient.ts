@@ -55,8 +55,21 @@ export async function apiRequest(
   const response = await fetch(url, options);
   
   if (!response.ok) {
-    const error = new Error(`${response.status}: ${response.statusText}`);
-    throw error;
+    try {
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const json = await response.json();
+        const msg = (json && (json.message || json.error)) ? String(json.message || json.error) : `${response.status}: ${response.statusText}`;
+        throw new Error(msg);
+      } else {
+        const text = await response.text();
+        const msg = text ? `${response.status}: ${text}` : `${response.status}: ${response.statusText}`;
+        throw new Error(msg);
+      }
+    } catch (e) {
+      // Fallback if body parsing failed
+      throw new Error(`${response.status}: ${response.statusText}`);
+    }
   }
   
   return response;

@@ -3,9 +3,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
+import { MathText } from '@/components/MathText';
 import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ScorePage() {
+  const { toast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [rangeStart, setRangeStart] = useState<number | ''>(1);
@@ -18,6 +21,7 @@ export default function ScorePage() {
   const [answer, setAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [skips, setSkips] = useState(0);
@@ -41,6 +45,7 @@ export default function ScorePage() {
   const finalizedRef = useRef<boolean>(false);
   const scoreRef = useRef<number>(0);
   const comboRef = useRef<number>(0);
+  const maxComboRef = useRef<number>(0);
   const correctRef = useRef<number>(0);
   const idxRef = useRef<number>(0);
   const wordsRef = useRef<Array<{ id: string; word: string; meaning: string }>>([]);
@@ -59,13 +64,25 @@ export default function ScorePage() {
     // Fetch words from server storage (FileUpload already saved them)
     const s = Math.max(1, Number(rangeStart));
     const e = Math.max(s, Number(rangeEnd));
-    const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (selectedJson?.presets?.length ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
-    const list = await res.json();
+    let list: Array<{ id: string; word: string; meaning: string }> = [];
+    try {
+      const useSource = Boolean(selectedJson?.isBuiltin && selectedJson?.presets?.length);
+      const res = await apiRequest('GET', `/api/vocabulary/range/${s}/${e}` + (useSource ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+      list = await res.json();
+    } catch (err: any) {
+      toast({
+        title: '読み込みエラー',
+        description: String(err?.message || err || '問題データの読み込みに失敗しました'),
+        variant: 'destructive',
+      });
+      return;
+    }
     const shuffled = [...list].sort(() => Math.random() - 0.5);
     setWords(shuffled); wordsRef.current = shuffled;
     setIdx(0); idxRef.current = 0;
     setScore(0); scoreRef.current = 0;
     setCombo(0); comboRef.current = 0;
+    setMaxCombo(0); maxComboRef.current = 0;
     setCorrect(0); correctRef.current = 0;
     setMistakes(0);
     setSkips(0);
@@ -96,7 +113,7 @@ export default function ScorePage() {
       start: Number(rangeStartRef.current) as number,
       end: Number(rangeEndRef.current) as number,
       limit: Number(limitSecRef.current) || 0,
-      maxCombo: comboRef.current,
+      maxCombo: maxComboRef.current,
       score: scoreRef.current,
       mistakes,
       skips,
@@ -125,7 +142,7 @@ export default function ScorePage() {
     if (ok) {
       const next = (idx + 1) % words.length;
       setScore((s) => { const v = s + 100 + combo * 10; scoreRef.current = v; return v; });
-      setCombo((c) => { const v = c + 1; comboRef.current = v; return v; });
+      setCombo((c) => { const v = c + 1; comboRef.current = v; if (v > maxComboRef.current) { setMaxCombo(v); maxComboRef.current = v; } return v; });
       setCorrect((c)=>{ const v = c + 1; correctRef.current = v; return v; });
       setIdx(next); idxRef.current = next;
       setAnswer('');
@@ -174,7 +191,7 @@ export default function ScorePage() {
   }, [remaining, isPlaying]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-[linear-gradient(to_bottom,transparent_0,transparent_calc(100%-2rem)),radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.06),transparent_60%)]">
       <header className="bg-card border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">スコアアタック 🕒🏆</h1>
@@ -247,7 +264,7 @@ export default function ScorePage() {
                 <div>残り: <span className="text-foreground font-medium">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</span></div>
               </div>
               <div className="text-center space-y-2">
-                <div className="text-xl font-semibold">{current?.word ?? '読み込み中...'}</div>
+                <div className="text-xl font-semibold"><MathText text={current?.word ?? '読み込み中...'} /></div>
                 <div className="text-sm text-muted-foreground">意味を入力</div>
               </div>
               <div className="flex gap-2">
@@ -257,7 +274,7 @@ export default function ScorePage() {
                 <Button variant="outline" onClick={finishGame}>終了</Button>
               </div>
               {lastAnswer && (
-                <div className="text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium">{lastAnswer}</span></div>
+                <div className="text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium"><MathText text={lastAnswer} /></span></div>
               )}
             </CardContent>
           </Card>
@@ -276,7 +293,7 @@ export default function ScorePage() {
                 <div className="flex justify-between"><span className="text-muted-foreground">間違い</span><span className="text-foreground">{mistakes}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">スキップ</span><span className="text-foreground">{skips}</span></div>
                 {result.lastMeaning ? (
-                  <div className="flex justify-between sm:col-span-2"><span className="text-muted-foreground">最後の問題の答え</span><span className="text-foreground">{result.lastMeaning} {result.lastWord ? `（${result.lastWord}）` : ''}</span></div>
+                  <div className="flex justify-between sm:col-span-2"><span className="text-muted-foreground">最後の問題の答え</span><span className="text-foreground"><MathText text={result.lastMeaning} /> {result.lastWord ? <span>（<MathText text={result.lastWord} />）</span> : ''}</span></div>
                 ) : null}
               </div>
               <div className="flex gap-2">

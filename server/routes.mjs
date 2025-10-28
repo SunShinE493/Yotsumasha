@@ -9,10 +9,15 @@ import {
   insertWordProgressSchema 
 } from "../shared/schema.mjs";
 import fetch from "node-fetch";
+import { WebSocketServer } from "ws";
+import bcrypt from "bcrypt";
 
 export async function registerRoutes(app) {
   // Setup authentication middleware
   setupAuth(app);
+
+  // --- Realtime battle (rooms state shared for HTTP list + WS) ---
+  const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer, cleanupTimer, lastCorrectBy }
 
   // Guest access route - allows users to continue without login
   app.post('/api/guest/continue', (req, res) => {
@@ -66,8 +71,13 @@ export async function registerRoutes(app) {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
       const full = req.body && req.body.full === true;
+      const incorrectOnly = req.body && req.body.incorrectOnly === true;
       // If "all" flag is provided, export all users' data
       if (req.body && req.body.all === true) {
+        if (incorrectOnly) {
+          const all = await storage.exportAllUsersIncorrectOnly();
+          return res.json(all);
+        }
         const all = full ? await storage.exportAllUsersDataFull() : await storage.exportAllUsersData();
         return res.json(all);
       }
@@ -135,7 +145,65 @@ export async function registerRoutes(app) {
       const data = await r.json();
       const content = data?.files?.[file]?.content;
       if (!content) return res.status(404).json({ message: 'File not found in gist' });
-      res.json({ content });
+      // Optional: apply immediately into storage
+      if (req.body && req.body.apply === true) {
+        try {
+          const parsed = JSON.parse(content);
+          // Bulk import if { users: [...] }
+          if (Array.isArray(parsed?.users)) {
+            let count = 0;
+            for (const entry of parsed.users) {
+              const u = entry?.user || {};
+              // Normalize password to hashed form
+              let normalizedPassword = null;
+              if (typeof u.passwordHash === 'string' && u.passwordHash.length > 0) {
+                normalizedPassword = u.passwordHash;
+              } else if (typeof u.password === 'string' && u.password.length > 0) {
+                normalizedPassword = u.password.startsWith('$2') ? u.password : await bcrypt.hash(u.password, 12);
+              }
+              const up = await storage.upsertUser({
+                id: u.id,
+                username: u.username || u.email || null,
+                isDev: !!u.isDev,
+                displayName: u.displayName || null,
+                isGuest: !!u.isGuest,
+                ...(normalizedPassword ? { password: normalizedPassword } : {}),
+              });
+              const payload = entry?.data || entry;
+              await storage.importUserData(up.id, payload);
+              count++;
+            }
+            return res.json({ ok: true, applied: true, imported: count });
+          }
+          // Single import
+          const userMeta = parsed.user || parsed.data?.user;
+          let targetId = req.userId;
+          if (userMeta) {
+            let normalizedPassword = null;
+            if (typeof userMeta.passwordHash === 'string' && userMeta.passwordHash.length > 0) {
+              normalizedPassword = userMeta.passwordHash;
+            } else if (typeof userMeta.password === 'string' && userMeta.password.length > 0) {
+              normalizedPassword = userMeta.password.startsWith('$2') ? userMeta.password : await bcrypt.hash(userMeta.password, 12);
+            }
+            const up = await storage.upsertUser({
+              id: userMeta.id,
+              username: userMeta.username || userMeta.email || null,
+              isDev: !!userMeta.isDev,
+              displayName: userMeta.displayName || null,
+              isGuest: !!userMeta.isGuest,
+              ...(normalizedPassword ? { password: normalizedPassword } : {}),
+            });
+            targetId = up.id;
+          }
+          const payload = parsed?.data || parsed;
+          await storage.importUserData(targetId, payload);
+          return res.json({ ok: true, applied: true, userId: targetId });
+        } catch (e) {
+          return res.status(400).json({ message: 'Failed to apply fetched content', error: e?.message || String(e) });
+        }
+      }
+      // Default: just return content (no apply)
+      res.json({ content, applied: false });
     } catch (e) {
       res.status(500).json({ message: 'fetch failed' });
     }
@@ -151,13 +219,21 @@ export async function registerRoutes(app) {
         let count = 0;
         for (const entry of list) {
           const u = entry?.user || {};
-          // Upsert user meta first (id/username/isDev/displayName)
+          // Normalize password: prefer passwordHash; if plain password provided, hash it; if hashed ($2*) keep as is
+          let normalizedPassword = null;
+          if (typeof u.passwordHash === 'string' && u.passwordHash.length > 0) {
+            normalizedPassword = u.passwordHash;
+          } else if (typeof u.password === 'string' && u.password.length > 0) {
+            normalizedPassword = u.password.startsWith('$2') ? u.password : await bcrypt.hash(u.password, 12);
+          }
+          // Upsert user meta first (id/username/isDev/displayName/passwordHash)
           const up = await storage.upsertUser({
             id: u.id,
             username: u.username || u.email || null,
             isDev: !!u.isDev,
             displayName: u.displayName || null,
             isGuest: !!u.isGuest,
+            ...(normalizedPassword ? { password: normalizedPassword } : {}),
           });
           // Accept shapes: {data:{...}} or {reviewWords:[...]}
           const payload = entry?.data || entry;
@@ -170,12 +246,19 @@ export async function registerRoutes(app) {
       const userMeta = body.user || body.data?.user;
       let targetId = req.userId;
       if (userMeta) {
+        let normalizedPassword = null;
+        if (typeof userMeta.passwordHash === 'string' && userMeta.passwordHash.length > 0) {
+          normalizedPassword = userMeta.passwordHash;
+        } else if (typeof userMeta.password === 'string' && userMeta.password.length > 0) {
+          normalizedPassword = userMeta.password.startsWith('$2') ? userMeta.password : await bcrypt.hash(userMeta.password, 12);
+        }
         const up = await storage.upsertUser({
           id: userMeta.id,
           username: userMeta.username || userMeta.email || null,
           isDev: !!userMeta.isDev,
           displayName: userMeta.displayName || null,
           isGuest: !!userMeta.isGuest,
+          ...(normalizedPassword ? { password: normalizedPassword } : {}),
         });
         targetId = up.id;
       }
@@ -188,16 +271,33 @@ export async function registerRoutes(app) {
     }
   });
 
-  // --- Open rooms listing for battle ---
-  // Provide a lightweight endpoint that lists room IDs and player counts
-  app.get('/api/battle/rooms', (req, res) => {
+  // --- Admin: Reset a user's password (hash and set) ---
+  app.post('/api/admin/user/reset-password', optionalAuthentication, async (req, res) => {
     try {
-      // Expose indirectly via storage/session map on server; since rooms are in main.mjs,
-      // use a global publisher -- for simplicity, return 501 if not available in this module.
-      res.status(501).json({ message: 'rooms listing not available on this route handler' });
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      const { username, userId, newPassword } = req.body || {};
+      if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
+        return res.status(400).json({ message: 'invalid newPassword' });
+      }
+      let target = null;
+      if (userId) {
+        target = await storage.getUser(userId);
+      } else if (username) {
+        target = await storage.getUserByUsername(username);
+      }
+      if (!target) return res.status(404).json({ message: 'user not found' });
+      const hashed = await bcrypt.hash(newPassword, 12);
+      await storage.upsertUser({ id: target.id, username: target.username, password: hashed });
+      res.json({ ok: true, userId: target.id });
     } catch (e) {
-      res.status(500).json({ message: 'failed' });
+      res.status(500).json({ message: 'failed to reset password' });
     }
+  });
+
+  // --- Open rooms listing for battle ---
+  app.get('/api/battle/rooms', (_req, _res, next) => {
+    // Defer to upstream route (main server) so both don't conflict
+    return next();
   });
 
   // Upload vocabulary JSON file
@@ -205,8 +305,13 @@ export async function registerRoutes(app) {
     try {
       const { words } = vocabularyFileSchema.parse(req.body);
       const userId = req.userId;
+      const replace = !!req.body?.replace;
 
-      // Append words without clearing existing vocabulary to preserve review and prior datasets
+      // If replace flag is provided, clear existing vocabulary first
+      if (replace) {
+        await storage.clearVocabularyWords(userId);
+      }
+      // Append words without clearing (default behavior)
       const createdWords = await storage.createVocabularyWords(userId, words);
 
       res.json({
@@ -276,6 +381,7 @@ export async function registerRoutes(app) {
       const session = await storage.createStudySession(userId, {
         startRange: config.startRange,
         endRange: config.endRange,
+        // Store requested count for traceability; will be corrected after words are resolved
         totalWords: config.questionCount,
         sourceFile: config.sourceFile,
       });
@@ -288,19 +394,36 @@ export async function registerRoutes(app) {
         words = await storage.getVocabularyWordsInRange(userId, config.startRange, config.endRange);
       }
 
+      // Fetch current review list to either exclude or use exclusively
+      const reviewProgress = await storage.getReviewWords(userId);
+      if (config.reviewOnly) {
+        const reviewOnlyWords = reviewProgress
+          .map((rp) => rp.word)
+          .filter((w) => w && w.id && w.word && w.meaning);
+        words = reviewOnlyWords;
+      } else {
+        const reviewIds = new Set(reviewProgress.map((rp) => rp.word?.id || rp.wordId));
+        words = (words || []).filter((w) => !reviewIds.has(w.id));
+      }
+
       if (config.order === "random") {
         words = words.sort(() => Math.random() - 0.5);
       }
 
-      words = words.slice(0, config.questionCount);
+      // Clamp to actual available words to avoid client/server count mismatches
+      const finalCount = Math.max(0, Math.min(config.questionCount, Array.isArray(words) ? words.length : 0));
+      words = (Array.isArray(words) ? words : []).slice(0, finalCount);
 
-      const reviewWords = await storage.getReviewWords(userId);
+      // Persist the actual totalWords to keep session metadata consistent
+      try {
+        await storage.updateStudySession(userId, session.id, { totalWords: words.length });
+      } catch {}
 
       const sessionWithWords = {
         ...session,
+        totalWords: words.length,
         words,
         progress: [],
-        incorrectWords: reviewWords,
       };
 
       res.json(sessionWithWords);
@@ -491,5 +614,163 @@ export async function registerRoutes(app) {
   });
 
   const httpServer = createServer(app);
+
+  // --- WebSocket Real-time Battle on same server ---
+  const wss = new WebSocketServer({ server: httpServer });
+
+  function broadcast(roomId, payload) {
+    const room = rooms.get(roomId);
+    if (!room) return;
+    const data = JSON.stringify(payload);
+    for (const ws of room.players.values()) {
+      try { ws.send(data); } catch {}
+    }
+    if (room.host) { try { room.host.send(data); } catch {} }
+  }
+
+  function toScores(room) {
+    const out = {};
+    for (const [n, s] of room.scores.entries()) out[n] = s;
+    return out;
+  }
+
+  function scheduleRoomCleanup(roomId) {
+    const r = rooms.get(roomId);
+    if (!r) return;
+    if (r.cleanupTimer) { try { clearTimeout(r.cleanupTimer); } catch {} }
+    r.cleanupTimer = setTimeout(() => {
+      const target = rooms.get(roomId);
+      if (!target) return;
+      if (target.state === 'ended' || (target.players && target.players.size === 0)) {
+        if (target.timer) { try { clearTimeout(target.timer); } catch {} }
+        rooms.delete(roomId);
+      }
+    }, 60_000);
+  }
+
+  function scheduleQuestionTimer(roomId) {
+    const r = rooms.get(roomId);
+    if (!r || r.state !== 'running') return;
+    if (r.timer) clearTimeout(r.timer);
+    r.timer = setTimeout(() => {
+      const room = rooms.get(roomId);
+      if (!room || room.state !== 'running') return;
+      room.asked = (room.asked || 0) + 1;
+      if (room.maxQuestions && room.asked >= room.maxQuestions) {
+        const lastQ = room.words[room.idx];
+        room.state = 'ended';
+        if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+        broadcast(roomId, { type: 'end', scores: toScores(room), endReason: 'timeout', lastId: lastQ?.id ?? null, lastWord: lastQ?.word ?? null, lastMeaning: lastQ?.meaning ?? null });
+        scheduleRoomCleanup(roomId);
+        return;
+      }
+      const prevQ = room.words[room.idx];
+      room.idx = (room.idx + 1) % room.words.length;
+      const nq = room.words[room.idx];
+      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, timeLimit: room.timeLimit, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
+      scheduleQuestionTimer(roomId);
+    }, (rooms.get(roomId)?.timeLimit || 30) * 1000);
+  }
+
+  function startRoom(roomId) {
+    const room = rooms.get(roomId);
+    if (!room || room.state !== 'waiting') return;
+    room.state = 'running';
+    room.idx = 0; room.asked = 0;
+    if (room.timer) clearTimeout(room.timer);
+    const q = room.words[room.idx];
+    broadcast(roomId, { type: 'question', index: room.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
+    scheduleQuestionTimer(roomId);
+  }
+
+  wss.on('connection', (ws) => {
+    ws.on('message', (raw) => {
+      let msg; try { msg = JSON.parse(raw.toString()); } catch { return; }
+      const { type } = msg || {};
+      if (type === 'create') {
+        const { room, name, limitSec, words, questionCount } = msg;
+        if (!room || !name || !Array.isArray(words) || !words.length) { ws.send(JSON.stringify({ type: 'error', message: 'invalid_create' })); return; }
+        if (rooms.has(room)) { ws.send(JSON.stringify({ type: 'error', message: 'room_exists' })); return; }
+        let normalized = words.map(w => ({ id: String(w.id||''), word: String(w.word||''), meaning: String(w.meaning||'') })).filter(w => w.word && w.meaning);
+        normalized = normalized.sort(() => Math.random() - 0.5);
+        const maxQuestions = Math.max(1, Math.min(Number(questionCount)||normalized.length, normalized.length));
+        const r = {
+          host: ws,
+          timeLimit: Math.max(5, Number(limitSec)||30),
+          words: normalized,
+          maxQuestions,
+          asked: 0,
+          state: 'waiting',
+          players: new Map(),
+          scores: new Map(),
+          idx: 0,
+          timer: null,
+          cleanupTimer: null,
+          lastCorrectBy: null,
+        };
+        rooms.set(room, r);
+        ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
+        broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions });
+      } else if (type === 'join') {
+        const { room, name } = msg; const r = rooms.get(room);
+        if (!r) { ws.send(JSON.stringify({ type: 'error', message: 'room_not_found' })); return; }
+        if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
+        // 途中参加: waiting でも running でも参加可
+        r.players.set(name, ws); r.scores.set(name, 0);
+        ws._room = room; ws._name = name;
+        // 既存プレイヤーにロビー/参加者更新
+        if (r.state === 'running') {
+          broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
+        } else {
+          broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
+        }
+        // 参加者に現在の状態を即送信
+        if (r.state === 'running') {
+          const q = r.words[r.idx];
+          ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
+          ws.send(JSON.stringify({ type: 'question', index: r.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } }));
+        }
+      } else if (type === 'start') {
+        const { room } = msg; const r = rooms.get(room);
+        if (!r) return; if (ws !== r.host) return; startRoom(room);
+      } else if (type === 'answer') {
+        const { room, name, text } = msg; const r = rooms.get(room);
+        if (!r || r.state !== 'running') return;
+        const q = r.words[r.idx]; if (!q) return;
+        const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        if (ok) {
+          r.lastCorrectBy = name;
+          const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
+          r.asked = (r.asked || 0) + 1;
+          broadcast(room, { type: 'answered', by: name });
+          if (r.maxQuestions && r.asked >= r.maxQuestions) {
+            r.state = 'ended'; if (r.timer) { clearTimeout(r.timer); r.timer = null; }
+            broadcast(room, { type: 'end', scores: toScores(r) });
+            scheduleRoomCleanup(room);
+            return;
+          }
+          const prevQ = r.words[r.idx];
+          r.idx = (r.idx + 1) % r.words.length;
+          const nq = r.words[r.idx];
+          broadcast(room, { type: 'score', scores: toScores(r) });
+          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, prevAnswerer: r.lastCorrectBy || null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
+          r.lastCorrectBy = null;
+          scheduleQuestionTimer(room);
+        }
+      }
+    });
+    ws.on('close', () => {
+      const room = ws._room; const name = ws._name;
+      if (!room || !rooms.has(room)) return;
+      const r = rooms.get(room);
+      if (r.players.has(name)) r.players.delete(name);
+      if (r.players.size === 0) { if (r.timer) clearTimeout(r.timer); rooms.delete(room); }
+      else {
+        if (r.state === 'running') broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
+        else broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()) });
+      }
+    });
+  });
+
   return httpServer;
 }

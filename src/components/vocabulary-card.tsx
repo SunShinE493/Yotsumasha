@@ -1,14 +1,19 @@
 import { useState } from "react";
 import type { VocabularyWord } from "@shared/schema";
+import { MathText } from "./MathText";
 
 interface VocabularyCardProps {
   word: VocabularyWord;
   rotationCount: number;
   onFlip: () => void;
-  fontSizeClass: string;
+  fontSizeClass?: string;
+  fontSizePx?: number;
+  rotationDeg?: number;
+  rotationTurn?: number; // 0.5 turn per flip when provided
 }
 
-export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass }: VocabularyCardProps) {
+export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fontSizePx, rotationDeg, rotationTurn }: VocabularyCardProps) {
+
   return (
     <div 
       className="relative h-64 cursor-pointer touch-target"
@@ -18,14 +23,18 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass }: V
       {/* card-flip に style プロパティで回転角度を直接適用 */}
       <div 
         className="card-flip relative w-full h-full"
-        style={{ transform: `rotateY(${rotationCount * 180}deg)` }}
+        style={{ transform: rotationTurn !== undefined ? `rotateY(${rotationTurn}turn)` : `rotateY(${rotationDeg !== undefined ? rotationDeg : rotationCount * 180}deg)` }}
       >
         {/* Front of Card (Word) */}
         <div className="card-front bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center">
           <div className="space-y-4">
             <div className="text-sm text-primary-foreground/80 font-medium">単語</div>
-            <div className={`${fontSizeClass} font-bold text-primary-foreground`} data-testid="text-word">
-                {word.word}
+            <div
+              className={`${fontSizeClass || ''} font-bold text-primary-foreground`}
+              style={fontSizePx ? { fontSize: `${fontSizePx}px`, lineHeight: 1.25 } : undefined}
+              data-testid="text-word"
+            >
+              <MathText text={word.word} />
             </div>
             {word.category && (
               <div className="text-sm text-primary-foreground/80" data-testid="text-category">
@@ -42,8 +51,12 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass }: V
         <div className="card-back bg-gradient-to-br from-accent to-muted rounded-xl shadow-lg p-8 flex flex-col items-center justify-center text-center">
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground font-medium">意味</div>
-            <div className="text-2xl font-bold text-foreground" data-testid="text-meaning">
-              {word.meaning}
+            <div
+              className="font-bold text-foreground"
+              style={fontSizePx ? { fontSize: `${Math.max(12, fontSizePx - 2)}px`, lineHeight: 1.4 } : undefined}
+              data-testid="text-meaning"
+            >
+              <MathText text={word.meaning} />
             </div>
             {word.example && (
               <div className="text-sm text-muted-foreground" data-testid="text-example">
