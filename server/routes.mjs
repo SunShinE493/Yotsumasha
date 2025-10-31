@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import { randomUUID } from "crypto";
 import { storage } from "./storage.mjs";
-import { loadVocabularyFromJson } from "./utils.mjs";
+import * as fileUtils from "./utils.mjs";
 import { setupAuth, isAuthenticated, optionalAuthentication } from "./auth.mjs";
 import { 
   vocabularyFileSchema, 
@@ -16,6 +16,17 @@ export async function registerRoutes(app) {
   // Setup authentication middleware
   setupAuth(app);
 
+  const {
+    listAvailableJsonCatalog,
+    readUploadedJsonFile,
+    saveUploadedJsonFile,
+    deleteUploadedJsonFile,
+    exportUploadedJsonFiles,
+    applyUploadedJsonFiles,
+    BUILTIN_JSON_FILES,
+  } = fileUtils;
+
+
   // --- Realtime battle (rooms state shared for HTTP list + WS) ---
   const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer, cleanupTimer, lastCorrectBy }
 
@@ -28,9 +39,9 @@ export async function registerRoutes(app) {
 
     res.json({ 
       id: req.session.guestId,
-      username: 'ゲストユーザー',
+      username: '鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｲ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴主・讓溘・荳ｻﾂ・｡繝ｻ・ｹ隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｶ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ',
       isGuest: true,
-      message: 'ゲストとしてアクセス中です' 
+      message: '鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｲ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴主・讓滄・髮・｣ｰ・､繝ｻ・ｸ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ驕ｯ・ｶ繝ｻ・ｻ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・｢鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｯ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｻ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬮｣蛹・ｽｽ・ｳ郢晢ｽｻ繝ｻ・ｭ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｧ鬩搾ｽｵ繝ｻ・ｺ驛｢譎｢・ｽ・ｻ 
     });
   });
 
@@ -44,7 +55,7 @@ export async function registerRoutes(app) {
       delete req.session.guestId;
     }
 
-    res.json({ message: 'ゲストデータをクリアしました' });
+    res.json({ message: '鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｲ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴主・讓滄Δ譎｢・ｽ・ｧ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｿ鬩幢ｽ｢繝ｻ・ｧ髯句ｹ｢・ｽ・ｵ驍ｵ・ｺ鬩｢謳ｾ・ｽ・ｹ隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｪ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・｢鬩搾ｽｵ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ驕ｶ謫ｾ・ｽ・ｪ鬩搾ｽｵ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ髫ｨ・ｳ郢晢ｽｻ });
   });
 
   // --- Admin backup/restore gated by env ---
@@ -88,7 +99,7 @@ export async function registerRoutes(app) {
     }
   });
 
-  // Backup to GitHub Gist (UIから実行用)。環境変数: GIST_TOKEN, GIST_ID, GIST_FILE(optional)
+  // Backup to GitHub Gist (UI鬩搾ｽｵ繝ｻ・ｺ髣包ｽｵ隴趣ｽ｢繝ｻ・ｽ髣・ｽｽ隶梧㊥・ｲ繝ｻ・ｽ・ｯ郢晢ｽｻ繝ｻ・｡髫ｶ蜷晢ｽｮ驛√・)鬩搾ｽｵ繝ｻ・ｲ驛｢・ｧ髣・ｽｽ郢晢ｽｻ鬮ｯ貅倥・郢晢ｽｻ郢晢ｽｻ繝ｻ・､鬨ｾ蛹・ｽｽ・ｻ髴取ｺ倥・ GIST_TOKEN, GIST_ID, GIST_FILE(optional)
   app.post('/api/admin/backup/gist', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
@@ -97,7 +108,7 @@ export async function registerRoutes(app) {
       const file = process.env.GIST_FILE || 'backup.json';
       if (!token || !gistId) return res.status(400).json({ message: 'Gist env not configured' });
 
-      // 既存の完全エクスポート（全ユーザー・最小形 or 指定形）。ここではご提示フォーマットに合わせ、reviewWords含む最小出力を採用
+      // 鬮ｫ・ｴ鬲・ｼ夲ｽｽ・ｽ繝ｻ・｢鬮ｯ譏ｴ繝ｻ・つ繝ｻ・･驛｢譎｢・ｽ・ｻ鬮ｯ讖ｸ・ｽ・ｳ髫ｰ逍ｲ・ｺ蛟･繝ｻ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｨ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｯ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴弱・・ｺ・｢驛｢譎｢・ｽ・ｻ鬩幢ｽ｢隴寂握縺狗ｹ晢ｽｻ繝ｻ・ｼ髣費｣ｰ繝ｻ・･驛｢譎｢・ｽ・ｻ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｦ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｶ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｻ鬮ｫ・ｴ陝・｢・つ鬮ｯ譏ｴ繝ｻ繝ｻ・ｸ隶厄ｽｸ繝ｻ・ｽ繝ｻ・ｽ郢晢ｽｻ繝ｻ・｢ or 鬮ｫ・ｰ隰費ｽｶ郢晢ｽｻ郢晢ｽｻ繝ｻ・ｮ髯橸ｽ｢繝ｻ・ｼ郢晢ｽｻ繝ｻ・ｽ郢晢ｽｻ繝ｻ・｢驛｢譎｢・ｽ・ｻ髯晢ｽｲ繝ｻ・ｨ繝ｻ縺､ﾂ驛｢・ｧ郢晢ｽｻ繝ｻ・ｼ郢晢ｽｻ繝ｻ・ｸ繝ｻ・ｺ鬮ｦ・ｮ陷ｷ・ｶ・つ陜｣・､繝ｻ・ｸ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｯ鬩搾ｽｵ繝ｻ・ｺ鬨ｾ謳ｾ・ｽ・ｲ鬩励ｑ・ｽ・ｲ鬯ｩ遨ゑｽｼ螟ｲ・ｽ・ｽ繝ｻ・ｺ鬩幢ｽ｢隴弱・・ｽ・ｼ隴・搨・ｰ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢隴弱・・ｽ・ｧ繝ｻ・ｭ驛｢譎｢・ｽ・｣鬩幢ｽ｢隴主・讓滄・鬆托ｽ･・｢隲・ｺ髯具ｽｹ繝ｻ・ｻ郢晢ｽｻ陷證ｦ・ｽ・ｸ繝ｻ・ｺ髯晢ｽｶ陷雁しﾂ驍ｵ・ｲ陟厄ｽｱviewWords鬮ｯ・ｷ繝ｻ・ｷ郢晢ｽｻ繝ｻ・ｫ鬩幢ｽ｢繝ｻ・ｧ繝ｻ縺､ﾂ鬮ｫ・ｴ陝・｢・つ鬮ｯ譏ｴ繝ｻ繝ｻ・ｸ隶抵ｽｭ郢晢ｽｻ鬮ｯ・ｷ霑壼遜・ｽ・ｸ陷ｻ・ｻ繝ｻ・ｽ陞ｳ螟ｲ・ｽ・ｬ隴会ｽｦ繝ｻ・ｽ繝ｻ・｡鬯ｨ・ｾ陋ｹ繝ｻ・ｽ・ｽ繝ｻ・ｨ
       const all = await storage.exportAllUsersData();
 
       const payload = {
@@ -122,7 +133,7 @@ export async function registerRoutes(app) {
     }
   });
 
-  // Fetch backup from Gist (UIから取得)
+  // Fetch backup from Gist (UI鬩搾ｽｵ繝ｻ・ｺ髣包ｽｵ隴趣ｽ｢繝ｻ・ｽ髣・ｽｽ隲｢・ｾ鬯ｮ・｢・つ郢晢ｽｻ繝ｻ・ｾ驛｢譎｢・ｽ・ｻ
   app.post('/api/admin/backup/gist/fetch', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
@@ -336,7 +347,7 @@ export async function registerRoutes(app) {
       let words;
       if (sourceFile) {
         // Load from JSON file
-        words = await loadVocabularyFromJson(sourceFile);
+        words = await fileUtils.loadVocabularyFromJson(sourceFile);
       } else {
         // Load from MemStorage
         words = await storage.getVocabularyWords(userId);
@@ -361,7 +372,7 @@ export async function registerRoutes(app) {
 
       let words;
       if (sourceFile) {
-        const allWords = await loadVocabularyFromJson(sourceFile);
+        const allWords = await fileUtils.loadVocabularyFromJson(sourceFile);
         words = allWords.slice(start - 1, end);
       } else {
         words = await storage.getVocabularyWordsInRange(userId, start, end);
@@ -388,7 +399,7 @@ export async function registerRoutes(app) {
 
       let words;
       if (config.sourceFile) {
-        const allWords = await loadVocabularyFromJson(config.sourceFile);
+        const allWords = await fileUtils.loadVocabularyFromJson(config.sourceFile);
         words = allWords.slice(config.startRange - 1, config.endRange);
       } else {
         words = await storage.getVocabularyWordsInRange(userId, config.startRange, config.endRange);
@@ -429,7 +440,7 @@ export async function registerRoutes(app) {
       res.json(sessionWithWords);
     } catch (error) {
       res.status(400).json({ 
-        message: "セッションの作成に失敗しました。無効な学習設定です。",
+        message: "鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｻ鬩幢ｽ｢隴擾ｽｴ郢晢ｽｻ驍ｵ・ｺ陷･謫ｾ・ｽ・ｹ隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｧ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｳ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｮ鬮｣蜴・ｽｽ・ｴ髫ｲ蟶帷樟郢晢ｽｻ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｫ鬮ｯ讓奇ｽｻ繧托ｽｽ・ｽ繝ｻ・ｱ鬮ｫ・ｰ繝ｻ・ｨ髯ｷ莨夲ｽｽ・ｱ郢晢ｽｻ繝ｻ・ｰ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｾ鬩搾ｽｵ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ髫ｨ・ｳ郢晢ｽｻ繝ｻ・ｸ繝ｻ・ｲ驛｢・ｧ闖ｫ繝ｻ・ｼ・ｯ鬮ｯ・ｷ闔ｨ螟ｲ・ｽ・ｽ繝ｻ・ｹ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｪ鬮ｯ譏ｴ繝ｻ繝ｻ・ｽ繝ｻ・ｦ鬯ｩ諤憺它繝ｻ・ｮ陞滂ｽｲ繝ｻ・ｽ繝ｻ・ｨ郢晢ｽｻ繝ｻ・ｭ鬮ｯ讖ｸ・ｽ・ｳ髯橸ｽ｢繝ｻ・ｹ驍ｵ・ｲ陜｣・､繝ｻ・ｸ繝ｻ・ｺ髯ｷ・ｷ繝ｻ・ｶ繝ｻ縺､ﾂ驛｢譎｢・ｽ・ｻ,
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
@@ -613,6 +624,95 @@ export async function registerRoutes(app) {
     }
   });
 
+  // --- File manager APIs ---
+  app.get('/api/files', optionalAuthentication, async (_req, res) => {
+    try {
+      const catalog = await listAvailableJsonCatalog();
+      const formatUploaded = (entry) => ({
+        name: entry.name,
+        wordCount: entry.wordCount ?? null,
+        size: entry.size ?? null,
+        updatedAt: entry.updatedAt ? new Date(entry.updatedAt).toISOString() : null,
+      });
+      res.json({
+        builtin: catalog.builtin.map((item) => ({
+          name: item.name,
+          wordCount: item.wordCount ?? null,
+        })),
+        uploaded: catalog.uploaded.map(formatUploaded),
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to list files' });
+    }
+  });
+
+  app.get('/api/files/:name', optionalAuthentication, async (req, res) => {
+    try {
+      const fileName = decodeURIComponent(req.params.name);
+      if (!fileName) {
+        return res.status(400).json({ message: 'Invalid file name' });
+      }
+      if (BUILTIN_JSON_FILES.includes(fileName)) {
+        return res.status(400).json({ message: 'Built-in files are read-only' });
+      }
+      const file = await readUploadedJsonFile(fileName);
+      res.json({ name: file.name, content: file.content, wordCount: file.wordCount });
+    } catch (error) {
+      res.status(404).json({ message: error?.message || 'File not found' });
+    }
+  });
+
+  app.post('/api/files', optionalAuthentication, async (req, res) => {
+    try {
+      const { name, content } = req.body || {};
+      if (!name || typeof name !== 'string' || !content || typeof content !== 'string') {
+        return res.status(400).json({ message: 'name and content are required' });
+      }
+      if (BUILTIN_JSON_FILES.includes(name.trim())) {
+        return res.status(400).json({ message: 'Cannot overwrite built-in files' });
+      }
+      const result = await saveUploadedJsonFile(name, content, { overwrite: false });
+      res.json({ ok: true, name: result.name, wordCount: result.wordCount });
+    } catch (error) {
+      if (error && error.code === 'FILE_EXISTS') {
+        return res.status(409).json({ message: 'File already exists' });
+      }
+      res.status(400).json({ message: error?.message || 'Failed to save file' });
+    }
+  });
+
+  app.put('/api/files/:name', optionalAuthentication, async (req, res) => {
+    try {
+      const fileName = decodeURIComponent(req.params.name);
+      const { content } = req.body || {};
+      if (!fileName || typeof content !== 'string') {
+        return res.status(400).json({ message: 'content is required' });
+      }
+      if (BUILTIN_JSON_FILES.includes(fileName)) {
+        return res.status(400).json({ message: 'Built-in files are read-only' });
+      }
+      const result = await saveUploadedJsonFile(fileName, content, { overwrite: true });
+      res.json({ ok: true, name: result.name, wordCount: result.wordCount });
+    } catch (error) {
+      res.status(400).json({ message: error?.message || 'Failed to update file' });
+    }
+  });
+
+  app.delete('/api/files/:name', optionalAuthentication, async (req, res) => {
+    try {
+      const fileName = decodeURIComponent(req.params.name);
+      if (!fileName) {
+        return res.status(400).json({ message: 'Invalid file name' });
+      }
+      if (BUILTIN_JSON_FILES.includes(fileName)) {
+        return res.status(400).json({ message: 'Built-in files are read-only' });
+      }
+      await deleteUploadedJsonFile(fileName);
+      res.json({ ok: true });
+    } catch (error) {
+      res.status(404).json({ message: error?.message || 'File not found' });
+    }
+  });
   const httpServer = createServer(app);
 
   // --- WebSocket Real-time Battle on same server ---
@@ -715,16 +815,16 @@ export async function registerRoutes(app) {
         const { room, name } = msg; const r = rooms.get(room);
         if (!r) { ws.send(JSON.stringify({ type: 'error', message: 'room_not_found' })); return; }
         if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
-        // 途中参加: waiting でも running でも参加可
+        // 鬯ｯ・ｨ繝ｻ・ｾ髮朱メ・ｲ・ｻ繝ｻ・ｽ繝ｻ・ｸ郢晢ｽｻ繝ｻ・ｭ鬮ｯ・ｷ繝ｻ・ｿ驛｢・ｧ郢晢ｽｻ郢晢ｽｻ: waiting 鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｧ鬩幢ｽ｢繝ｻ・ｧ驛｢譎｢・ｽ・ｻrunning 鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｧ鬩幢ｽ｢繝ｻ・ｧ驛｢・ｧ郢晢ｽｻ陝貊・建闔ｨ螟ｲ・ｽ・｣繝ｻ・ｰ鬮ｯ・ｷ繝ｻ・ｿ郢晢ｽｻ繝ｻ・ｯ
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
-        // 既存プレイヤーにロビー/参加者更新
+        // 鬮ｫ・ｴ鬲・ｼ夲ｽｽ・ｽ繝ｻ・｢鬮ｯ譏ｴ繝ｻ・つ繝ｻ・･驛｢譎｢・ｽ・ｻ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｬ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・､鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・､鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｫ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｭ鬩幢ｽ｢隴寂或・ｾ・ｭ驛｢譎｢・ｽ・ｻ/鬮ｯ・ｷ繝ｻ・ｿ驛｢・ｧ郢晢ｽｻ郢晢ｽｻ鬯ｮ・｢繝ｻ・ｰ驛｢譎｢・ｽ・ｻ髯晢ｽｲ繝ｻ・ｩ鬮ｫ・ｴ郢晢ｽｻ繝ｻ・ｽ繝ｻ・ｰ
         if (r.state === 'running') {
           broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
         } else {
           broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
         }
-        // 参加者に現在の状態を即送信
+        // 鬮ｯ・ｷ繝ｻ・ｿ驛｢・ｧ郢晢ｽｻ郢晢ｽｻ鬯ｮ・｢繝ｻ・ｰ驛｢譎｢・ｽ・ｻ驕ｶ鬆托ｽ･・｢繝ｻ・ｿ繝ｻ・ｴ郢晢ｽｻ繝ｻ・ｾ鬮ｯ諛ｶ・ｽ・ｨ郢晢ｽｻ繝ｻ・ｨ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｮ鬮ｴ謇假ｽｽ・･郢晢ｽｻ繝ｻ・ｶ鬮ｫ・ｲ繝ｻ・ｷ髣包ｽｵ隴趣ｽ｢繝ｻ・ｽ陞ｳ螢ｽﾂ・ｺ郢晢ｽｻ繝ｻ・ｳ鬯ｯ・ｨ繝ｻ・ｾ驕ｶ謫ｾ・ｽ・ｽ郢晢ｽｻ繝ｻ・ｿ郢晢ｽｻ繝ｻ・｡
         if (r.state === 'running') {
           const q = r.words[r.idx];
           ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
@@ -774,3 +874,5 @@ export async function registerRoutes(app) {
 
   return httpServer;
 }
+
+
