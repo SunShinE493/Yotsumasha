@@ -39,12 +39,9 @@ export async function registerRoutes(app) {
 
     res.json({ 
       id: req.session.guestId,
-      username: '鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｲ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴主・讓溘・荳ｻﾂ・｡繝ｻ・ｹ隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｶ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ',
+      username: 'ゲストユーザー',
       isGuest: true,
-      message: '鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｲ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴主・讓滄・髮・｣ｰ・､繝ｻ・ｸ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ驕ｯ・ｶ繝ｻ・ｻ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・｢鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｯ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｻ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬮｣蛹・ｽｽ・ｳ郢晢ｽｻ繝ｻ・ｭ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｧ鬩搾ｽｵ繝ｻ・ｺ驛｢譎｢・ｽ・ｻ 
-    });
-  });
-
+      message: 'ゲストとしてアクセス中です'
   // Guest logout/clear route - clears guest session data
   app.post('/api/guest/logout', (req, res) => {
     if (req.session.guestId) {
@@ -55,7 +52,7 @@ export async function registerRoutes(app) {
       delete req.session.guestId;
     }
 
-    res.json({ message: '鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｲ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴主・讓滄Δ譎｢・ｽ・ｧ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｿ鬩幢ｽ｢繝ｻ・ｧ髯句ｹ｢・ｽ・ｵ驍ｵ・ｺ鬩｢謳ｾ・ｽ・ｹ隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｪ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・｢鬩搾ｽｵ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ驕ｶ謫ｾ・ｽ・ｪ鬩搾ｽｵ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ髫ｨ・ｳ郢晢ｽｻ });
+    res.json({ message: 'ゲストデータをクリアしました'});
   });
 
   // --- Admin backup/restore gated by env ---
@@ -99,7 +96,7 @@ export async function registerRoutes(app) {
     }
   });
 
-  // Backup to GitHub Gist (UI鬩搾ｽｵ繝ｻ・ｺ髣包ｽｵ隴趣ｽ｢繝ｻ・ｽ髣・ｽｽ隶梧㊥・ｲ繝ｻ・ｽ・ｯ郢晢ｽｻ繝ｻ・｡髫ｶ蜷晢ｽｮ驛√・)鬩搾ｽｵ繝ｻ・ｲ驛｢・ｧ髣・ｽｽ郢晢ｽｻ鬮ｯ貅倥・郢晢ｽｻ郢晢ｽｻ繝ｻ・､鬨ｾ蛹・ｽｽ・ｻ髴取ｺ倥・ GIST_TOKEN, GIST_ID, GIST_FILE(optional)
+  // Backup to GitHub Gist (UIから操作するバックアップ。環境変数 GIST_TOKEN, GIST_ID, GIST_FILE(optional) が必要)
   app.post('/api/admin/backup/gist', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
@@ -108,7 +105,7 @@ export async function registerRoutes(app) {
       const file = process.env.GIST_FILE || 'backup.json';
       if (!token || !gistId) return res.status(400).json({ message: 'Gist env not configured' });
 
-      // 鬮ｫ・ｴ鬲・ｼ夲ｽｽ・ｽ繝ｻ・｢鬮ｯ譏ｴ繝ｻ・つ繝ｻ・･驛｢譎｢・ｽ・ｻ鬮ｯ讖ｸ・ｽ・ｳ髫ｰ逍ｲ・ｺ蛟･繝ｻ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｨ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｯ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｹ鬩幢ｽ｢隴弱・・ｺ・｢驛｢譎｢・ｽ・ｻ鬩幢ｽ｢隴寂握縺狗ｹ晢ｽｻ繝ｻ・ｼ髣費｣ｰ繝ｻ・･驛｢譎｢・ｽ・ｻ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｦ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｶ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｻ鬮ｫ・ｴ陝・｢・つ鬮ｯ譏ｴ繝ｻ繝ｻ・ｸ隶厄ｽｸ繝ｻ・ｽ繝ｻ・ｽ郢晢ｽｻ繝ｻ・｢ or 鬮ｫ・ｰ隰費ｽｶ郢晢ｽｻ郢晢ｽｻ繝ｻ・ｮ髯橸ｽ｢繝ｻ・ｼ郢晢ｽｻ繝ｻ・ｽ郢晢ｽｻ繝ｻ・｢驛｢譎｢・ｽ・ｻ髯晢ｽｲ繝ｻ・ｨ繝ｻ縺､ﾂ驛｢・ｧ郢晢ｽｻ繝ｻ・ｼ郢晢ｽｻ繝ｻ・ｸ繝ｻ・ｺ鬮ｦ・ｮ陷ｷ・ｶ・つ陜｣・､繝ｻ・ｸ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｯ鬩搾ｽｵ繝ｻ・ｺ鬨ｾ謳ｾ・ｽ・ｲ鬩励ｑ・ｽ・ｲ鬯ｩ遨ゑｽｼ螟ｲ・ｽ・ｽ繝ｻ・ｺ鬩幢ｽ｢隴弱・・ｽ・ｼ隴・搨・ｰ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩幢ｽ｢隴弱・・ｽ・ｧ繝ｻ・ｭ驛｢譎｢・ｽ・｣鬩幢ｽ｢隴主・讓滄・鬆托ｽ･・｢隲・ｺ髯具ｽｹ繝ｻ・ｻ郢晢ｽｻ陷證ｦ・ｽ・ｸ繝ｻ・ｺ髯晢ｽｶ陷雁しﾂ驍ｵ・ｲ陟厄ｽｱviewWords鬮ｯ・ｷ繝ｻ・ｷ郢晢ｽｻ繝ｻ・ｫ鬩幢ｽ｢繝ｻ・ｧ繝ｻ縺､ﾂ鬮ｫ・ｴ陝・｢・つ鬮ｯ譏ｴ繝ｻ繝ｻ・ｸ隶抵ｽｭ郢晢ｽｻ鬮ｯ・ｷ霑壼遜・ｽ・ｸ陷ｻ・ｻ繝ｻ・ｽ陞ｳ螟ｲ・ｽ・ｬ隴会ｽｦ繝ｻ・ｽ繝ｻ・｡鬯ｨ・ｾ陋ｹ繝ｻ・ｽ・ｽ繝ｻ・ｨ
+      // ユーザーデータを全てエクスポートし、JSON形式でGistにパッチ（更新）する
       const all = await storage.exportAllUsersData();
 
       const payload = {
@@ -133,7 +130,7 @@ export async function registerRoutes(app) {
     }
   });
 
-  // Fetch backup from Gist (UI鬩搾ｽｵ繝ｻ・ｺ髣包ｽｵ隴趣ｽ｢繝ｻ・ｽ髣・ｽｽ隲｢・ｾ鬯ｮ・｢・つ郢晢ｽｻ繝ｻ・ｾ驛｢譎｢・ｽ・ｻ
+  // Fetch backup from Gist (UIから操作するリストア/復元)
   app.post('/api/admin/backup/gist/fetch', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
@@ -440,7 +437,7 @@ export async function registerRoutes(app) {
       res.json(sessionWithWords);
     } catch (error) {
       res.status(400).json({ 
-        message: "鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・ｻ鬩幢ｽ｢隴擾ｽｴ郢晢ｽｻ驍ｵ・ｺ陷･謫ｾ・ｽ・ｹ隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｧ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｳ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｮ鬮｣蜴・ｽｽ・ｴ髫ｲ蟶帷樟郢晢ｽｻ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｫ鬮ｯ讓奇ｽｻ繧托ｽｽ・ｽ繝ｻ・ｱ鬮ｫ・ｰ繝ｻ・ｨ髯ｷ莨夲ｽｽ・ｱ郢晢ｽｻ繝ｻ・ｰ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｾ鬩搾ｽｵ繝ｻ・ｺ髯ｷ莨夲ｽｽ・ｱ髫ｨ・ｳ郢晢ｽｻ繝ｻ・ｸ繝ｻ・ｲ驛｢・ｧ闖ｫ繝ｻ・ｼ・ｯ鬮ｯ・ｷ闔ｨ螟ｲ・ｽ・ｽ繝ｻ・ｹ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｪ鬮ｯ譏ｴ繝ｻ繝ｻ・ｽ繝ｻ・ｦ鬯ｩ諤憺它繝ｻ・ｮ陞滂ｽｲ繝ｻ・ｽ繝ｻ・ｨ郢晢ｽｻ繝ｻ・ｭ鬮ｯ讖ｸ・ｽ・ｳ髯橸ｽ｢繝ｻ・ｹ驍ｵ・ｲ陜｣・､繝ｻ・ｸ繝ｻ・ｺ髯ｷ・ｷ繝ｻ・ｶ繝ｻ縺､ﾂ驛｢譎｢・ｽ・ｻ,
+        message: "学習セッションの作成に失敗しました。指定された単語の範囲や設定を確認してください。"
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
@@ -815,16 +812,16 @@ export async function registerRoutes(app) {
         const { room, name } = msg; const r = rooms.get(room);
         if (!r) { ws.send(JSON.stringify({ type: 'error', message: 'room_not_found' })); return; }
         if (r.players.has(name)) { ws.send(JSON.stringify({ type: 'error', message: 'name_in_use' })); return; }
-        // 鬯ｯ・ｨ繝ｻ・ｾ髮朱メ・ｲ・ｻ繝ｻ・ｽ繝ｻ・ｸ郢晢ｽｻ繝ｻ・ｭ鬮ｯ・ｷ繝ｻ・ｿ驛｢・ｧ郢晢ｽｻ郢晢ｽｻ: waiting 鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｧ鬩幢ｽ｢繝ｻ・ｧ驛｢譎｢・ｽ・ｻrunning 鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｧ鬩幢ｽ｢繝ｻ・ｧ驛｢・ｧ郢晢ｽｻ陝貊・建闔ｨ螟ｲ・ｽ・｣繝ｻ・ｰ鬮ｯ・ｷ繝ｻ・ｿ郢晢ｽｻ繝ｻ・ｯ
+        // 状態: waiting の場合はロビー情報を、running の場合はプレイヤーリストのみを通知
         r.players.set(name, ws); r.scores.set(name, 0);
         ws._room = room; ws._name = name;
-        // 鬮ｫ・ｴ鬲・ｼ夲ｽｽ・ｽ繝ｻ・｢鬮ｯ譏ｴ繝ｻ・つ繝ｻ・･驛｢譎｢・ｽ・ｻ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｬ鬩幢ｽ｢繝ｻ・ｧ郢晢ｽｻ繝ｻ・､鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・､鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｼ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｫ鬩幢ｽ｢隴趣ｽ｢繝ｻ・ｽ繝ｻ・ｭ鬩幢ｽ｢隴寂或・ｾ・ｭ驛｢譎｢・ｽ・ｻ/鬮ｯ・ｷ繝ｻ・ｿ驛｢・ｧ郢晢ｽｻ郢晢ｽｻ鬯ｮ・｢繝ｻ・ｰ驛｢譎｢・ｽ・ｻ髯晢ｽｲ繝ｻ・ｩ鬮ｫ・ｴ郢晢ｽｻ繝ｻ・ｽ繝ｻ・ｰ
+        // 全員にプレイヤーリストをブロードキャスト（ロビー情報/開始情報は不要）
         if (r.state === 'running') {
           broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
         } else {
           broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
         }
-        // 鬮ｯ・ｷ繝ｻ・ｿ驛｢・ｧ郢晢ｽｻ郢晢ｽｻ鬯ｮ・｢繝ｻ・ｰ驛｢譎｢・ｽ・ｻ驕ｶ鬆托ｽ･・｢繝ｻ・ｿ繝ｻ・ｴ郢晢ｽｻ繝ｻ・ｾ鬮ｯ諛ｶ・ｽ・ｨ郢晢ｽｻ繝ｻ・ｨ鬩搾ｽｵ繝ｻ・ｺ郢晢ｽｻ繝ｻ・ｮ鬮ｴ謇假ｽｽ・･郢晢ｽｻ繝ｻ・ｶ鬮ｫ・ｲ繝ｻ・ｷ髣包ｽｵ隴趣ｽ｢繝ｻ・ｽ陞ｳ螢ｽﾂ・ｺ郢晢ｽｻ繝ｻ・ｳ鬯ｯ・ｨ繝ｻ・ｾ驕ｶ謫ｾ・ｽ・ｽ郢晢ｽｻ繝ｻ・ｿ郢晢ｽｻ繝ｻ・｡
+      // 実行中の場合、参加者に現在のスコアと問題を送信
         if (r.state === 'running') {
           const q = r.words[r.idx];
           ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
