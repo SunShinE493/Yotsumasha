@@ -57,6 +57,40 @@ export async function registerRoutes(app) {
     res.json({ message: 'ゲストデータをクリアしました'});
   });
 
+  // Admin: overwrite built-in JSON (password required)
+  app.post('/api/admin/files/builtin', optionalAuthentication, async (req, res) => {
+    try {
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      const { name, content } = req.body || {};
+      if (!name || typeof name !== 'string' || typeof content !== 'string') {
+        return res.status(400).json({ message: 'name and content are required' });
+      }
+      if (!BUILTIN_JSON_FILES.includes(name)) {
+        return res.status(400).json({ message: 'Not a built-in file' });
+      }
+      // Validate JSON (array of {word,meaning})
+      let parsed;
+      try {
+        parsed = JSON.parse(content);
+        if (!Array.isArray(parsed)) throw new Error('must be array');
+        for (const item of parsed) {
+          if (!item || typeof item !== 'object' || !item.word || !item.meaning) {
+            throw new Error('invalid word record');
+          }
+        }
+      } catch (e) {
+        return res.status(400).json({ message: 'invalid json content', error: e?.message || String(e) });
+      }
+      // Resolve path and write
+      const resolved = await fileUtils.resolveJsonFilePath(name);
+      const fs = await import('fs/promises');
+      await fs.writeFile(resolved.path, JSON.stringify(parsed, null, 2), 'utf8');
+      return res.json({ ok: true, name, wordCount: parsed.length });
+    } catch (e) {
+      res.status(500).json({ message: 'failed to save builtin', error: e?.message || String(e) });
+    }
+  });
+
   // --- Admin backup/restore gated by env ---
   function isBackupAdmin(req) {
     const envUser = process.env.BACKUP_ADMIN_EMAIL;

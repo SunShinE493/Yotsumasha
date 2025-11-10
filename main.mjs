@@ -497,6 +497,15 @@ dailyTrigger(channel2)
     askQuiz(client, channelId, wcount)
   }
 
+  // Trigger gist backup after schedule work
+  try { await backupToGist(); } catch {}
+}
+
+// Best-effort backup to gist on each trigger
+async function backupToGist() {
+  try {
+    await axios.post('http://localhost:5000/api/admin/backup/gist', {}, { timeout: 3000 });
+  } catch {}
 }
 
 

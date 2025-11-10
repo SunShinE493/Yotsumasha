@@ -32,7 +32,10 @@ export default function CampfirePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">仕上げ</CardTitle>
+            <div className="flex items-center gap-3">
+              <img src="/sample.img" alt="campfire" className="w-8 h-8 rounded-md object-cover" />
+              <CardTitle className="text-base">仕上げ</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-4">
             <div className="text-sm text-muted-foreground">

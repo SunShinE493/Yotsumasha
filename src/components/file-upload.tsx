@@ -44,6 +44,7 @@ const availableJsonFiles = {
   "organic.json":organic,
   "Chemistry.json":Chemistry,
 };
+import { useEffect, useState } from "react";
 
 // 親に渡すデータの型を定義
 export interface SelectedJsonInfo {
@@ -63,6 +64,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [userFiles, setUserFiles] = useState<{ name: string; wordCount: number|null }[]>([]);
 
   // 内蔵/外部を区別して処理する
   const processJsonData = (data: any[], fileName: string, isBuiltin: boolean = false) => {
@@ -178,6 +180,32 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
     }
   };
 
+  // ユーザーアップロード済みファイル一覧
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiRequest('GET', '/api/files');
+        const data = await res.json();
+        const uploaded = Array.isArray(data?.uploaded) ? data.uploaded.map((f:any) => ({ name: f.name, wordCount: f.wordCount ?? null })) : [];
+        setUserFiles(uploaded);
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  const handleUserFilePick = async (name: string) => {
+    if (!name) return;
+    try {
+      const res = await apiRequest('GET', `/api/files/${encodeURIComponent(name)}`);
+      const { content } = await res.json();
+      const words = JSON.parse(content);
+      processJsonData(words, name, false);
+    } catch (e:any) {
+      toast({ title: '読み込み失敗', description: e?.message || 'ユーザーファイルの読み込みに失敗しました', variant: 'destructive' });
+    }
+  };
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -274,6 +302,25 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
                 </SelectContent>
               </Select>
             </div>
+
+        {/* ユーザーJSONファイル選択UI */}
+        <div className="bg-muted rounded-lg p-3">
+          <Label className="block text-sm font-medium text-foreground mb-2">
+            ユーザーJSONファイルを選択
+          </Label>
+          <Select onValueChange={handleUserFilePick}>
+            <SelectTrigger>
+              <SelectValue placeholder="アップロード済みから選択" />
+            </SelectTrigger>
+            <SelectContent>
+              {userFiles.map((f) => (
+                <SelectItem key={f.name} value={f.name}>
+                  {f.name} {typeof f.wordCount === 'number' ? `(${f.wordCount})` : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
             {/* 保存済みデータセットの適用 */}
             <SavedDatasets />

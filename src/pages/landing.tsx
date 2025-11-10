@@ -51,6 +51,14 @@ export default function Landing() {
               <p className="mt-2 text-sm text-muted-foreground">復習リストを焼く（アップロード→料理する）</p>
             </a>
 
+            <a href="/files" className="group block rounded-xl border border-border bg-card p-5 hover:bg-accent transition-colors">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-foreground">ファイル管理</h3>
+                <span className="text-sm text-muted-foreground">Files</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">自分のJSONを読み込み・保存・編集</p>
+            </a>
+
             <a href="/ranking" className="group block rounded-xl border border-border bg-card p-5 hover:bg-accent transition-colors md:col-span-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-foreground">ランキング</h3>
