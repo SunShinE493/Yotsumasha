@@ -43,6 +43,7 @@ export async function registerRoutes(app) {
       isGuest: true,
       message: 'ゲストとしてアクセス中です'
     });
+  });
   // Guest logout/clear route - clears guest session data
   app.post('/api/guest/logout', (req, res) => {
     if (req.session.guestId) {
