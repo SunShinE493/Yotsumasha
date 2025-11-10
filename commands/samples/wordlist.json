@@ -1,0 +1,656 @@
+[
+    {
+        "word": "Chuckle",
+        "meaning": "くすくす笑う",
+        "category": "英単3"
+    },
+    {
+        "word": "soothe",
+        "meaning": "なだめる",
+        "category": "英単3"
+    },
+    {
+        "word": "tempt",
+        "meaning": "誘惑する",
+        "category": "英単3"
+    },
+    {
+        "word": "scold",
+        "meaning": "叱る",
+        "category": "英単3"
+    },
+    {
+        "word": "oppress",
+        "meaning": "圧迫する",
+        "category": "英単3"
+    },
+    {
+        "word": "astonish",
+        "meaning": "驚かせる",
+        "category": "英単3"
+    },
+    {
+        "word": "mourn",
+        "meaning": "嘆く",
+        "category": "英単3"
+    },
+    {
+        "word": "offend",
+        "meaning": "怒らせる",
+        "category": "英単3"
+    },
+    {
+        "word": "depress",
+        "meaning": "憂鬱にさせる",
+        "category": "英単3"
+    },
+    {
+        "word": "sacrifice",
+        "meaning": "犠牲にする",
+        "category": "英単3"
+    },
+    {
+        "word": "impulse",
+        "meaning": "衝動",
+        "category": "英単3"
+    },
+    {
+        "word": "stem",
+        "meaning": "原因である",
+        "category": "英単3"
+    },
+    {
+        "word": "trigger",
+        "meaning": "きっかけになる",
+        "category": "英単3"
+    },
+    {
+        "word": "consequence",
+        "meaning": "結果",
+        "category": "英単3"
+    },
+    {
+        "word": "resort",
+        "meaning": "訴える",
+        "category": "英単3"
+    },
+    {
+        "word": "formula",
+        "meaning": "方法",
+        "category": "英単3"
+    },
+    {
+        "word": "procedure",
+        "meaning": "手続き",
+        "category": "英単3"
+    },
+    {
+        "word": "extraordinary",
+        "meaning": "並外れた",
+        "category": "英単3"
+    },
+    {
+        "word": "absolute",
+        "meaning": "絶対的な",
+        "category": "英単3"
+    },
+    {
+        "word": "overwhelming",
+        "meaning": "圧倒的な",
+        "category": "英単3"
+    },
+    {
+        "word": "altogether",
+        "meaning": "完全に",
+        "category": "英単3"
+    },
+    {
+        "word": "entire",
+        "meaning": "すべての",
+        "category": "英単3"
+    },
+    {
+        "word": "tremendos",
+        "meaning": "すさまじい",
+        "category": "英単3"
+    },
+    {
+        "word": "sheer",
+        "meaning": "とてつもない〜の",
+        "category": "英単3"
+    },
+    {
+        "word": "partial",
+        "meaning": "部分的な",
+        "category": "英単3"
+    },
+    {
+        "word": "barely",
+        "meaning": "かろうじて",
+        "category": "英単3"
+    },
+    {
+        "word": "slight",
+        "meaning": "わずかな",
+        "category": "英単3"
+    },
+    {
+        "word": "approximately",
+        "meaning": "おおよそ",
+        "category": "英単3"
+    },
+    {
+        "word": "frequently",
+        "meaning": "頻繁に",
+        "category": "英単3"
+    },
+    {
+        "word": "apparently",
+        "meaning": "どうやら〜らしい",
+        "category": "英単3"
+    },
+    {
+        "word": "merely",
+        "meaning": "〜にすぎない",
+        "category": "英単3"
+    },
+    {
+        "word": "somehow",
+        "meaning": "何らかの方法で",
+        "category": "英単3"
+    },
+    {
+        "word": "thus",
+        "meaning": "それゆえに",
+        "category": "英単3"
+    },
+    {
+        "word": "pretty",
+        "meaning": "まあまあ",
+        "category": "英単3"
+    },
+    {
+        "word": "despite",
+        "meaning": "〜にもかかわらず",
+        "category": "英単3"
+    },
+    {
+        "word": "defy",
+        "meaning": "逆らう",
+        "category": "英単3"
+    },
+    {
+        "word": "condemn",
+        "meaning": "非難する",
+        "category": "英単3"
+    },
+    {
+        "word": "contradict",
+        "meaning": "矛盾する",
+        "category": "英単3"
+    },
+    {
+        "word": "articulate",
+        "meaning": "はっきり述べる",
+        "category": "英単3"
+    },
+    {
+        "word": "advocate",
+        "meaning": "提唱者",
+        "category": "英単3"
+    },
+    {
+        "word": "evolution",
+        "meaning": "進化",
+        "category": "英単3"
+    },
+    {
+        "word": "fluid",
+        "meaning": "流体",
+        "category": "英単3"
+    },
+    {
+        "word": "probe",
+        "meaning": "探査機",
+        "category": "英単3"
+    },
+    {
+        "word": "particle",
+        "meaning": "粒子",
+        "category": "英単3"
+    },
+    {
+        "word": "mutation",
+        "meaning": "突然変異",
+        "category": "英単3"
+    },
+    {
+        "word": "heredity",
+        "meaning": "遺伝",
+        "category": "英単3"
+    },
+    {
+        "word": "hypothesis",
+        "meaning": "仮説",
+        "category": "英単3"
+    },
+    {
+        "word": "specimen",
+        "meaning": "標本",
+        "category": "英単3"
+    },
+    {
+        "word": "microscope",
+        "meaning": "顕微鏡",
+        "category": "英単3"
+    },
+    {
+        "word": "realm",
+        "meaning": "領域",
+        "category": "英単3"
+    },
+  {
+    "word": "prosperity",
+    "meaning": "繁栄"
+  },
+  {
+    "word": "persuade",
+    "meaning": "説得して〜する"
+  },
+  {
+    "word": "convince",
+    "meaning": "確信する"
+  },
+  {
+    "word": "fasten",
+    "meaning": "固定する"
+  },
+  {
+    "word": "resist",
+    "meaning": "我慢する"
+  },
+  {
+    "word": "bend",
+    "meaning": "身を屈める"
+  },
+  {
+    "word": "gaze",
+    "meaning": "見つめる"
+  },
+  {
+    "word": "glance",
+    "meaning": "ちらりとみる"
+  },
+  {
+    "word": "nod",
+    "meaning": "うなずく"
+  },
+  {
+    "word": "bury",
+    "meaning": "埋める"
+  },
+  {
+    "word": "scatter",
+    "meaning": "撒き散らす"
+  },
+  {
+    "word": "hang",
+    "meaning": "掛ける"
+  },
+  {
+    "word": "stir",
+    "meaning": "混ぜる"
+  },
+  {
+    "word": "dip",
+    "meaning": "つける"
+  },
+  {
+    "word": "polish",
+    "meaning": "磨く"
+  },
+  {
+    "word": "imitate",
+    "meaning": "まねる"
+  },
+  {
+    "word": "arise",
+    "meaning": "生じる"
+  },
+  {
+    "word": "occur",
+    "meaning": "生じる"
+  },
+  {
+    "word": "involve",
+    "meaning": "巻き込まれる"
+  },
+  {
+    "word": "counterpart",
+    "meaning": "対応する"
+  },
+  {
+    "word": "persist",
+    "meaning": "持続する"
+  },
+  {
+    "word": "acquire",
+    "meaning": "習得する"
+  },
+  {
+    "word": "reunion",
+    "meaning": "同窓会"
+  },
+  {
+    "word": "classify",
+    "meaning": "分類する"
+  },
+  {
+    "word": "estimate",
+    "meaning": "推定する"
+  },
+  {
+    "word": "organize",
+    "meaning": "まとめる"
+  },
+  {
+    "word": "suppose",
+    "meaning": "仮定する(〜することになっている)"
+  },
+  {
+    "word": "preserve",
+    "meaning": "保護する"
+  },
+  {
+    "word": "greedy",
+    "meaning": "貪欲な"
+  },
+  {
+    "word": "addicted",
+    "meaning": "中毒である"
+  },
+  {
+    "word": "earnest",
+    "meaning": "真面目な"
+  },
+  {
+    "word": "modest",
+    "meaning": "謙虚な"
+  },
+  {
+    "word": "punctual",
+    "meaning": "時間を守る"
+  },
+  {
+    "word": "proper",
+    "meaning": "適切な"
+  },
+  {
+    "word": "tidy",
+    "meaning": "きちんとした"
+  },
+  {
+    "word": "fabulous",
+    "meaning": "とても素敵な"
+  },
+  {
+    "word": "ripe",
+    "meaning": "熟した"
+  },
+  {
+    "word": "mature",
+    "meaning": "成熟した"
+  },
+  {
+    "word": "weird",
+    "meaning": "変な"
+  },
+  {
+    "word": "severe",
+    "meaning": "厳しい"
+  },
+  {
+    "word": "valid",
+    "meaning": "妥当な"
+  },
+  {
+    "word": "urgent",
+    "meaning": "緊急の"
+  },
+  {
+    "word": "bare",
+    "meaning": "剥き出しの"
+  },
+  {
+    "word": "narrow",
+    "meaning": "狭い"
+  },
+  {
+    "word": "calculate",
+    "meaning": "計算する"
+  },
+  {
+    "word": "incident",
+    "meaning": "出来事"
+  },
+  {
+    "word": "current",
+    "meaning": "最新の"
+  },
+  {
+    "word": "permanent",
+    "meaning": "永久的な"
+  },
+  {
+    "word": "enclose",
+    "meaning": "同封する"
+  },
+  {
+    "word": "content",
+    "meaning": "中身"
+  },
+  {
+    "word": "fuss",
+    "meaning": "大騒ぎ"
+  },
+  {
+    "word": "reception",
+    "meaning": "もてなし"
+  },
+  {
+    "word": "guarantee",
+    "meaning": "保証される"
+  },
+  {
+    "word": "ingredient",
+    "meaning": "材料"
+  },
+  {
+    "word": "calculate",
+    "meaning": "〜を計算する"
+  },
+  {
+    "word": "incident",
+    "meaning": "出来事"
+  },
+  {
+    "word": "current",
+    "meaning": "最新の"
+  },
+  {
+    "word": "abate",
+    "meaning": "勢い・強度などが和らぐ"
+  },
+  {
+    "word": "alleviate",
+    "meaning": "苦痛・問題などを軽減する"
+  },
+  {
+    "word": "apprehensive",
+    "meaning": "不安な"
+  },
+  {
+    "word": "belligerent",
+    "meaning": "好戦的な"
+  },
+  {
+    "word": "candid",
+    "meaning": "率直な"
+  },
+  {
+    "word": "coerce",
+    "meaning": "人に強制する"
+  },
+  {
+    "word": "conspicuous",
+    "meaning": "目立つ"
+  },
+  {
+    "word": "deteriorate",
+    "meaning": "悪化する"
+  },
+  {
+    "word": "elusive",
+    "meaning": "理解や定義がとらえどころのない"
+  },
+  {
+    "word": "exacerbate",
+    "meaning": "悪化させる"
+  },
+  {
+    "word": "feasible",
+    "meaning": "実現可能な"
+  },
+  {
+    "word": "frivolous",
+    "meaning": "くだらない"
+  },
+  {
+    "word": "impeccable",
+    "meaning": "欠点のない"
+  },
+  {
+    "word": "innate",
+    "meaning": "生まれつきの"
+  },
+  {
+    "word": "meticulous",
+    "meaning": "細心の注意を払う"
+  },
+  {
+    "word": "perilous",
+    "meaning": "危険な"
+  },
+  {
+    "word": "plausible",
+    "meaning": "もっともらしい"
+  },
+  {
+    "word": "resilient",
+    "meaning": "回復力のある"
+  },
+  {
+    "word": "scrutinize",
+    "meaning": "綿密に調べる"
+  },
+  {
+    "word": "substantiate",
+    "meaning": "主張などを実証する"
+  },
+  {
+    "word": "permanent",
+    "meaning": "永久的な"
+  },
+  {
+    "word": "enclose",
+    "meaning": "同封する"
+  },
+  {
+    "word": "fuss",
+    "meaning": "大騒ぎ"
+  },
+  {
+    "word": "reception",
+    "meaning": "もてなし"
+  },
+  {
+    "word": "aisle",
+    "meaning": "通路"
+  },
+  {
+    "word": "district",
+    "meaning": "地区"
+  },
+  {
+    "word": "facility",
+    "meaning": "施設"
+  },
+  {
+    "word": "occupy",
+    "meaning": "占める"
+  },
+  {
+    "word": "tragedy",
+    "meaning": "悲劇"
+  },
+  {
+    "word": "biography",
+    "meaning": "伝記"
+  },
+  {
+    "word": "proverb",
+    "meaning": "ことわざ"
+  },
+  {
+    "word": "interpret",
+    "meaning": "解釈する"
+  },
+  {
+    "word": "quote",
+    "meaning": "引用する"
+  },
+  {
+    "word": "indicate",
+    "meaning": "示す"
+  },
+  {
+    "word": "reveal",
+    "meaning": "明らかにする"
+  },
+  {
+    "word": "absorb",
+    "meaning": "没頭する"
+  },
+  {
+    "word": "fond",
+    "meaning": "好きで"
+  },
+  {
+    "word": "reluctant",
+    "meaning": "機が進まない"
+  },
+  {
+    "word": "tremble",
+    "meaning": "震える"
+  },
+  {
+    "word": "despair",
+    "meaning": "絶望😔"
+  },
+  {
+    "word": "moderate",
+    "meaning": "適度な"
+  },
+  {
+    "word": "subtle",
+    "meaning": "かすかな"
+  },
+  {
+    "word": "ironically",
+    "meaning": "皮肉なことに"
+  },
+  {
+    "word": "regardless",
+    "meaning": "無関係に"
+  }
+]

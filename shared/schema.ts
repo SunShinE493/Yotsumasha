@@ -1,0 +1,143 @@
+import { sql } from "drizzle-orm";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// Session storage table
+export const sessions = pgTable(
+"sessions",
+{
+sid: varchar("sid").primaryKey(),
+sess: jsonb("sess").notNull(),
+expire: timestamp("expire").notNull(),
+},
+(table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table
+export const users = pgTable("users", {
+id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+email: varchar("email").unique(),
+firstName: varchar("first_name"),
+lastName: varchar("last_name"),
+profileImageUrl: varchar("profile_image_url"),
+createdAt: timestamp("created_at").defaultNow(),
+updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 新しいVocabularyWordsテーブル: ファイルからアップロードされる単語を保存
+export const vocabularyWords = pgTable("vocabulary_words", {
+id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+word: text("word").notNull(),
+meaning: text("meaning").notNull(),
+category: text("category"),
+example: text("example"),
+difficulty: integer("difficulty").default(1),
+createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 新しいReviewVocabularyWordsテーブル: 復習管理用のテーブル
+export const reviewVocabularyWords = pgTable("review_vocabulary_words", {
+id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+wordId: varchar("word_id").references(() => vocabularyWords.id).notNull(),
+isRemembered: boolean("is_remembered").default(false),
+attempts: integer("attempts").default(1),
+lastStudied: timestamp("last_studied").defaultNow(),
+});
+
+export const studySessions = pgTable("study_sessions", {
+id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+startRange: integer("start_range").notNull(),
+endRange: integer("end_range").notNull(),
+totalWords: integer("total_words").notNull(),
+sourceFile: text("source_file"),
+correctCount: integer("correct_count").default(0),
+incorrectCount: integer("incorrect_count").default(0),
+isCompleted: boolean("is_completed").default(false),
+createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const wordProgress = pgTable(
+  "word_progress",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    wordId: varchar("word_id").references(() => vocabularyWords.id).notNull(), 
+    sessionId: varchar("session_id").references(() => studySessions.id).notNull(),
+    isRemembered: boolean("is_remembered").notNull(),
+    attempts: integer("attempts").default(1),
+    lastStudied: timestamp("last_studied").defaultNow(),
+  },
+  (table) => {
+    return {
+      uniqueProgress: uniqueIndex("unique_progress_idx").on(table.wordId, table.sessionId),
+    };
+  }
+);
+
+// Zod schemas
+export const insertVocabularyWordSchema = createInsertSchema(vocabularyWords).pick({
+word: true,
+meaning: true,
+category: true,
+example: true,
+difficulty: true,
+});
+
+export const insertReviewVocabularyWordSchema = createInsertSchema(reviewVocabularyWords).pick({
+wordId: true,
+isRemembered: true,
+attempts: true,
+});
+
+export const insertStudySessionSchema = createInsertSchema(studySessions).pick({
+startRange: true,
+endRange: true,
+totalWords: true,
+});
+
+export const insertWordProgressSchema = createInsertSchema(wordProgress).pick({
+wordId: true,
+sessionId: true,
+isRemembered: true,
+attempts: true,
+});
+
+// Additional schemas for API
+export const vocabularyFileSchema = z.object({
+words: z.array(z.object({
+word: z.string(),
+meaning: z.string(),
+category: z.string().optional(),
+example: z.string().optional(),
+difficulty: z.number().min(1).max(5).optional(),
+}))
+});
+
+export const studyConfigSchema = z.object({
+startRange: z.number().min(1),
+endRange: z.number().min(1),
+questionCount: z.number().min(1),
+order: z.enum(["sequential", "random", "difficulty"]),
+reviewOnly: z.boolean().default(false),
+sourceFile: z.string().optional(),
+});
+
+// Types
+export type VocabularyWord = typeof vocabularyWords.$inferSelect;
+export type InsertVocabularyWord = z.infer<typeof insertVocabularyWordSchema>;
+export type ReviewVocabularyWord = typeof reviewVocabularyWords.$inferSelect;
+export type InsertReviewVocabularyWord = z.infer<typeof insertReviewVocabularyWordSchema>;
+export type StudySession = typeof studySessions.$inferSelect & {
+  words?: VocabularyWord[];
+  progress?: WordProgress[];
+  incorrectWords?: VocabularyWord[];
+};
+export type InsertStudySession = z.infer<typeof insertStudySessionSchema>;
+export type WordProgress = typeof wordProgress.$inferSelect;
+export type InsertWordProgress = z.infer<typeof insertWordProgressSchema>;
+export type VocabularyFile = z.infer<typeof vocabularyFileSchema>;
+export type StudyConfig = z.infer<typeof studyConfigSchema>;
+
+// User types
+export type User = typeof users.$inferSelect;
+export type UpsertUser = typeof users.$inferInsert;
