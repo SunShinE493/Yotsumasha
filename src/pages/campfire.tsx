@@ -36,7 +36,7 @@ export default function CampfirePage() {
         <Card className="relative overflow-hidden">
           <div
             className="absolute inset-0 bg-center bg-cover opacity-30 pointer-events-none"
-            style={{ backgroundImage: "url('/campfire_lit.png')" }}
+            style={{ backgroundImage: "url('/Campfire_lit.png')" }}
           />
           <div className="relative">
             <CardHeader>

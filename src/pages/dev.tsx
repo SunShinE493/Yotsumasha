@@ -38,27 +38,63 @@ export default function DevToolsPage() {
   }, []);
 
   const loadBuiltin = async (name: string) => {
+    if (!email || !password) {
+      setStatus('Email and password required');
+      return;
+    }
     setSelectedBuiltin(name);
     try {
-      const res = await apiRequest('POST', '/api/admin/files/builtin/read', { name, email, password });
-      if (!res.ok) { setBuiltinContent('[]'); return; }
+      setStatus('Loading...');
+      const res = await fetch('/api/admin/files/builtin/read', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Failed to load' }));
+        setStatus(`Load failed: ${err.message || res.status}`);
+        setBuiltinContent('[]');
+        return;
+      }
       const data = await res.json();
       setBuiltinContent(data?.content || '[]');
-    } catch { setBuiltinContent('[]'); }
+      setStatus('Loaded');
+    } catch (e) {
+      setStatus('Load error');
+      setBuiltinContent('[]');
+    }
   };
 
   const saveBuiltin = async () => {
-    if (!selectedBuiltin) return;
+    if (!selectedBuiltin || !email || !password) {
+      setStatus('Email, password, and file selection required');
+      return;
+    }
     try {
-      const res = await apiRequest('POST', '/api/admin/files/builtin', { name: selectedBuiltin, content: builtinContent, email, password });
+      setStatus('Saving...');
+      const res = await fetch('/api/admin/files/builtin', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: selectedBuiltin, content: builtinContent, email, password })
+      });
       if (!res.ok) {
-        setStatus(`Save builtin failed (${res.status})`);
+        const err = await res.json().catch(() => ({ message: 'Failed to save' }));
+        setStatus(`Save failed: ${err.message || res.status}`);
         return;
       }
       setStatus('Builtin saved');
-      try { await apiRequest('POST', '/api/admin/backup/gist', {}); } catch {}
-    } catch {
-      setStatus('Save builtin error');
+      try {
+        await fetch('/api/admin/backup/gist', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+      } catch {}
+    } catch (e) {
+      setStatus('Save error');
     }
   };
 
