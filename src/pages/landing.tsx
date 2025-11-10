@@ -43,6 +43,14 @@ export default function Landing() {
               <p className="mt-2 text-sm text-muted-foreground">制限時間でスコアを競う</p>
             </a>
 
+            <a href="/campfire" className="group block rounded-xl border border-border bg-card p-5 hover:bg-accent transition-colors">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-foreground">Campfire</h3>
+                <span className="text-sm text-muted-foreground">Campfire</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">復習リストを焼く（アップロード→料理する）</p>
+            </a>
+
             <a href="/ranking" className="group block rounded-xl border border-border bg-card p-5 hover:bg-accent transition-colors md:col-span-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-foreground">ランキング</h3>
