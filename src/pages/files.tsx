@@ -49,9 +49,14 @@ export default function FilesPage() {
 
   const handleCreate = async () => {
     try {
-      await apiRequest("POST", "/api/files", { name: newFileName, content: editorContent || "[]" });
-      toast({ title: "保存しました", description: `${newFileName} を作成しました` });
-      setSelected(newFileName);
+      // クライアント側で .json 拡張子を強制付与し、前後空白を除去
+      let name = (newFileName || "").trim();
+      if (!name.toLowerCase().endsWith(".json")) {
+        name = `${name}.json`;
+      }
+      await apiRequest("POST", "/api/files", { name, content: editorContent || "[]" });
+      toast({ title: "保存しました", description: `${name} を作成しました` });
+      setSelected(name);
       setIsBuiltin(false);
       await reload();
       // Try backup to gist (best-effort)
