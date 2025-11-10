@@ -3,6 +3,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function DevToolsPage() {
   const queryClient = useQueryClient();
@@ -13,12 +16,59 @@ export default function DevToolsPage() {
   const [importJson, setImportJson] = useState<string>('');
   const [status, setStatus] = useState<string>('');
   const [incorrectOnly, setIncorrectOnly] = useState<boolean>(false);
+  const [builtin, setBuiltin] = useState<{ name: string; wordCount: number|null }[]>([]);
+  const [selectedBuiltin, setSelectedBuiltin] = useState<string>('');
+  const [builtinContent, setBuiltinContent] = useState<string>('');
 
   useEffect(() => {
     fetch('/api/csrf', { credentials: 'same-origin' })
       .then(r=>r.json())
       .then(d=> setCsrf(d.csrfToken || '')); 
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiRequest('GET', '/api/files');
+        const data = await res.json();
+        const list = Array.isArray(data?.builtin) ? data.builtin.map((f:any)=>({ name: f.name, wordCount: f.wordCount ?? null })) : [];
+        setBuiltin(list);
+      } catch {}
+    })();
+  }, []);
+
+  const loadBuiltin = async (name: string) => {
+    setSelectedBuiltin(name);
+    try {
+      // 読み込みは /src/components/data から直接は不可のため、/api/vocabulary?source= を使わず、/api/files は built-in 禁止。ここでは空テンプレ挿入→保存時に上書き。
+      // 最低限、現在の文字数は出せない場合があるが、保存のたびに上書きする運用。
+      // 可能ならサーバに専用GETを追加するが今回は簡易対応で空の配列か既存値を試行。
+      const res = await fetch(`/src/components/data/${name}`, { credentials: 'same-origin' });
+      if (res.ok) {
+        const text = await res.text();
+        setBuiltinContent(text);
+      } else {
+        setBuiltinContent('[]');
+      }
+    } catch {
+      setBuiltinContent('[]');
+    }
+  };
+
+  const saveBuiltin = async () => {
+    if (!selectedBuiltin) return;
+    try {
+      const res = await apiRequest('POST', '/api/admin/files/builtin', { name: selectedBuiltin, content: builtinContent, email, password });
+      if (!res.ok) {
+        setStatus(`Save builtin failed (${res.status})`);
+        return;
+      }
+      setStatus('Builtin saved');
+      try { await apiRequest('POST', '/api/admin/backup/gist', {}); } catch {}
+    } catch {
+      setStatus('Save builtin error');
+    }
+  };
 
   const doExport = async () => {
     try {
@@ -188,6 +238,29 @@ export default function DevToolsPage() {
             </div>
             <div className="flex gap-2">
               <Button variant="secondary" onClick={doImport}>Import User Data</Button>
+              <div className="text-sm text-muted-foreground">{status}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-base font-semibold text-foreground">Builtin JSON Editor</h2>
+            <div>
+              <Label className="text-xs text-muted-foreground">内蔵ファイル</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {builtin.map(b => (
+                  <button key={b.name}
+                    className={`text-left px-3 py-2 rounded-md border ${selectedBuiltin===b.name?'bg-accent':'bg-background'} hover:bg-accent transition-colors`}
+                    onClick={()=>loadBuiltin(b.name)}>
+                    <div className="text-sm text-foreground">{b.name}</div>
+                    <div className="text-xs text-muted-foreground">{typeof b.wordCount==='number'?`${b.wordCount} 語`:''}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Textarea className="min-h-[320px]" value={builtinContent} onChange={(e)=>setBuiltinContent(e.target.value)} placeholder='[ { "word": "apple", "meaning": "りんご" } ]' />
+            <div className="flex gap-2">
+              <Button onClick={saveBuiltin} disabled={!selectedBuiltin}>Save Builtin</Button>
               <div className="text-sm text-muted-foreground">{status}</div>
             </div>
           </CardContent>

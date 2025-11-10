@@ -31,18 +31,7 @@ export default function FilesPage() {
   const loadFile = async (name: string, builtin: boolean) => {
     setSelected(name);
     setIsBuiltin(builtin);
-    if (builtin) {
-      // Built-in: show read-only content by loading via GET /api/vocabulary?source=name
-      try {
-        const res = await apiRequest("GET", `/api/files/${encodeURIComponent(name)}`);
-        // For built-in, server disallows; fallback: synthesize content with count only
-        const data = await res.json();
-        setEditorContent(data?.content || "[]");
-      } catch {
-        // Fallback to minimal content
-        setEditorContent("[]");
-      }
-    } else {
+    if (!builtin) {
       try {
         const res = await apiRequest("GET", `/api/files/${encodeURIComponent(name)}`);
         const data = await res.json();
@@ -70,9 +59,7 @@ export default function FilesPage() {
   const handleSave = async () => {
     if (!selected) return;
     try {
-      if (isBuiltin) {
-        await apiRequest("POST", "/api/admin/files/builtin", { name: selected, content: editorContent });
-      } else {
+      if (!isBuiltin) {
         await apiRequest("PUT", `/api/files/${encodeURIComponent(selected)}`, { content: editorContent });
       }
       toast({ title: "保存しました", description: `${selected} を保存しました` });
@@ -116,18 +103,6 @@ export default function FilesPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <Label className="text-xs text-muted-foreground">内蔵</Label>
-                <div className="mt-2 space-y-2">
-                  {catalog.builtin.map((f) => (
-                    <button key={f.name} className={`w-full text-left px-3 py-2 rounded-md border ${selected === f.name ? 'bg-accent' : 'bg-background'} hover:bg-accent transition-colors`}
-                      onClick={() => loadFile(f.name, true)}>
-                      <div className="text-sm text-foreground">{f.name}</div>
-                      <div className="text-xs text-muted-foreground">{f.wordCount ?? '-'} 語</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
                 <Label className="text-xs text-muted-foreground">アップロード</Label>
                 <div className="mt-2 space-y-2">
                   {catalog.uploaded.map((f) => (
@@ -152,12 +127,47 @@ export default function FilesPage() {
                 <Button variant="outline" onClick={handleCreate}>新規作成</Button>
                 <div className="flex-1" />
                 <Button onClick={handleSave} disabled={!selected}>保存</Button>
-                <Button variant="destructive" onClick={handleDelete} disabled={!selected || isBuiltin}>削除</Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={!selected}>削除</Button>
               </div>
-              <Textarea className="min-h-[360px]" value={editorContent} onChange={(e) => setEditorContent(e.target.value)} placeholder={`[\n  { "word": "apple", "meaning": "りんご" }\n]`} />
-              <p className="text-xs text-muted-foreground">
-                {isBuiltin ? "内蔵ファイルの編集には管理者パスワードが必要です（保存時に検証）。" : "アップロードファイルは自由に編集できます。"}
-              </p>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={()=>{
+                  // 初期テンプレート
+                  if (!editorContent || editorContent.trim().length === 0) {
+                    setEditorContent('[\n  {\n    "word": "",\n    "meaning": "",\n    "category": "",\n    "example": "",\n    "difficulty": 1\n  }\n]');
+                  } else {
+                    // 配列末尾に1行追加
+                    try {
+                      const arr = JSON.parse(editorContent);
+                      if (Array.isArray(arr)) {
+                        arr.push({ word: "", meaning: "", category: "", example: "", difficulty: 1 });
+                        setEditorContent(JSON.stringify(arr, null, 2));
+                      }
+                    } catch {
+                      // 無視
+                    }
+                  }
+                }}>行を追加</Button>
+              </div>
+              <Textarea
+                className="min-h-[360px]"
+                value={editorContent}
+                onChange={(e) => setEditorContent(e.target.value)}
+                onKeyDown={(e)=>{
+                  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    // Ctrl/Cmd+Enter でテンプレート行を追加
+                    try {
+                      const arr = editorContent ? JSON.parse(editorContent) : [];
+                      if (Array.isArray(arr)) {
+                        arr.push({ word: "", meaning: "", category: "", example: "", difficulty: 1 });
+                        setEditorContent(JSON.stringify(arr, null, 2));
+                        e.preventDefault();
+                      }
+                    } catch {}
+                  }
+                }}
+                placeholder={`[\n  { "word": "apple", "meaning": "りんご" }\n]`}
+              />
+              <p className="text-xs text-muted-foreground">ヒント: Ctrl/Cmd+Enter でテンプレート行を追加できます。</p>
             </CardContent>
           </Card>
         </div>
