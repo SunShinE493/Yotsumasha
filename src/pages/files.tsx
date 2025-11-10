@@ -175,6 +175,11 @@ export default function FilesPage() {
                 placeholder={`[\n  { "word": "apple", "meaning": "りんご" }\n]`}
               />
               <p className="text-xs text-muted-foreground">ヒント: Ctrl/Cmd+Enter でテンプレート行を追加できます。</p>
+              {selected && (
+                <div className="w-full mt-3 px-4 py-3 rounded-md border border-border bg-muted text-foreground">
+                  <div className="text-base font-medium truncate">{selected}</div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

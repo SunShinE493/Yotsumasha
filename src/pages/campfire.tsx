@@ -23,40 +23,41 @@ export default function CampfirePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        <header>
-          <h1 className="text-xl font-semibold text-foreground">Campfire</h1>
-          <p className="text-sm text-muted-foreground">復習リストを焼こう</p>
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">Campfire</h1>
+            <p className="text-sm text-muted-foreground">復習リストを焼こう</p>
+          </div>
+          <a href="/" className="px-3 py-2 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm">ホームへ</a>
         </header>
 
         <FileUpload onUploadSuccess={handleUploadSuccess} />
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <img src="/Campfire.png" alt="campfire" className="w-8 h-8 rounded-md object-cover" />
+        <Card className="relative overflow-hidden">
+          <div
+            className="absolute inset-0 bg-center bg-cover opacity-30 pointer-events-none"
+            style={{ backgroundImage: "url('/campfire_lit.png')" }}
+          />
+          <div className="relative">
+            <CardHeader>
               <CardTitle className="text-base">仕上げ</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between gap-4">
-            <div className="text-sm text-muted-foreground">
-              {uploaded ? (
-                <span>
-                  アップロード済み: <span className="text-foreground">{uploaded.name}</span>（{uploaded.wordCount}語）
-                </span>
-              ) : (
-                <span>まず単語リスト（JSON）をアップロードしてください</span>
-              )}
-            </div>
-            <Button onClick={handleCook} disabled={!uploaded}>
-              料理する
-            </Button>
-          </CardContent>
+            </CardHeader>
+            <CardContent className="flex items-center justify-between gap-4">
+              <div className="text-sm text-muted-foreground">
+                {uploaded ? (
+                  <span>
+                    アップロード済み: <span className="text-foreground">{uploaded.name}</span>（{uploaded.wordCount}語）
+                  </span>
+                ) : (
+                  <span>まず単語リスト（JSON）をアップロードしてください</span>
+                )}
+              </div>
+              <Button onClick={handleCook} disabled={!uploaded}>
+                料理する
+              </Button>
+            </CardContent>
+          </div>
         </Card>
-        <div>
-          <a href="/" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm">
-            ホームへ戻る
-          </a>
-        </div>
       </div>
     </div>
   );
