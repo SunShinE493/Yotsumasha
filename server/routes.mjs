@@ -42,6 +42,7 @@ export async function registerRoutes(app) {
       username: 'ゲストユーザー',
       isGuest: true,
       message: 'ゲストとしてアクセス中です'
+    });
   // Guest logout/clear route - clears guest session data
   app.post('/api/guest/logout', (req, res) => {
     if (req.session.guestId) {
@@ -437,7 +438,7 @@ export async function registerRoutes(app) {
       res.json(sessionWithWords);
     } catch (error) {
       res.status(400).json({ 
-        message: "学習セッションの作成に失敗しました。指定された単語の範囲や設定を確認してください。"
+        message: "学習セッションの作成に失敗しました。指定された単語の範囲や設定を確認してください。",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
