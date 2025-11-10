@@ -40,19 +40,11 @@ export default function DevToolsPage() {
   const loadBuiltin = async (name: string) => {
     setSelectedBuiltin(name);
     try {
-      // 読み込みは /src/components/data から直接は不可のため、/api/vocabulary?source= を使わず、/api/files は built-in 禁止。ここでは空テンプレ挿入→保存時に上書き。
-      // 最低限、現在の文字数は出せない場合があるが、保存のたびに上書きする運用。
-      // 可能ならサーバに専用GETを追加するが今回は簡易対応で空の配列か既存値を試行。
-      const res = await fetch(`/src/components/data/${name}`, { credentials: 'same-origin' });
-      if (res.ok) {
-        const text = await res.text();
-        setBuiltinContent(text);
-      } else {
-        setBuiltinContent('[]');
-      }
-    } catch {
-      setBuiltinContent('[]');
-    }
+      const res = await apiRequest('POST', '/api/admin/files/builtin/read', { name, email, password });
+      if (!res.ok) { setBuiltinContent('[]'); return; }
+      const data = await res.json();
+      setBuiltinContent(data?.content || '[]');
+    } catch { setBuiltinContent('[]'); }
   };
 
   const saveBuiltin = async () => {

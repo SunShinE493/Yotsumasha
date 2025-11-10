@@ -666,6 +666,7 @@ export async function registerRoutes(app) {
         wordCount: entry.wordCount ?? null,
         size: entry.size ?? null,
         updatedAt: entry.updatedAt ? new Date(entry.updatedAt).toISOString() : null,
+        owner: (storage.getUploadedOwner(entry.name) || null),
       });
       res.json({
         builtin: catalog.builtin.map((item) => ({
@@ -705,6 +706,7 @@ export async function registerRoutes(app) {
         return res.status(400).json({ message: 'Cannot overwrite built-in files' });
       }
       const result = await saveUploadedJsonFile(name, content, { overwrite: false });
+      try { storage.setUploadedOwner(result.name, req.userId); } catch {}
       res.json({ ok: true, name: result.name, wordCount: result.wordCount });
     } catch (error) {
       if (error && error.code === 'FILE_EXISTS') {
@@ -724,7 +726,14 @@ export async function registerRoutes(app) {
       if (BUILTIN_JSON_FILES.includes(fileName)) {
         return res.status(400).json({ message: 'Built-in files are read-only' });
       }
+      // Only owner or developer can edit
+      const meta = storage.getUploadedOwner(fileName);
+      const isDev = req.user?.isDev === true;
+      if (meta && !isDev && meta.ownerId !== req.userId) {
+        return res.status(403).json({ message: 'forbidden (not owner)' });
+      }
       const result = await saveUploadedJsonFile(fileName, content, { overwrite: true });
+      if (!meta) { try { storage.setUploadedOwner(fileName, req.userId); } catch {} }
       res.json({ ok: true, name: result.name, wordCount: result.wordCount });
     } catch (error) {
       res.status(400).json({ message: error?.message || 'Failed to update file' });
@@ -740,10 +749,30 @@ export async function registerRoutes(app) {
       if (BUILTIN_JSON_FILES.includes(fileName)) {
         return res.status(400).json({ message: 'Built-in files are read-only' });
       }
+      const meta = storage.getUploadedOwner(fileName);
+      const isDev = req.user?.isDev === true;
+      if (meta && !isDev && meta.ownerId !== req.userId) {
+        return res.status(403).json({ message: 'forbidden (not owner)' });
+      }
       await deleteUploadedJsonFile(fileName);
       res.json({ ok: true });
     } catch (error) {
       res.status(404).json({ message: error?.message || 'File not found' });
+    }
+  });
+
+  // Admin: read builtin JSON content
+  app.post('/api/admin/files/builtin/read', optionalAuthentication, async (req, res) => {
+    try {
+      if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
+      const { name } = req.body || {};
+      if (!name || !BUILTIN_JSON_FILES.includes(name)) return res.status(400).json({ message: 'invalid file' });
+      const resolved = await fileUtils.resolveJsonFilePath(name);
+      const fs = await import('fs/promises');
+      const content = await fs.readFile(resolved.path, 'utf8');
+      res.json({ name, content });
+    } catch (e) {
+      res.status(500).json({ message: 'failed to read builtin', error: e?.message || String(e) });
     }
   });
   const httpServer = createServer(app);

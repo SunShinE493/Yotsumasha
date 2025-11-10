@@ -22,6 +22,8 @@ export class MemStorage {
     // Score attack: userId -> record
     this.scoreAttack = new Map();
     this.scoreAttackRuns = new Map(); // userId -> Array<run>
+    // Uploaded file ownership metadata: fileName -> { ownerId, ownerName }
+    this.uploadedFilesMeta = new Map();
 
     // Session store for authentication
     this.sessionStore = new MemoryStore({
@@ -84,6 +86,7 @@ export class MemStorage {
       userDatasets: Array.from(this.userDatasets.entries()).map(([uid, map]) => [uid, Array.from(map.entries())]),
       scoreAttack: Array.from(this.scoreAttack.entries()),
       scoreAttackRuns: Array.from(this.scoreAttackRuns.entries()),
+      uploadedFilesMeta: Array.from(this.uploadedFilesMeta.entries()),
     };
   }
 
@@ -97,6 +100,7 @@ export class MemStorage {
       this.userDatasets = new Map((data?.userDatasets || []).map(([uid, entries]) => [uid, new Map(entries || [])]));
       this.scoreAttack = new Map(data?.scoreAttack || []);
       this.scoreAttackRuns = new Map((data?.scoreAttackRuns || []).map(([uid, arr]) => [uid, Array.isArray(arr) ? arr : []]));
+      this.uploadedFilesMeta = new Map(data?.uploadedFilesMeta || []);
     } catch (e) {
       console.error('[Persist] populate failed:', e?.message || e);
     }
@@ -758,6 +762,22 @@ export class MemStorage {
 
   async getScoreAttack(userId) {
     return this.scoreAttack.get(userId) || { lastScore: 0, bestScore: 0, updatedAt: null };
+  }
+
+  // --- Uploaded files ownership helpers ---
+  setUploadedOwner(fileName, ownerId) {
+    const user = this.users.get(ownerId) || null;
+    const ownerName = user?.displayName || user?.username || '名無しさん';
+    this.uploadedFilesMeta.set(fileName, { ownerId, ownerName });
+    this._scheduleSave();
+    return this.uploadedFilesMeta.get(fileName);
+  }
+  getUploadedOwner(fileName) {
+    return this.uploadedFilesMeta.get(fileName) || null;
+  }
+  isOwner(userId, fileName) {
+    const meta = this.getUploadedOwner(fileName);
+    return !!(meta && meta.ownerId === userId);
   }
 }
 

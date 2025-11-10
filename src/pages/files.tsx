@@ -6,16 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
 
-type CatalogItem = { name: string; wordCount: number | null; type: "builtin" | "uploaded"; updatedAt?: string | null; size?: number | null; };
+type CatalogItem = { name: string; wordCount: number | null; type: "builtin" | "uploaded"; updatedAt?: string | null; size?: number | null; owner?: { ownerId: string; ownerName: string } | null; };
 
 export default function FilesPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [catalog, setCatalog] = useState<{ builtin: CatalogItem[]; uploaded: CatalogItem[] }>({ builtin: [], uploaded: [] });
   const [selected, setSelected] = useState<string>("");
   const [editorContent, setEditorContent] = useState<string>("");
   const [isBuiltin, setIsBuiltin] = useState<boolean>(false);
   const [newFileName, setNewFileName] = useState<string>("my-words.json");
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   const reload = async () => {
     try {
@@ -31,6 +34,8 @@ export default function FilesPage() {
   const loadFile = async (name: string, builtin: boolean) => {
     setSelected(name);
     setIsBuiltin(builtin);
+    const entry = catalog.uploaded.find(f => f.name === name);
+    setIsOwner(!!(entry?.owner && user?.id && entry.owner.ownerId === user.id));
     if (!builtin) {
       try {
         const res = await apiRequest("GET", `/api/files/${encodeURIComponent(name)}`);
@@ -106,10 +111,12 @@ export default function FilesPage() {
                 <Label className="text-xs text-muted-foreground">アップロード</Label>
                 <div className="mt-2 space-y-2">
                   {catalog.uploaded.map((f) => (
-                    <button key={f.name} className={`w-full text-left px-3 py-2 rounded-md border ${selected === f.name ? 'bg-accent' : 'bg-background'} hover:bg-accent transition-colors`}
+                    <button key={f.name} className={`w-full text-left px-4 py-3 rounded-md border ${selected === f.name ? 'bg-accent' : 'bg-background'} hover:bg-accent transition-colors`}
                       onClick={() => loadFile(f.name, false)}>
-                      <div className="text-sm text-foreground">{f.name}</div>
-                      <div className="text-xs text-muted-foreground">{(f.wordCount ?? '-') + ' 語'} {f.updatedAt ? `・${new Date(f.updatedAt).toLocaleString()}` : ''}</div>
+                      <div className="text-base text-foreground truncate">{f.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {(f.wordCount ?? '-') + ' 語'} {f.owner?.ownerName ? `・作成者: ${f.owner.ownerName}` : ''} {f.updatedAt ? `・${new Date(f.updatedAt).toLocaleString()}` : ''}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -126,8 +133,8 @@ export default function FilesPage() {
                 <Input value={newFileName} onChange={(e) => setNewFileName(e.target.value)} placeholder="new-file.json" />
                 <Button variant="outline" onClick={handleCreate}>新規作成</Button>
                 <div className="flex-1" />
-                <Button onClick={handleSave} disabled={!selected}>保存</Button>
-                <Button variant="destructive" onClick={handleDelete} disabled={!selected}>削除</Button>
+                <Button onClick={handleSave} disabled={!selected || !isOwner}>保存</Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={!selected || !isOwner}>削除</Button>
               </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={()=>{

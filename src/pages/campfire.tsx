@@ -33,7 +33,7 @@ export default function CampfirePage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
-              <img src="/sample.img" alt="campfire" className="w-8 h-8 rounded-md object-cover" />
+              <img src="/Campfire.png" alt="campfire" className="w-8 h-8 rounded-md object-cover" />
               <CardTitle className="text-base">仕上げ</CardTitle>
             </div>
           </CardHeader>
@@ -52,6 +52,11 @@ export default function CampfirePage() {
             </Button>
           </CardContent>
         </Card>
+        <div>
+          <a href="/" className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm">
+            ホームへ戻る
+          </a>
+        </div>
       </div>
     </div>
   );
