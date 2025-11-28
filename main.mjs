@@ -748,7 +748,7 @@ if(API_KEY === undefined){
       try {
     
         let result = await ai.models.generateContentStream({
-        model: "gemini-3-pro-preview",
+        model: "gemini-2.5-pro",
         contents: content,
         config: { // 前回確認した通り、configで問題ないならこれでOK
             temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
