@@ -293,6 +293,7 @@ export default function Home() {
       {/* --- */}
 
       {/* Floating Action Button */}
+      {/*
       {reviewWords && (
           <div className="fixed bottom-6 right-6">
             <button
@@ -315,6 +316,7 @@ export default function Home() {
             </button>
           </div>
         )}
+      */}
     </div>
   );
 }
