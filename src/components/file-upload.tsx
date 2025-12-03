@@ -33,11 +33,13 @@ import chiri from "./data/chiri.json";
 import chiri2 from "./data/chiri2.json";
 import Chemistry from "./data/Chemistry.json";
 import organic from "./data/organic.json";
+import rinri2 from "./data/rinri2.json";
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
   "koumin.json": koumin,
   "koumin2.json": koumin2,
   "rinri.json": rinri,
+  "rinri2.json": rinri2,
   "seikei.json": seikei,
   "chiri.json":chiri,
   "chiri2.json":chiri2,

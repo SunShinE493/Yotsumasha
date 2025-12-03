@@ -16,6 +16,7 @@ export const BUILTIN_JSON_FILES = [
   "koumin.json",
   "koumin2.json",
   "rinri.json",
+  "rinri2.json",
   "seikei.json",
   "chiri.json",
   "chiri2.json",
