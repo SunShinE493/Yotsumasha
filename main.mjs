@@ -18,7 +18,7 @@ const parser = new Parser();
 import { Client as Youtubei, MusicClient } from "youtubei";
 import axios from 'axios';
 
-// Import routes
+// Import routes. 
 import { registerRoutes } from './server/routes.mjs';
 
 //aaa
