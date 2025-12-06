@@ -22,6 +22,8 @@ export const BUILTIN_JSON_FILES = [
   "chiri2.json",
   "Chemistry.json",
   "organic.json",
+  "chemistoryByIsii.json",
+  "chemistoryByIsii2.json",
 ];
 
 async function ensureUploadsDir() {

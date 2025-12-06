@@ -34,6 +34,11 @@ import chiri2 from "./data/chiri2.json";
 import Chemistry from "./data/Chemistry.json";
 import organic from "./data/organic.json";
 import rinri2 from "./data/rinri2.json";
+import chemistoryByIsii from "./data/chemistoryByIsii.json";
+import chemistoryByIsii2 from "./data/chemistoryByIsii2.json";
+
+
+
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
   "koumin.json": koumin,
@@ -41,10 +46,12 @@ const availableJsonFiles = {
   "rinri.json": rinri,
   "rinri2.json": rinri2,
   "seikei.json": seikei,
-  "chiri.json":chiri,
-  "chiri2.json":chiri2,
-  "organic.json":organic,
-  "Chemistry.json":Chemistry,
+  "chiri.json": chiri,
+  "chiri2.json": chiri2,
+  "organic.json": organic,
+  "Chemistry.json": Chemistry,
+  "chemistoryByIsii.json": chemistoryByIsii,
+  "chemistoryByIsii2.json": chemistoryByIsii2,
 };
 import { useEffect, useState } from "react";
 
@@ -66,7 +73,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [userFiles, setUserFiles] = useState<{ name: string; wordCount: number|null }[]>([]);
+  const [userFiles, setUserFiles] = useState<{ name: string; wordCount: number | null }[]>([]);
 
   // 内蔵/外部を区別して処理する
   const processJsonData = (data: any[], fileName: string, isBuiltin: boolean = false) => {
@@ -98,26 +105,26 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       onSuccess: () => {
         // 動的プリセット生成（特に Chemistry は Category ごと）
         let presets: { start: number; end: number; label: string }[] = [];
-        
-          const categoryToIndexRange: Map<string, { start: number; end: number }[]> = new Map();
-          words.forEach((w, idx) => {
-            const cat = String(w.category || '未分類');
-            const index1 = idx + 1; // 1-based index for users
-            const ranges = categoryToIndexRange.get(cat) || [];
-            const last = ranges[ranges.length - 1];
-            if (last && last.end === index1 - 1) {
-              last.end = index1;
-            } else {
-              ranges.push({ start: index1, end: index1 });
-            }
-            categoryToIndexRange.set(cat, ranges);
-          });
-          // Categoryごとに複数の離散レンジがあれば、最小-最大でまとめる（UI簡略化）
-          presets = Array.from(categoryToIndexRange.entries()).map(([cat, ranges]) => {
-            const minStart = Math.min(...ranges.map(r => r.start));
-            const maxEnd = Math.max(...ranges.map(r => r.end));
-            return { start: minStart, end: maxEnd, label: cat };
-          }).sort((a, b) => a.start - b.start);
+
+        const categoryToIndexRange: Map<string, { start: number; end: number }[]> = new Map();
+        words.forEach((w, idx) => {
+          const cat = String(w.category || '未分類');
+          const index1 = idx + 1; // 1-based index for users
+          const ranges = categoryToIndexRange.get(cat) || [];
+          const last = ranges[ranges.length - 1];
+          if (last && last.end === index1 - 1) {
+            last.end = index1;
+          } else {
+            ranges.push({ start: index1, end: index1 });
+          }
+          categoryToIndexRange.set(cat, ranges);
+        });
+        // Categoryごとに複数の離散レンジがあれば、最小-最大でまとめる（UI簡略化）
+        presets = Array.from(categoryToIndexRange.entries()).map(([cat, ranges]) => {
+          const minStart = Math.min(...ranges.map(r => r.start));
+          const maxEnd = Math.max(...ranges.map(r => r.end));
+          return { start: minStart, end: maxEnd, label: cat };
+        }).sort((a, b) => a.start - b.start);
 
         const selectedFile: SelectedJsonInfo = {
           name: fileName,
@@ -188,7 +195,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       try {
         const res = await apiRequest('GET', '/api/files');
         const data = await res.json();
-        const uploaded = Array.isArray(data?.uploaded) ? data.uploaded.map((f:any) => ({ name: f.name, wordCount: f.wordCount ?? null })) : [];
+        const uploaded = Array.isArray(data?.uploaded) ? data.uploaded.map((f: any) => ({ name: f.name, wordCount: f.wordCount ?? null })) : [];
         setUserFiles(uploaded);
       } catch {
         // ignore
@@ -203,7 +210,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       const { content } = await res.json();
       const words = JSON.parse(content);
       processJsonData(words, name, false);
-    } catch (e:any) {
+    } catch (e: any) {
       toast({ title: '読み込み失敗', description: e?.message || 'ユーザーファイルの読み込みに失敗しました', variant: 'destructive' });
     }
   };
@@ -239,7 +246,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
       const response = await apiRequest("POST", "/api/vocabulary/upload", payload);
       return response.json();
     },
-    onSuccess: (data, variables) => {},
+    onSuccess: (data, variables) => { },
     onError: (error) => {
       toast({
         title: "アップロードエラー",
@@ -261,11 +268,10 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
           {/* File Upload Area */}
           <div className="space-y-3">
             <div
-              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                dragActive
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary"
-              }`}
+              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${dragActive
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary"
+                }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -305,24 +311,24 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
               </Select>
             </div>
 
-        {/* ユーザーJSONファイル選択UI */}
-        <div className="bg-muted rounded-lg p-3">
-          <Label className="block text-sm font-medium text-foreground mb-2">
-            ユーザーJSONファイルを選択
-          </Label>
-          <Select onValueChange={handleUserFilePick}>
-            <SelectTrigger>
-              <SelectValue placeholder="アップロード済みから選択" />
-            </SelectTrigger>
-            <SelectContent>
-              {userFiles.map((f) => (
-                <SelectItem key={f.name} value={f.name}>
-                  {f.name} {typeof f.wordCount === 'number' ? `(${f.wordCount})` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            {/* ユーザーJSONファイル選択UI */}
+            <div className="bg-muted rounded-lg p-3">
+              <Label className="block text-sm font-medium text-foreground mb-2">
+                ユーザーJSONファイルを選択
+              </Label>
+              <Select onValueChange={handleUserFilePick}>
+                <SelectTrigger>
+                  <SelectValue placeholder="アップロード済みから選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  {userFiles.map((f) => (
+                    <SelectItem key={f.name} value={f.name}>
+                      {f.name} {typeof f.wordCount === 'number' ? `(${f.wordCount})` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* 保存済みデータセットの適用 */}
             <SavedDatasets />
@@ -331,7 +337,7 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
             <div className="bg-muted rounded-lg p-3">
               <p className="text-sm font-medium text-foreground mb-2">サンプル構造:</p>
               <pre className="text-xs text-muted-foreground overflow-x-auto">
-{`[
+                {`[
   {
     "word": "apple",
     "meaning": "りんご",
