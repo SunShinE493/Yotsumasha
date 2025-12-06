@@ -96,7 +96,9 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
         meaning: normalizeMultiline(item.meaning),
         category: normalizeMultiline(item.category) || "未分類",
         example: normalizeMultiline(item.example),
-        difficulty: item.difficulty || 1,
+        difficulty: (typeof item.difficulty === 'string'
+          ? parseInt(item.difficulty.split(/[;:]/)[0], 10)
+          : Number(item.difficulty)) || 1,
       };
     });
 
