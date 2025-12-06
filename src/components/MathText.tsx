@@ -95,9 +95,24 @@ export function MathText({ text }: { text: string }) {
     if (!text) return text;
 
     // Check for "smiles:" prefix
+    // Format: smiles:<SMILES_STRING>:<remaining text>
     if (text.startsWith('smiles:')) {
-      const smilesString = text.substring(7).trim(); // Remove "smiles:"
-      return <SmilesText smiles={smilesString} />;
+      const afterPrefix = text.substring(7); // Remove "smiles:"
+      // Find the second colon which separates SMILES from remaining text
+      const colonIndex = afterPrefix.indexOf(':');
+      if (colonIndex !== -1) {
+        const smilesString = afterPrefix.substring(0, colonIndex).trim();
+        const remainingText = afterPrefix.substring(colonIndex + 1).trim();
+        return (
+          <>
+            <SmilesText smiles={smilesString} />
+            {remainingText && <span>{remainingText}</span>}
+          </>
+        );
+      } else {
+        // No second colon, entire string after prefix is SMILES
+        return <SmilesText smiles={afterPrefix.trim()} />;
+      }
     }
 
     // Pre-normalize common JSON-escape pitfalls: "\text" becomes tab + "ext" if not double-escaped
