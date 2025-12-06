@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SmiDrawer from 'smiles-drawer/dist/smiles-drawer.min.js';
+import * as SmiDrawerModule from '../lib/smiles-drawer-lib.js';
+const SmiDrawer = (SmiDrawerModule as any).default || SmiDrawerModule;
 
 interface SmilesTextProps {
     smiles: string;
