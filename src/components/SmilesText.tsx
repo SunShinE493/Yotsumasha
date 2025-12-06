@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SmiDrawer from 'smiles-drawer';
+import SmiDrawer from 'smiles-drawer/dist/smiles-drawer.min.js';
 
 interface SmilesTextProps {
     smiles: string;
