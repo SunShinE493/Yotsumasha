@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { VocabularyWord } from "@shared/schema";
 import { MathText } from "./MathText";
+import { formatMeaning } from "@/lib/answerUtils";
 
 interface VocabularyCardProps {
   word: VocabularyWord;
@@ -15,13 +16,13 @@ interface VocabularyCardProps {
 export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fontSizePx, rotationDeg, rotationTurn }: VocabularyCardProps) {
 
   return (
-    <div 
+    <div
       className="relative h-64 cursor-pointer touch-target"
       onClick={onFlip}
       data-testid="card-vocabulary"
     >
       {/* card-flip に style プロパティで回転角度を直接適用 */}
-      <div 
+      <div
         className="card-flip relative w-full h-full"
         style={{ transform: rotationTurn !== undefined ? `rotateY(${rotationTurn}turn)` : `rotateY(${rotationDeg !== undefined ? rotationDeg : rotationCount * 180}deg)` }}
       >
@@ -56,7 +57,7 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fon
               style={fontSizePx ? { fontSize: `${Math.max(12, fontSizePx - 2)}px`, lineHeight: 1.4 } : undefined}
               data-testid="text-meaning"
             >
-              <MathText text={word.meaning} />
+              <MathText text={formatMeaning(word.meaning)} />
             </div>
             {word.example && (
               <div className="text-sm text-muted-foreground" data-testid="text-example">

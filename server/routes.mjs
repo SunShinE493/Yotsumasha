@@ -831,7 +831,7 @@ export async function registerRoutes(app) {
         const { room, name, text } = msg; const r = rooms.get(room);
         if (!r || r.state !== 'running') return;
         const q = r.words[r.idx]; if (!q) return;
-        const ok = String(text || '').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        const ok = validateAnswer(String(text || ''), q.meaning);
         if (ok) {
           r.lastCorrectBy = name;
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
@@ -960,4 +960,38 @@ export async function performRestoreFromGist(apply = false) {
   }
 
   return { content, applied: false };
+}
+
+// --- Helper for Battle Validation ---
+function validateAnswer(userInput, meaning) {
+  if (!userInput) return false;
+  const input = userInput.trim();
+  const m = String(meaning);
+
+  if (m.startsWith('c:')) {
+    const parts = m.split(':');
+    const correct = parts[parts.length - 1];
+    return match(input, correct);
+  }
+
+  if (m.startsWith('m:')) {
+    const parts = m.split(':');
+    // m:A:B -> A or B
+    for (let i = 1; i < parts.length; i++) {
+      if (match(input, parts[i])) return true;
+    }
+    return false;
+  }
+  return match(input, m);
+}
+
+function match(input, target) {
+  const normTarget = target.trim();
+  if (input === normTarget) return true;
+  // Slash rule: "A/B" matches "AB"
+  if (normTarget.includes('/')) {
+    const noSlashTarget = normTarget.replace(/\//g, '');
+    if (input === noSlashTarget) return true;
+  }
+  return false;
 }

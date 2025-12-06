@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUpload, type SelectedJsonInfo } from '@/components/file-upload';
 import { MathText } from '@/components/MathText';
+import { validateAnswer, formatMeaning } from '@/lib/answerUtils';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,7 +26,7 @@ export default function ScorePage() {
   const [correct, setCorrect] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [skips, setSkips] = useState(0);
-  const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
+  const [flash, setFlash] = useState<'none' | 'green' | 'red'>('none');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [result, setResult] = useState<null | {
     fileName: string | null;
@@ -104,7 +105,7 @@ export default function ScorePage() {
     }, 1000);
   };
 
-  async function finalizeGame(reason: 'timeout'|'manual') {
+  async function finalizeGame(reason: 'timeout' | 'manual') {
     if (finalizedRef.current) return;
     finalizedRef.current = true;
     const currentWord = wordsRef.current[idxRef.current];
@@ -125,10 +126,10 @@ export default function ScorePage() {
     setIsPlaying(false);
     try {
       await apiRequest('POST', '/api/score-attack/submit', { score: scoreRef.current, summary });
-    } catch {}
+    } catch { }
     // Only time-out should add last question to review per request
     if (reason === 'timeout' && currentWord) {
-      try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false, word: { id: currentWord.id, word: currentWord.word, meaning: currentWord.meaning } }); } catch {}
+      try { await apiRequest('POST', '/api/study/progress', { wordId: currentWord.id, isRemembered: false, word: { id: currentWord.id, word: currentWord.word, meaning: currentWord.meaning } }); } catch { }
     }
   }
 
@@ -138,53 +139,53 @@ export default function ScorePage() {
 
   const submitAnswer = async () => {
     if (!current) return;
-    const ok = answer.trim() === String(current.meaning||'').trim();
+    const ok = validateAnswer(answer, current.meaning || '');
     if (ok) {
       const next = (idx + 1) % words.length;
       setScore((s) => { const v = s + 100 + combo * 10; scoreRef.current = v; return v; });
       setCombo((c) => { const v = c + 1; comboRef.current = v; if (v > maxComboRef.current) { setMaxCombo(v); maxComboRef.current = v; } return v; });
-      setCorrect((c)=>{ const v = c + 1; correctRef.current = v; return v; });
+      setCorrect((c) => { const v = c + 1; correctRef.current = v; return v; });
       setIdx(next); idxRef.current = next;
       setAnswer('');
       if (current?.meaning) setLastAnswer(current.meaning);
-      setFlash('green'); setTimeout(()=>setFlash('none'), 120);
+      setFlash('green'); setTimeout(() => setFlash('none'), 120);
     } else {
       setCombo(0);
-      setMistakes((m)=>m+1);
+      setMistakes((m) => m + 1);
       setFlash('red');
-      setTimeout(()=>setFlash('none'), 200);
-      try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false, word: { id: current.id, word: current.word, meaning: current.meaning } }); } catch {}
+      setTimeout(() => setFlash('none'), 200);
+      try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false, word: { id: current.id, word: current.word, meaning: current.meaning } }); } catch { }
     }
   };
 
   const skipQuestion = async () => {
     if (!current) return;
-    setSkips((k)=>k+1);
-    setScore((s)=> Math.max(0, s - 50));
+    setSkips((k) => k + 1);
+    setScore((s) => Math.max(0, s - 50));
     setCombo(0);
     setFlash('red');
-    setTimeout(()=>setFlash('none'), 200);
+    setTimeout(() => setFlash('none'), 200);
     const next = (idx + 1) % words.length;
     setIdx(next); idxRef.current = next;
     setAnswer('');
     if (current?.meaning) setLastAnswer(current.meaning);
     // Save to review
-    try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false, word: { id: current.id, word: current.word, meaning: current.meaning } }); } catch {}
+    try { await apiRequest('POST', '/api/study/progress', { wordId: current.id, isRemembered: false, word: { id: current.id, word: current.word, meaning: current.meaning } }); } catch { }
   };
 
   // keep refs in sync for values not set via closures
-  useEffect(()=>{ wordsRef.current = words; }, [words]);
-  useEffect(()=>{ idxRef.current = idx; }, [idx]);
-  useEffect(()=>{ scoreRef.current = score; }, [score]);
-  useEffect(()=>{ comboRef.current = combo; }, [combo]);
-  useEffect(()=>{ correctRef.current = correct; }, [correct]);
-  useEffect(()=>{ selectedJsonRef.current = selectedJson; }, [selectedJson]);
-  useEffect(()=>{ rangeStartRef.current = rangeStart; }, [rangeStart]);
-  useEffect(()=>{ rangeEndRef.current = rangeEnd; }, [rangeEnd]);
-  useEffect(()=>{ limitSecRef.current = limitSec; }, [limitSec]);
+  useEffect(() => { wordsRef.current = words; }, [words]);
+  useEffect(() => { idxRef.current = idx; }, [idx]);
+  useEffect(() => { scoreRef.current = score; }, [score]);
+  useEffect(() => { comboRef.current = combo; }, [combo]);
+  useEffect(() => { correctRef.current = correct; }, [correct]);
+  useEffect(() => { selectedJsonRef.current = selectedJson; }, [selectedJson]);
+  useEffect(() => { rangeStartRef.current = rangeStart; }, [rangeStart]);
+  useEffect(() => { rangeEndRef.current = rangeEnd; }, [rangeEnd]);
+  useEffect(() => { limitSecRef.current = limitSec; }, [limitSec]);
 
   // finalize via effect to avoid stale interval closures
-  useEffect(()=>{
+  useEffect(() => {
     if (isPlaying && remaining === 0) {
       void finalizeGame('timeout');
     }
@@ -216,18 +217,18 @@ export default function ScorePage() {
                 }} />
                 {selectedJson?.presets?.length ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {selectedJson.presets.map((p)=> (
-                      <Button key={p.label} variant="outline" size="sm" onClick={()=>{ setRangeStart(p.start); setRangeEnd(p.end); }}>
+                    {selectedJson.presets.map((p) => (
+                      <Button key={p.label} variant="outline" size="sm" onClick={() => { setRangeStart(p.start); setRangeEnd(p.end); }}>
                         {p.label}
                       </Button>
                     ))}
-                    <Button variant="secondary" size="sm" onClick={()=>{ setRangeStart(1); setRangeEnd(selectedJson.wordCount); }}>全範囲</Button>
+                    <Button variant="secondary" size="sm" onClick={() => { setRangeStart(1); setRangeEnd(selectedJson.wordCount); }}>全範囲</Button>
                   </div>
                 ) : null}
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
-                    <Input type="number" min={0} value={rangeStart} onChange={(e)=>{
+                    <Input type="number" min={0} value={rangeStart} onChange={(e) => {
                       if (e.target.value === '') { setRangeStart(''); return; }
                       const v = Number(e.target.value);
                       setRangeStart(isNaN(v) ? '' : v);
@@ -235,7 +236,7 @@ export default function ScorePage() {
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">終了</label>
-                    <Input type="number" min={typeof rangeStart==='number' ? rangeStart : 0} value={rangeEnd} onChange={(e)=>{
+                    <Input type="number" min={typeof rangeStart === 'number' ? rangeStart : 0} value={rangeEnd} onChange={(e) => {
                       if (e.target.value === '') { setRangeEnd(''); return; }
                       const v = Number(e.target.value);
                       setRangeEnd(isNaN(v) ? '' : v);
@@ -243,7 +244,7 @@ export default function ScorePage() {
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">制限(秒)</label>
-                    <Input type="number" min={10} value={limitSec} onChange={(e)=>{ if(e.target.value===''){ setLimitSec(''); return; } const v = Number(e.target.value); setLimitSec(isNaN(v)?'':v); }} />
+                    <Input type="number" min={10} value={limitSec} onChange={(e) => { if (e.target.value === '') { setLimitSec(''); return; } const v = Number(e.target.value); setLimitSec(isNaN(v) ? '' : v); }} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -257,24 +258,24 @@ export default function ScorePage() {
           </Card>
         ) : (
           <Card>
-            <CardContent className={`p-6 space-y-4 ${flash==='green' ? 'bg-green-500/10' : ''} ${flash==='red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
+            <CardContent className={`p-6 space-y-4 ${flash === 'green' ? 'bg-green-500/10' : ''} ${flash === 'red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div>コンボ: <span className="text-foreground font-medium">{combo}</span></div>
                 <div>スコア: <span className="text-foreground font-medium">{score}</span></div>
-                <div>残り: <span className="text-foreground font-medium">{String(Math.floor(remaining/60)).padStart(2,'0')}:{String(remaining%60).padStart(2,'0')}</span></div>
+                <div>残り: <span className="text-foreground font-medium">{String(Math.floor(remaining / 60)).padStart(2, '0')}:{String(remaining % 60).padStart(2, '0')}</span></div>
               </div>
               <div className="text-center space-y-2">
                 <div className="text-xl font-semibold"><MathText text={current?.word ?? '読み込み中...'} /></div>
                 <div className="text-sm text-muted-foreground">意味を入力</div>
               </div>
               <div className="flex gap-2">
-                <Input placeholder="ここに意味を入力" value={answer} onChange={(e)=>setAnswer(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter') submitAnswer(); }} />
+                <Input placeholder="ここに意味を入力" value={answer} onChange={(e) => setAnswer(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') submitAnswer(); }} />
                 <Button onClick={submitAnswer}>送信</Button>
                 <Button variant="secondary" onClick={skipQuestion}>？</Button>
                 <Button variant="outline" onClick={finishGame}>終了</Button>
               </div>
               {lastAnswer && (
-                <div className="text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium"><MathText text={lastAnswer} /></span></div>
+                <div className="text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(lastAnswer)} /></span></div>
               )}
             </CardContent>
           </Card>
@@ -293,12 +294,12 @@ export default function ScorePage() {
                 <div className="flex justify-between"><span className="text-muted-foreground">間違い</span><span className="text-foreground">{mistakes}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">スキップ</span><span className="text-foreground">{skips}</span></div>
                 {result.lastMeaning ? (
-                  <div className="flex justify-between sm:col-span-2"><span className="text-muted-foreground">最後の問題の答え</span><span className="text-foreground"><MathText text={result.lastMeaning} /> {result.lastWord ? <span>（<MathText text={result.lastWord} />）</span> : ''}</span></div>
+                  <div className="flex justify-between sm:col-span-2"><span className="text-muted-foreground">最後の問題の答え</span><span className="text-foreground"><MathText text={formatMeaning(result.lastMeaning!)} /> {result.lastWord ? <span>（<MathText text={result.lastWord} />）</span> : ''}</span></div>
                 ) : null}
               </div>
               <div className="flex gap-2">
                 <Button onClick={startGame}>もう一度</Button>
-                <Button variant="outline" onClick={()=>setResult(null)}>閉じる</Button>
+                <Button variant="outline" onClick={() => setResult(null)}>閉じる</Button>
               </div>
             </CardContent>
           </Card>

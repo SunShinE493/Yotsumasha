@@ -7,15 +7,16 @@ import { apiRequest } from '@/lib/queryClient';
 import { MathText } from '@/components/MathText';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { validateAnswer, formatMeaning } from '@/lib/answerUtils';
 
 export default function BattlePage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [fontSizePx, setFontSizePx] = useState<number>(24);
-  const [mode, setMode] = useState<'host'|'join'|null>(null);
+  const [mode, setMode] = useState<'host' | 'join' | null>(null);
   const [room, setRoom] = useState('');
   const [name, setName] = useState('');
-  const [openRooms, setOpenRooms] = useState<Array<{id:string; state:string; playerCount:number}> | null>(null);
+  const [openRooms, setOpenRooms] = useState<Array<{ id: string; state: string; playerCount: number }> | null>(null);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [rangeStart, setRangeStart] = useState<number | ''>(1);
   const [rangeEnd, setRangeEnd] = useState<number | ''>(50);
@@ -25,7 +26,7 @@ export default function BattlePage() {
 
   // --- WebSocket client state ---
   const wsRef = useRef<WebSocket | null>(null);
-  const [phase, setPhase] = useState<'idle'|'lobby'|'running'|'ended'>('idle');
+  const [phase, setPhase] = useState<'idle' | 'lobby' | 'running' | 'ended'>('idle');
   const [players, setPlayers] = useState<string[]>([]);
   const [lastAnsweredBy, setLastAnsweredBy] = useState<string | null>(null);
   const [lastAnswerByName, setLastAnswerByName] = useState<Record<string, string>>({});
@@ -34,7 +35,7 @@ export default function BattlePage() {
   const [questionId, setQuestionId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
-  const [flash, setFlash] = useState<'none'|'green'|'red'>('none');
+  const [flash, setFlash] = useState<'none' | 'green' | 'red'>('none');
   const selfNameRef = useRef<string>('');
   const [lastAnswer, setLastAnswer] = useState<string | null>(null);
   const [lastAnswerWord, setLastAnswerWord] = useState<string | null>(null);
@@ -45,11 +46,11 @@ export default function BattlePage() {
   // Refs to track previous question for reliable display (avoid stale closures)
   const prevWordRef = useRef<string | null>(null);
   const prevMeaningRef = useRef<string | null>(null);
-  const [finalRanking, setFinalRanking] = useState<Array<{name:string;score:number}>>([]);
+  const [finalRanking, setFinalRanking] = useState<Array<{ name: string; score: number }>>([]);
   const [finalLastWord, setFinalLastWord] = useState<string | null>(null);
   const [finalLastMeaning, setFinalLastMeaning] = useState<string | null>(null);
 
-  useEffect(()=>{
+  useEffect(() => {
     const isNum = (v: number | ''): v is number => typeof v === 'number' && !Number.isNaN(v);
     const ok = Boolean(
       name && room && selectedJson &&
@@ -57,7 +58,7 @@ export default function BattlePage() {
       rangeEnd >= rangeStart
     );
     setCanStart(ok);
-  },[name, room, selectedJson, rangeStart, rangeEnd]);
+  }, [name, room, selectedJson, rangeStart, rangeEnd]);
 
   // Prefill display name if available
   useEffect(() => {
@@ -119,9 +120,9 @@ export default function BattlePage() {
           // correct/incorrect visual cue per client
           const by = typeof msg.by === 'string' ? msg.by : null;
           if (by && by === selfNameRef.current && msg.correct) {
-            setFlash('green'); setTimeout(()=>setFlash('none'), 200);
+            setFlash('green'); setTimeout(() => setFlash('none'), 200);
           } else if (by && by !== selfNameRef.current && msg.correct) {
-            setFlash('red'); setTimeout(()=>setFlash('none'), 200);
+            setFlash('red'); setTimeout(() => setFlash('none'), 200);
           }
           if (typeof msg.by === 'string') {
             setLastAnsweredBy(`${msg.by}: ${String(msg.text || '')}`);
@@ -130,20 +131,20 @@ export default function BattlePage() {
         } else if (msg.type === 'end') {
           setPhase('ended');
           setScores(msg.scores || {});
-          const entries = Object.entries(msg.scores || {}).sort((a,b)=> (b[1]??0) - (a[1]??0));
-          setFinalRanking(entries.map(([n,s])=>({ name: n, score: Number(s) })));
+          const entries = Object.entries(msg.scores || {}).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0));
+          setFinalRanking(entries.map(([n, s]) => ({ name: n, score: Number(s) })));
           if (msg.lastMeaning) {
             setFinalLastMeaning(msg.lastMeaning);
             setFinalLastWord(msg.lastWord ?? null);
             // add to review if timeout
             if (msg.endReason === 'timeout' && msg.lastId) {
               try {
-                await apiRequest('POST','/api/study/progress', {
+                await apiRequest('POST', '/api/study/progress', {
                   wordId: msg.lastId,
                   isRemembered: false,
                   word: { id: msg.lastId, word: msg.lastWord || '', meaning: msg.lastMeaning || '' }
                 } as any);
-              } catch {}
+              } catch { }
             }
           }
           setQuestionWord(null);
@@ -153,7 +154,7 @@ export default function BattlePage() {
           setLastAnswerWord(null);
           if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         }
-      } catch {}
+      } catch { }
     };
     ws.onclose = () => {
       if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -224,7 +225,7 @@ export default function BattlePage() {
     if (!wsRef.current || !answerText.trim()) return;
     const text = answerText.trim();
     // locally detect wrong answer to add to review
-    const isCorrect = questionMeaning ? (text === questionMeaning) : false;
+    const isCorrect = questionMeaning ? validateAnswer(text, questionMeaning) : false;
     if (!isCorrect && questionId) {
       try {
         await apiRequest('POST', '/api/study/progress', {
@@ -232,10 +233,10 @@ export default function BattlePage() {
           isRemembered: false,
           word: { id: questionId, word: questionWord || '', meaning: questionMeaning || '' }
         });
-      } catch {}
-      setFlash('red'); setTimeout(()=>setFlash('none'), 200);
+      } catch { }
+      setFlash('red'); setTimeout(() => setFlash('none'), 200);
     } else {
-      setFlash('green'); setTimeout(()=>setFlash('none'), 120);
+      setFlash('green'); setTimeout(() => setFlash('none'), 120);
     }
     wsRef.current.send(JSON.stringify({ type: 'answer', room, name, text }));
     setAnswerText('');
@@ -259,20 +260,20 @@ export default function BattlePage() {
 
         {mode === 'host' && (
           <Card>
-            <CardContent className={`p-6 space-y-4 ${flash==='green' ? 'bg-green-500/10' : ''} ${flash==='red' ? 'bg-red-500/10' : ''}`}>
+            <CardContent className={`p-6 space-y-4 ${flash === 'green' ? 'bg-green-500/10' : ''} ${flash === 'red' ? 'bg-red-500/10' : ''}`}>
               <h2 className="font-semibold">部屋設定</h2>
               <div className="grid gap-4">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">名前</label>
-                    <Input placeholder="名前" value={name} onChange={(e)=>setName(e.target.value)} />
+                    <Input placeholder="名前" value={name} onChange={(e) => setName(e.target.value)} />
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">部屋番号</label>
-                    <Input placeholder="部屋番号" value={room} onChange={(e)=>setRoom(e.target.value)} />
+                    <Input placeholder="部屋番号" value={room} onChange={(e) => setRoom(e.target.value)} />
                   </div>
                 </div>
-                <FileUpload onUploadSuccess={(info)=>{
+                <FileUpload onUploadSuccess={(info) => {
                   setSelectedJson(info);
                   if (info.presets && info.presets.length > 0) {
                     setRangeStart(info.presets[0].start);
@@ -284,18 +285,18 @@ export default function BattlePage() {
                 }} />
                 {selectedJson?.presets?.length ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {selectedJson.presets.map((p)=> (
-                      <Button key={p.label} variant="outline" size="sm" onClick={()=>{ setRangeStart(p.start); setRangeEnd(p.end); }}>
+                    {selectedJson.presets.map((p) => (
+                      <Button key={p.label} variant="outline" size="sm" onClick={() => { setRangeStart(p.start); setRangeEnd(p.end); }}>
                         {p.label}
                       </Button>
                     ))}
-                    <Button variant="secondary" size="sm" onClick={()=>{ setRangeStart(1); setRangeEnd(selectedJson.wordCount); }}>全範囲</Button>
+                    <Button variant="secondary" size="sm" onClick={() => { setRangeStart(1); setRangeEnd(selectedJson.wordCount); }}>全範囲</Button>
                   </div>
                 ) : null}
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">開始</label>
-                    <Input type="number" min={0} value={rangeStart} onChange={(e)=>{
+                    <Input type="number" min={0} value={rangeStart} onChange={(e) => {
                       if (e.target.value === '') { setRangeStart(''); return; }
                       const v = Number(e.target.value);
                       setRangeStart(isNaN(v) ? '' : v);
@@ -303,7 +304,7 @@ export default function BattlePage() {
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">終了</label>
-                    <Input type="number" min={typeof rangeStart==='number' ? rangeStart : 0} value={rangeEnd} onChange={(e)=>{
+                    <Input type="number" min={typeof rangeStart === 'number' ? rangeStart : 0} value={rangeEnd} onChange={(e) => {
                       if (e.target.value === '') { setRangeEnd(''); return; }
                       const v = Number(e.target.value);
                       setRangeEnd(isNaN(v) ? '' : v);
@@ -311,13 +312,13 @@ export default function BattlePage() {
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground">制限(秒)</label>
-                    <Input type="number" min={5} value={limitSec} onChange={(e)=>{ if(e.target.value===''){ setLimitSec(''); return; } const v = Number(e.target.value); setLimitSec(isNaN(v)?'':v); }} />
+                    <Input type="number" min={5} value={limitSec} onChange={(e) => { if (e.target.value === '') { setLimitSec(''); return; } const v = Number(e.target.value); setLimitSec(isNaN(v) ? '' : v); }} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-sm text-muted-foreground">出題数</label>
-                    <Input type="number" value={questionCount} onChange={(e)=>{ if(e.target.value===''){ setQuestionCount(''); return; } const v = Number(e.target.value); setQuestionCount(isNaN(v)?'':v); }} />
+                    <Input type="number" value={questionCount} onChange={(e) => { if (e.target.value === '') { setQuestionCount(''); return; } const v = Number(e.target.value); setQuestionCount(isNaN(v) ? '' : v); }} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -348,14 +349,14 @@ export default function BattlePage() {
             <CardContent className="p-6 space-y-4">
               <h2 className="font-semibold">部屋に入る</h2>
               <div className="grid gap-3">
-                <Input placeholder="名前" value={name} onChange={(e)=>setName(e.target.value)} />
-                <Input placeholder="部屋番号" value={room} onChange={(e)=>setRoom(e.target.value)} />
+                <Input placeholder="名前" value={name} onChange={(e) => setName(e.target.value)} />
+                <Input placeholder="部屋番号" value={room} onChange={(e) => setRoom(e.target.value)} />
                 <Button className="mt-2" onClick={handleJoin} disabled={!name || !room}>入室</Button>
               </div>
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="font-semibold">開いている部屋</div>
-                  <Button type="button" size="sm" variant="outline" onClick={async (e)=>{
+                  <Button type="button" size="sm" variant="outline" onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     try {
@@ -367,13 +368,13 @@ export default function BattlePage() {
                     }
                   }}>更新</Button>
                 </div>
-                <AutoRoomsList onUpdate={(list)=>setOpenRooms(list)} intervalMs={5000} />
+                <AutoRoomsList onUpdate={(list) => setOpenRooms(list)} intervalMs={5000} />
                 <div className="grid gap-2">
                   {Array.isArray(openRooms) && openRooms.map(r => (
                     <div key={r.id} className="rounded-md border border-border bg-background px-3 py-2">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span> {Array.isArray((r as any).players) && (r as any).players.length>0 ? <span className="text-xs text-muted-foreground ml-2">[{(r as any).players.join(', ')}]</span> : null}</div>
-                        <Button size="sm" onClick={()=>{ setRoom(r.id); }}>この部屋に入る</Button>
+                        <div className="text-sm text-foreground">{r.id} <span className="text-muted-foreground">({r.playerCount})</span> {Array.isArray((r as any).players) && (r as any).players.length > 0 ? <span className="text-xs text-muted-foreground ml-2">[{(r as any).players.join(', ')}]</span> : null}</div>
+                        <Button size="sm" onClick={() => { setRoom(r.id); }}>この部屋に入る</Button>
                       </div>
                       {Number(r.playerCount) === 0 && (
                         <div className="mt-1 text-[11px] text-muted-foreground">誰もいないこの部屋はもうすぐ削除されます</div>
@@ -397,7 +398,7 @@ export default function BattlePage() {
 
         {(phase === 'running' || phase === 'ended') && (
           <Card>
-            <CardContent className={`p-0 ${flash==='green' ? 'bg-green-500/10' : ''} ${flash==='red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
+            <CardContent className={`p-0 ${flash === 'green' ? 'bg-green-500/10' : ''} ${flash === 'red' ? 'bg-red-500/10 animate-pulse' : ''}`}>
               {typeof remaining === 'number' && (
                 <div className="h-1 bg-blue-500/20">
                   <div
@@ -416,19 +417,19 @@ export default function BattlePage() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-sm text-muted-foreground">問題:</div>
                     <div className="flex items-center gap-2">
-                      <button className="text-xs px-2 py-0.5 rounded border" onClick={()=>setFontSizePx(v=>Math.max(10, v-3))}>-A</button>
+                      <button className="text-xs px-2 py-0.5 rounded border" onClick={() => setFontSizePx(v => Math.max(10, v - 3))}>-A</button>
                       <span className="text-[10px] text-muted-foreground">{fontSizePx}px</span>
-                      <button className="text-xs px-2 py-0.5 rounded border" onClick={()=>setFontSizePx(v=>v+3)}>+A</button>
+                      <button className="text-xs px-2 py-0.5 rounded border" onClick={() => setFontSizePx(v => v + 3)}>+A</button>
                     </div>
                   </div>
                   <div className="font-semibold text-foreground" style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.25 }}>
-                    <MathText text={questionWord ?? (phase==='ended' ? '終了しました' : '...')} />
+                    <MathText text={questionWord ?? (phase === 'ended' ? '終了しました' : '...')} />
                   </div>
                 </div>
 
                 {phase === 'running' && (
                   <form onSubmit={submitAnswer} className="flex gap-2">
-                    <Input placeholder="意味を入力" value={answerText} onChange={(e)=>setAnswerText(e.target.value)} autoFocus />
+                    <Input placeholder="意味を入力" value={answerText} onChange={(e) => setAnswerText(e.target.value)} autoFocus />
                     <Button type="submit">回答</Button>
                   </form>
                 )}
@@ -436,7 +437,7 @@ export default function BattlePage() {
                 <div>
                   <div className="font-semibold mb-2">スコア</div>
                   <div className="grid sm:grid-cols-2 gap-2">
-                    {Object.entries(scores).sort((a,b)=> (b[1]??0) - (a[1]??0)).map(([n, sc]) => (
+                    {Object.entries(scores).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0)).map(([n, sc]) => (
                       <div key={n} className="flex items-center rounded-md border border-border bg-background px-3 py-2">
                         <div className="text-foreground">{n}</div>
                         <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ? <MathText text={lastAnswerByName[n]} /> : ''}</div>
@@ -446,25 +447,25 @@ export default function BattlePage() {
                   </div>
                   {lastAnswer && (
                     <div className="mt-4 text-sm text-muted-foreground">
-                      直前の答え: <span className="text-foreground font-medium"><MathText text={lastAnswer} /></span>
+                      直前の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(lastAnswer)} /></span>
                       {lastAnswerWord ? <span className="text-muted-foreground">（<MathText text={lastAnswerWord} />）</span> : null}
                       {lastAnswerer ? <span className="ml-2 text-xs text-muted-foreground">正解者: <span className="text-foreground font-medium">{lastAnswerer}</span></span> : null}
                     </div>
                   )}
-                  {phase==='ended' && (
+                  {phase === 'ended' && (
                     <div className="mt-6">
                       <div className="font-semibold mb-2">最終ランキング</div>
                       <div className="space-y-1 text-sm">
-                        {finalRanking.map((r, i)=> (
+                        {finalRanking.map((r, i) => (
                           <div key={r.name} className="flex items-center justify-between">
-                            <div>{['🥇','🥈','🥉'][i] || ' '} {r.name}</div>
+                            <div>{['🥇', '🥈', '🥉'][i] || ' '} {r.name}</div>
                             <div className="text-muted-foreground">{r.score}</div>
                           </div>
                         ))}
                       </div>
                       {finalLastMeaning && (
                         <div className="mt-3 text-sm text-muted-foreground">
-                          最後の問題の答え: <span className="text-foreground font-medium"><MathText text={finalLastMeaning} /></span>
+                          最後の問題の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(finalLastMeaning)} /></span>
                           {finalLastWord ? <span className="text-muted-foreground">（<MathText text={finalLastWord} />）</span> : null}
                         </div>
                       )}
