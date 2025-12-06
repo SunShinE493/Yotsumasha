@@ -10,17 +10,35 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, BookOpen, Brain, Users } from "lucide-react";
 
+import { useQuery } from "@tanstack/react-query";
+
+interface UpdateItem {
+  date: string;
+  title: string;
+  content: string;
+}
+
 export default function AuthPage() {
-  const { 
-    user, 
-    loginMutation, 
-    registerMutation, 
-    continueAsGuestMutation 
+  const {
+    user,
+    loginMutation,
+    registerMutation,
+    continueAsGuestMutation
   } = useAuth();
   const [, setLocation] = useLocation();
 
   const [loginData, setLoginData] = useState({ username: "", password: "" });
   const [registerData, setRegisterData] = useState({ username: "", password: "" });
+
+  // Fetch updates
+  const { data: updates } = useQuery<UpdateItem[]>({
+    queryKey: ['updates'],
+    queryFn: async () => {
+      const res = await fetch('/updates.json');
+      if (!res.ok) return [];
+      return res.json();
+    }
+  });
 
   // Redirect if already authenticated
   if (user) {
@@ -33,7 +51,7 @@ export default function AuthPage() {
     console.log("handleLogin called. Login data:", loginData);
     try {
       await loginMutation.mutateAsync(loginData);
-      const fetchedUserAfterLogin = await queryClient.fetchQuery({ 
+      const fetchedUserAfterLogin = await queryClient.fetchQuery({
         queryKey: ["/api/user"],
         queryFn: async () => {
           try {
@@ -58,7 +76,7 @@ export default function AuthPage() {
     console.log("handleRegister called. Register data:", registerData);
     try {
       await registerMutation.mutateAsync(registerData);
-      const fetchedUserAfterRegister = await queryClient.fetchQuery({ 
+      const fetchedUserAfterRegister = await queryClient.fetchQuery({
         queryKey: ["/api/user"],
         queryFn: async () => {
           try {
@@ -82,7 +100,7 @@ export default function AuthPage() {
     console.log("handleGuestAccess called.");
     try {
       await continueAsGuestMutation.mutateAsync();
-      const fetchedUserAfterGuest = await queryClient.fetchQuery({ 
+      const fetchedUserAfterGuest = await queryClient.fetchQuery({
         queryKey: ["/api/user"],
         queryFn: async () => {
           try {
@@ -302,6 +320,29 @@ export default function AuthPage() {
                 よつましゃアプリで語彙力を向上させましょう 🚀
               </p>
             </div>
+
+            {/* Updates Section */}
+            {updates && updates.length > 0 && (
+              <Card className="bg-white/50 border-blue-100 shadow-sm text-left">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">📢</span>
+                    <CardTitle className="text-md font-bold text-gray-800">最新情報</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
+                    {updates.map((update, idx) => (
+                      <div key={idx} className="border-l-2 border-blue-400 pl-3 pb-1">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">{update.date}</p>
+                        <h4 className="text-sm font-bold text-gray-800 mb-1">{update.title}</h4>
+                        <p className="text-xs text-gray-600 leading-relaxed">{update.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="grid gap-8">
               <div className="flex items-start space-x-5 group">
