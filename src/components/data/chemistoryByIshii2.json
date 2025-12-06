@@ -1493,7 +1493,7 @@
   {
     "category": "芳香族",
     "subcategory": "0",
-    "word": "smiles:c1ccccc1C=C:化学式C₆H₅C₂H₃を何と言うか。",
+    "word": "smiles:C=CC1=CC=CC=C1:化学式C₆H₅C₂H₃を何と言うか。",
     "meaning": "スチレン",
     "difficulty": "1"
   },
@@ -1514,7 +1514,7 @@
   {
     "category": "芳香族",
     "subcategory": "2",
-    "word": "smiles:c1ccccc1[N+](=O)[O-]:濃硝酸と濃硫酸の混合物(　)をベンゼンに加えると(　)ができる。",
+    "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:濃硝酸と濃硫酸の混合物(　)をベンゼンに加えると(　)ができる。",
     "meaning": "混酸/ニトロベンゼン",
     "difficulty": "1"
   },
@@ -1528,21 +1528,21 @@
   {
     "category": "芳香族",
     "subcategory": "2",
-    "word": "smiles:c1ccccc1[N+](=O)[O-]:この構造式で表される(　)は特有の甘い香りのある(　)色～(　)色の(　)で水より重く、水に(　)、有機溶媒に(　)",
+    "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:この構造式で表される(　)は特有の甘い香りのある(　)色～(　)色の(　)で水より重く、水に(　)、有機溶媒に(　)",
     "meaning": "ニトロベンゼン/無/淡黄/c:固体:液体:気体:液体/c:よく溶ける:溶けにくい:溶けない:よく溶ける/c:よく溶ける:溶けにくい:溶けない:溶けにくい",
     "difficulty": "2;2;2;2;2;2"
   },
   {
     "category": "芳香族",
     "subcategory": "2",
-    "word": "smiles:c1ccccc1[N+](=O)[O-]:Cc1c(cc(cc1[N+](=O)[O-])[N+](=O)[O-])[N+](=O)[O-]:トルエンを混酸でニトロ化すると、o-位やp-位が酸化されて C₆H₆(CH₃)NO₂ (　)ができ、さらにニトロ化が進むと(　)ができる。",
+    "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:CC1=C(C=C(C=C1[N+](=O)[O-])[N+](=O)[O-])[N+](=O)[O-]:トルエンを混酸でニトロ化すると、o-位やp-位が酸化されて C₆H₆(CH₃)NO₂ (　)ができ、さらにニトロ化が進むと(　)ができる。",
     "meaning": "m:ニトロトルエン:メチルニトロベンゼン/m:2.4.6-トリニトロトルエン:TNT",
     "difficulty": "1;1"
   },
   {
     "category": "芳香族",
     "subcategory": "3",
-    "word": "smiles:OS(=O)(=O)c1ccccc1:ベンゼンに濃硫酸を加えて加熱すると(　)ができる。",
+    "word": "smiles:OS(=O)(=O)C1=CC=CC=C1:ベンゼンに濃硫酸を加えて加熱すると(　)ができる。",
     "meaning": "ベンゼンスルホン酸",
     "difficulty": "2"
   },
@@ -1556,7 +1556,7 @@
   {
     "category": "芳香族",
     "subcategory": "3",
-    "word": "smiles:OS(=O)(=O)c1ccccc1:この構造式で表される(　)は(　)の(　)色・板状の結晶で(　)が大きい。水やエタノールに(　)、有機溶媒に(　)。",
+    "word": "smiles:OS(=O)(=O)C1=CC=CC=C1:この構造式で表される(　)は(　)の(　)色・板状の結晶で(　)が大きい。水やエタノールに(　)、有機溶媒に(　)。",
     "meaning": "ベンゼンスルホン酸/c:強酸性:強塩基性:弱酸性:弱塩基性:強酸性/無/潮解性/c:よく溶ける:溶けにくい:溶けない:よく溶ける/c:よく溶ける:溶けにくい:溶けない:溶けにくい",
     "difficulty": "1;2;2;2;2;2"
   },
@@ -1584,7 +1584,7 @@
   {
     "category": "芳香族",
     "subcategory": "4",
-    "word": "smiles:O=C(O)c1ccccc1:O=Cc1ccccc1:トルエン ⌬-CH₃ やエチルベンゼン ⌬-CH₂CH₃ を過マンガン酸カリウム KMnO₄ で酸化すると(　)ができる。また、トルエンを穏やかに酸化すると(　)ができる。",
+    "word": "smiles:O=C(O)C1=CC=CC=C1:O=CC1=CC=CC=C1:トルエン ⌬-CH₃ やエチルベンゼン ⌬-CH₂CH₃ を過マンガン酸カリウム KMnO₄ で酸化すると(　)ができる。また、トルエンを穏やかに酸化すると(　)ができる。",
     "meaning": "安息香酸/ベンズアルデヒド",
     "difficulty": "2;2"
   },
@@ -1668,35 +1668,35 @@
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(O)c1ccccc1:この構造式で表され、分子式 C₇H₇O₂ を(　)という。",
+    "word": "smiles:O=C(O)C1=CC=CC=C1:この構造式で表され、分子式 C₇H₇O₂ を(　)という。",
     "meaning": "安息香酸",
     "difficulty": "1"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:OC(=O)c1ccccc1C(=O)O:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
+    "word": "smiles:OC(=O)C1=C(C(=O)O)C=CC=C1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
     "meaning": "フタル酸",
     "difficulty": "1"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(O)c1cccc(C(=O)O)c1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
+    "word": "smiles:O=C(O)C1=CC=CC(C(=O)O)=C1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
     "meaning": "イソフタル酸",
     "difficulty": "3"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(O)c1ccc(C(O)=O)cc1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
+    "word": "smiles:O=C(O)C1=CC=C(C(=O)O)C=C1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
     "meaning": "テレフタル酸",
     "difficulty": "1"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(O)c1ccccc1O:この構造式で表され、分子式 C₇H₈O₃ を(　)という。",
+    "word": "smiles:O=C(O)C1=CC=CC=C1O:この構造式で表され、分子式 C₇H₈O₃ を(　)という。",
     "meaning": "サリチル酸",
     "difficulty": "1"
   },
@@ -1717,21 +1717,21 @@
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(O)c1ccccc1:この構造式で表される(　)は(　)の酸化で得られる。",
+    "word": "smiles:O=C(O)C1=CC=CC=C1:この構造式で表される(　)は(　)の酸化で得られる。",
     "meaning": "安息香酸/トルエン",
     "difficulty": "1;2"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:OC(=O)c1ccccc1C(=O)O:この構造式で表される(　)は(　)の酸化で得られる。",
+    "word": "smiles:OC(=O)C1=C(C(=O)O)C=CC=C1:この構造式で表される(　)は(　)の酸化で得られる。",
     "meaning": "フタル酸/o-キシレン",
     "difficulty": "1;2"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(O)c1ccc(C(O)=O)cc1:この構造式で表される(　)は(　)の酸化で得られる。",
+    "word": "smiles:O=C(O)C1=CC=C(C(=O)O)C=C1:この構造式で表される(　)は(　)の酸化で得られる。",
     "meaning": "テレフタル酸/p-キシレン",
     "difficulty": "1;2"
   },
@@ -1745,28 +1745,28 @@
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(O)c1ccccc1O:この構造式で表される(　)はナトリウムフェノキシドを高温・高圧で( 化学式 )と反応させた後、希硫酸を作用させて作る。",
+    "word": "smiles:O=C(O)C1=CC=CC=C1O:この構造式で表される(　)はナトリウムフェノキシドを高温・高圧で( 化学式 )と反応させた後、希硫酸を作用させて作る。",
     "meaning": "サリチル酸/CO2",
     "difficulty": "1;2"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:O=C(OC)c1ccccc1O:サリチル酸にメタノールと濃硫酸を作用させる((　)する)と、(　)に使われる(　)ができる。",
+    "word": "smiles:O=C(OC)C1=CC=CC=C1O:サリチル酸にメタノールと濃硫酸を作用させる((　)する)と、(　)に使われる(　)ができる。",
     "meaning": "エステル化/m:鎮痛消炎剤:消炎塗布剤:湿布薬/m:サリチル酸メチル:サロメチール",
     "difficulty": "1;2"
   },
   {
     "category": "ﾌｪﾉｰﾙ・芳ｶﾙﾎﾞﾝ",
     "subcategory": "1",
-    "word": "smiles:CC(=O)Oc1ccccc1C(=O)O:サリチル酸に無水酢酸を作用させる((　)する)と、(　)に使われる(　)ができる。",
+    "word": "smiles:CC(=O)OC1=CC=CC=C1C(=O)O:サリチル酸に無水酢酸を作用させる((　)する)と、(　)に使われる(　)ができる。",
     "meaning": "アセチル化/解熱鎮痛剤/アセチルサリチル酸",
     "difficulty": "2;2"
   },
   {
     "category": "窒素芳香族",
     "subcategory": "0",
-    "word": "smiles:c1ccccc1[Na+](=O)[O-]:この構造式で表される(　)ようにベンゼン環のH原子が(　) -NO₂ で置換された化合物を(　)という。",
+    "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:この構造式で表される(　)ようにベンゼン環のH原子が(　) -NO₂ で置換された化合物を(　)という。",
     "meaning": "ニトロベンゼン/ニトロ基/芳香族ニトロ化合物",
     "difficulty": "1;1;1"
   },
@@ -3171,4 +3171,3 @@
     "difficulty": "3;3;3"
   }
 ]
-
