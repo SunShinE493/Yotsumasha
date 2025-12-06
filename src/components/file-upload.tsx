@@ -50,8 +50,8 @@ const availableJsonFiles = {
   "chiri2.json": chiri2,
   "organic.json": organic,
   "Chemistry.json": Chemistry,
-  "chemistoryByIsii.json": chemistoryByIsii,
-  "chemistoryByIsii2.json": chemistoryByIsii2,
+  "chemistoryByIshii.json": chemistoryByIshii,
+  "chemistoryByIshii2.json": chemistoryByIshii2,
 };
 import { useEffect, useState } from "react";
 
