@@ -144,6 +144,29 @@ export async function registerRoutes(app) {
       // ユーザーデータを全てエクスポートし、JSON形式でGistにパッチ（更新）する
       const all = await storage.exportAllUsersData();
 
+      // Read extra files (schedule.json, wordlist.json) if they exist
+      const extraFiles = {};
+      const fs = await import('fs/promises');
+      for (const fname of ['schedule.json', 'wordlist.json']) {
+        try {
+          const content = await fs.readFile(fname, 'utf8');
+          extraFiles[fname] = content;
+        } catch { }
+      }
+
+      // Read all uploaded JSON files
+      const uploadedFiles = {};
+      try {
+        const uploads = await fileUtils.exportUploadedJsonFiles(); // returns array of {name, content}
+        for (const up of uploads) {
+          uploadedFiles[up.name] = up.content;
+        }
+      } catch { }
+
+      // Embed into backup payload
+      if (Object.keys(extraFiles).length) all.extraFiles = extraFiles;
+      if (Object.keys(uploadedFiles).length) all.uploadedFiles = uploadedFiles;
+
       const payload = {
         files: { [file]: { content: JSON.stringify(all, null, 2) } }
       };
@@ -948,6 +971,19 @@ export async function performRestoreFromGist(apply = false) {
         ...(normalizedPassword ? { password: normalizedPassword } : {}),
       });
       targetId = up.id;
+      if (parsed.extraFiles) {
+        const fs = await import('fs/promises');
+        for (const [fname, content] of Object.entries(parsed.extraFiles)) {
+          if (['schedule.json', 'wordlist.json'].includes(fname)) {
+            try { await fs.writeFile(fname, content, 'utf8'); } catch { }
+          }
+        }
+      }
+      if (parsed.uploadedFiles) {
+        const uploads = Object.entries(parsed.uploadedFiles).map(([name, content]) => ({ name, content }));
+        await fileUtils.applyUploadedJsonFiles(uploads);
+      }
+
       const payload = parsed?.data || parsed;
       await storage.importUserData(targetId, payload);
       return { ok: true, applied: true, userId: targetId };
@@ -981,6 +1017,18 @@ function validateAnswer(userInput, meaning) {
       if (match(input, parts[i])) return true;
     }
     return false;
+  }
+
+  if (m.startsWith('r:')) {
+    const parts = m.split(':');
+    const items = parts.slice(2);
+    if (items.length > 0) {
+      const last = items[items.length - 1];
+      if (last.includes('/r')) {
+        items[items.length - 1] = last.split('/r')[0];
+      }
+    }
+    return items.every(item => input.includes(item));
   }
   return match(input, m);
 }
