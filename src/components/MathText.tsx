@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { SmilesText } from './SmilesText';
 
 declare global {
   interface Window {
@@ -92,6 +93,13 @@ export function MathText({ text }: { text: string }) {
 
   const content = useMemo(() => {
     if (!text) return text;
+
+    // Check for "smiles:" prefix
+    if (text.startsWith('smiles:')) {
+      const smilesString = text.substring(7).trim(); // Remove "smiles:"
+      return <SmilesText smiles={smilesString} />;
+    }
+
     // Pre-normalize common JSON-escape pitfalls: "\text" becomes tab + "ext" if not double-escaped
     // Replace TAB + 'ext' -> '\text'
     const normalized = text.replace(/\t(?:ext)/g, '\\text');

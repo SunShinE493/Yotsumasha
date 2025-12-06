@@ -60,7 +60,6 @@
     "clsx": "^2.1.1",
     "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.7",
-    
     "discord.js": "^14.14.1",
     "drizzle-orm": "^0.44.5",
     "drizzle-zod": "^0.8.3",
@@ -83,12 +82,11 @@
     "rss-parser": "^3.13.0",
     "sequelize": "^6.37.3",
     "sequelize-cli": "^6.6.2",
-    
+    "smiles-drawer": "^2.1.7",
     "sqlite3": "^5.1.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^3.4.13",
     "tailwindcss-animate": "^1.0.7",
-    
     "tiny-csrf": "^1.1.6",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
@@ -106,8 +104,5 @@
   "keywords": [
     "node",
     "glitch"
-  ],
-  "devDependencies": {
-    
-  }
+  ]
 }
