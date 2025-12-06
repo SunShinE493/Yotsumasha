@@ -75,6 +75,26 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     console.log("DEBUG: Current word word:", currentWord?.word);
   }, [currentWord]);
 
+  // Safeguard: If "Loading next word..." (i.e. !isLoading && !currentWord) persists for >5s, interrupt session
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (!isLoading && !currentWord && studyWords?.length > 0) {
+      console.log("Safeguard: Stuck in loading next word state. Starting 5s timer.");
+      timer = setTimeout(() => {
+        console.warn("Safeguard: 5s timeout reached. Interrupting session.");
+        toast({
+          title: "通信エラー",
+          description: "読み込みに時間がかかっているため、セッションを中断しました。",
+          variant: "destructive",
+        });
+        hookHandleEarlyFinish();
+      }, 5000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isLoading, currentWord, studyWords, hookHandleEarlyFinish, toast]);
+
   const recordProgressMutation = useMutation({
     mutationFn: async ({ wordId, isRemembered }: { wordId: string; isRemembered: boolean }) => {
       await apiRequest("POST", "/api/study/progress", {
@@ -106,8 +126,8 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     }
     setTimeout(() => {
       markWord(isRemembered);
-    },200);
-    
+    }, 200);
+
     if (!currentWord) {
       console.log("handleMarkWord called with no currentWord.");
       return;
@@ -118,7 +138,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
       isRemembered,
     }, {
       onSuccess: () => {
-       // setRotationCount(0);
+        // setRotationCount(0);
         //markWord(isRemembered);
       }
     });
@@ -278,9 +298,9 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
                 </Button>
               </div>
               <div className="mt-4 flex items-center justify-center space-x-2">
-                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v)=>Math.max(10, v-3))}>-A</Button>
+                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v) => Math.max(10, v - 3))}>-A</Button>
                 <div className="text-xs text-muted-foreground">{fontSizePx}px</div>
-                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v)=>v+3)}>+A</Button>
+                <Button variant="outline" size="sm" onClick={() => setFontSizePx((v) => v + 3)}>+A</Button>
               </div>
               {rotationCount % 2 === 0 && (
                 <p className="text-center text-sm text-muted-foreground mt-4">
