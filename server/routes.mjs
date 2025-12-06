@@ -3,10 +3,10 @@ import { randomUUID } from "crypto";
 import { storage } from "./storage.mjs";
 import * as fileUtils from "./utils.mjs";
 import { setupAuth, isAuthenticated, optionalAuthentication } from "./auth.mjs";
-import { 
-  vocabularyFileSchema, 
-  studyConfigSchema, 
-  insertWordProgressSchema 
+import {
+  vocabularyFileSchema,
+  studyConfigSchema,
+  insertWordProgressSchema
 } from "../shared/schema.mjs";
 import fetch from "node-fetch";
 import { WebSocketServer } from "ws";
@@ -37,7 +37,7 @@ export async function registerRoutes(app) {
       req.session.guestId = `guest_${randomUUID()}`;
     }
 
-    res.json({ 
+    res.json({
       id: req.session.guestId,
       username: 'ゲストユーザー',
       isGuest: true,
@@ -54,7 +54,7 @@ export async function registerRoutes(app) {
       delete req.session.guestId;
     }
 
-    res.json({ message: 'ゲストデータをクリアしました'});
+    res.json({ message: 'ゲストデータをクリアしました' });
   });
 
   // Admin: overwrite built-in JSON (password required)
@@ -170,86 +170,18 @@ export async function registerRoutes(app) {
   app.post('/api/admin/backup/gist/fetch', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
-      const token = process.env.GIST_TOKEN;
-      const gistId = process.env.GIST_ID;
-      const file = process.env.GIST_FILE || 'backup.json';
-      if (!gistId) return res.status(400).json({ message: 'Gist env not configured' });
-
-      const r = await fetch(`https://api.github.com/gists/${gistId}`, {
-        method: 'GET',
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-          'Accept': 'application/vnd.github+json',
-        }
-      });
-      if (!r.ok) {
-        const text = await r.text();
-        return res.status(500).json({ message: 'Failed to fetch gist', status: r.status, body: text });
+      const apply = req.body && req.body.apply === true;
+      try {
+        const result = await performRestoreFromGist(apply);
+        res.json(result);
+      } catch (e) {
+        if (e.message.includes('not configured')) return res.status(400).json({ message: e.message });
+        if (e.message.includes('File not found')) return res.status(404).json({ message: e.message });
+        if (e.status) return res.status(500).json({ message: 'Failed to fetch gist', status: e.status, body: e.body });
+        throw e;
       }
-      const data = await r.json();
-      const content = data?.files?.[file]?.content;
-      if (!content) return res.status(404).json({ message: 'File not found in gist' });
-      // Optional: apply immediately into storage
-      if (req.body && req.body.apply === true) {
-        try {
-          const parsed = JSON.parse(content);
-          // Bulk import if { users: [...] }
-          if (Array.isArray(parsed?.users)) {
-            let count = 0;
-            for (const entry of parsed.users) {
-              const u = entry?.user || {};
-              // Normalize password to hashed form
-              let normalizedPassword = null;
-              if (typeof u.passwordHash === 'string' && u.passwordHash.length > 0) {
-                normalizedPassword = u.passwordHash;
-              } else if (typeof u.password === 'string' && u.password.length > 0) {
-                normalizedPassword = u.password.startsWith('$2') ? u.password : await bcrypt.hash(u.password, 12);
-              }
-              const up = await storage.upsertUser({
-                id: u.id,
-                username: u.username || u.email || null,
-                isDev: !!u.isDev,
-                displayName: u.displayName || null,
-                isGuest: !!u.isGuest,
-                ...(normalizedPassword ? { password: normalizedPassword } : {}),
-              });
-              const payload = entry?.data || entry;
-              await storage.importUserData(up.id, payload);
-              count++;
-            }
-            return res.json({ ok: true, applied: true, imported: count });
-          }
-          // Single import
-          const userMeta = parsed.user || parsed.data?.user;
-          let targetId = req.userId;
-          if (userMeta) {
-            let normalizedPassword = null;
-            if (typeof userMeta.passwordHash === 'string' && userMeta.passwordHash.length > 0) {
-              normalizedPassword = userMeta.passwordHash;
-            } else if (typeof userMeta.password === 'string' && userMeta.password.length > 0) {
-              normalizedPassword = userMeta.password.startsWith('$2') ? userMeta.password : await bcrypt.hash(userMeta.password, 12);
-            }
-            const up = await storage.upsertUser({
-              id: userMeta.id,
-              username: userMeta.username || userMeta.email || null,
-              isDev: !!userMeta.isDev,
-              displayName: userMeta.displayName || null,
-              isGuest: !!userMeta.isGuest,
-              ...(normalizedPassword ? { password: normalizedPassword } : {}),
-            });
-            targetId = up.id;
-          }
-          const payload = parsed?.data || parsed;
-          await storage.importUserData(targetId, payload);
-          return res.json({ ok: true, applied: true, userId: targetId });
-        } catch (e) {
-          return res.status(400).json({ message: 'Failed to apply fetched content', error: e?.message || String(e) });
-        }
-      }
-      // Default: just return content (no apply)
-      res.json({ content, applied: false });
     } catch (e) {
-      res.status(500).json({ message: 'fetch failed' });
+      res.status(500).json({ message: 'fetch failed', error: e.message });
     }
   });
 
@@ -364,7 +296,7 @@ export async function registerRoutes(app) {
         words: createdWords
       });
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "Invalid vocabulary file format",
         error: error instanceof Error ? error.message : "Unknown error"
       });
@@ -461,7 +393,7 @@ export async function registerRoutes(app) {
       // Persist the actual totalWords to keep session metadata consistent
       try {
         await storage.updateStudySession(userId, session.id, { totalWords: words.length });
-      } catch {}
+      } catch { }
 
       const sessionWithWords = {
         ...session,
@@ -472,7 +404,7 @@ export async function registerRoutes(app) {
 
       res.json(sessionWithWords);
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "学習セッションの作成に失敗しました。指定された単語の範囲や設定を確認してください。",
         error: error instanceof Error ? error.message : "Unknown error"
       });
@@ -531,7 +463,7 @@ export async function registerRoutes(app) {
       const progress = await storage.createWordProgress(userId, progressData);
       res.json(progress);
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: "Invalid progress data",
         error: error instanceof Error ? error.message : "Unknown error"
       });
@@ -573,12 +505,12 @@ export async function registerRoutes(app) {
       if (summary && typeof summary === 'object') {
         const payload = {
           score: Number(score),
-          maxCombo: Number(summary.maxCombo)||0,
-          correctCount: Number(summary.correctCount)||0,
+          maxCombo: Number(summary.maxCombo) || 0,
+          correctCount: Number(summary.correctCount) || 0,
           fileName: summary.fileName || null,
-          start: Number(summary.start)||0,
-          end: Number(summary.end)||0,
-          limit: Number(summary.limit)||0,
+          start: Number(summary.start) || 0,
+          end: Number(summary.end) || 0,
+          limit: Number(summary.limit) || 0,
         };
         await storage.addScoreAttackRun(userId, payload);
       }
@@ -706,7 +638,7 @@ export async function registerRoutes(app) {
         return res.status(400).json({ message: 'Cannot overwrite built-in files' });
       }
       const result = await saveUploadedJsonFile(name, content, { overwrite: false });
-      try { storage.setUploadedOwner(result.name, req.userId); } catch {}
+      try { storage.setUploadedOwner(result.name, req.userId); } catch { }
       res.json({ ok: true, name: result.name, wordCount: result.wordCount });
     } catch (error) {
       if (error && error.code === 'FILE_EXISTS') {
@@ -733,7 +665,7 @@ export async function registerRoutes(app) {
         return res.status(403).json({ message: 'forbidden (not owner)' });
       }
       const result = await saveUploadedJsonFile(fileName, content, { overwrite: true });
-      if (!meta) { try { storage.setUploadedOwner(fileName, req.userId); } catch {} }
+      if (!meta) { try { storage.setUploadedOwner(fileName, req.userId); } catch { } }
       res.json({ ok: true, name: result.name, wordCount: result.wordCount });
     } catch (error) {
       res.status(400).json({ message: error?.message || 'Failed to update file' });
@@ -785,9 +717,9 @@ export async function registerRoutes(app) {
     if (!room) return;
     const data = JSON.stringify(payload);
     for (const ws of room.players.values()) {
-      try { ws.send(data); } catch {}
+      try { ws.send(data); } catch { }
     }
-    if (room.host) { try { room.host.send(data); } catch {} }
+    if (room.host) { try { room.host.send(data); } catch { } }
   }
 
   function toScores(room) {
@@ -799,12 +731,12 @@ export async function registerRoutes(app) {
   function scheduleRoomCleanup(roomId) {
     const r = rooms.get(roomId);
     if (!r) return;
-    if (r.cleanupTimer) { try { clearTimeout(r.cleanupTimer); } catch {} }
+    if (r.cleanupTimer) { try { clearTimeout(r.cleanupTimer); } catch { } }
     r.cleanupTimer = setTimeout(() => {
       const target = rooms.get(roomId);
       if (!target) return;
       if (target.state === 'ended' || (target.players && target.players.size === 0)) {
-        if (target.timer) { try { clearTimeout(target.timer); } catch {} }
+        if (target.timer) { try { clearTimeout(target.timer); } catch { } }
         rooms.delete(roomId);
       }
     }, 60_000);
@@ -853,12 +785,12 @@ export async function registerRoutes(app) {
         const { room, name, limitSec, words, questionCount } = msg;
         if (!room || !name || !Array.isArray(words) || !words.length) { ws.send(JSON.stringify({ type: 'error', message: 'invalid_create' })); return; }
         if (rooms.has(room)) { ws.send(JSON.stringify({ type: 'error', message: 'room_exists' })); return; }
-        let normalized = words.map(w => ({ id: String(w.id||''), word: String(w.word||''), meaning: String(w.meaning||'') })).filter(w => w.word && w.meaning);
+        let normalized = words.map(w => ({ id: String(w.id || ''), word: String(w.word || ''), meaning: String(w.meaning || '') })).filter(w => w.word && w.meaning);
         normalized = normalized.sort(() => Math.random() - 0.5);
-        const maxQuestions = Math.max(1, Math.min(Number(questionCount)||normalized.length, normalized.length));
+        const maxQuestions = Math.max(1, Math.min(Number(questionCount) || normalized.length, normalized.length));
         const r = {
           host: ws,
-          timeLimit: Math.max(5, Number(limitSec)||30),
+          timeLimit: Math.max(5, Number(limitSec) || 30),
           words: normalized,
           maxQuestions,
           asked: 0,
@@ -886,7 +818,7 @@ export async function registerRoutes(app) {
         } else {
           broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
         }
-      // 実行中の場合、参加者に現在のスコアと問題を送信
+        // 実行中の場合、参加者に現在のスコアと問題を送信
         if (r.state === 'running') {
           const q = r.words[r.idx];
           ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
@@ -899,7 +831,7 @@ export async function registerRoutes(app) {
         const { room, name, text } = msg; const r = rooms.get(room);
         if (!r || r.state !== 'running') return;
         const q = r.words[r.idx]; if (!q) return;
-        const ok = String(text||'').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        const ok = String(text || '').trim().toLowerCase() === q.meaning.trim().toLowerCase();
         if (ok) {
           r.lastCorrectBy = name;
           const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
@@ -938,3 +870,94 @@ export async function registerRoutes(app) {
 }
 
 
+
+// Exported backup/restore functions for internal use
+export async function performRestoreFromGist(apply = false) {
+  const token = process.env.GIST_TOKEN;
+  const gistId = process.env.GIST_ID;
+  const file = process.env.GIST_FILE || 'backup.json';
+  if (!gistId) throw new Error('Gist env not configured');
+
+  const r = await fetch(`https://api.github.com/gists/${gistId}`, {
+    method: 'GET',
+    headers: {
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      'Accept': 'application/vnd.github+json',
+    }
+  });
+  if (!r.ok) {
+    const text = await r.text();
+    const e = new Error('Failed to fetch gist');
+    e.status = r.status;
+    e.body = text;
+    throw e;
+  }
+  const data = await r.json();
+  const content = data?.files?.[file]?.content;
+  if (!content) throw new Error('File not found in gist');
+
+  if (apply) {
+    const parsed = JSON.parse(content);
+    // Bulk import if { users: [...] }
+    if (Array.isArray(parsed?.users)) {
+      let count = 0;
+      for (const entry of parsed.users) {
+        const u = entry?.user || {};
+        // Normalize password to hashed form
+        let normalizedPassword = null;
+        if (typeof u.passwordHash === 'string' && u.passwordHash.length > 0) {
+          normalizedPassword = u.passwordHash;
+        } else if (typeof u.password === 'string' && u.password.length > 0) {
+          normalizedPassword = u.password.startsWith('$2') ? u.password : await bcrypt.hash(u.password, 12);
+        }
+        const up = await storage.upsertUser({
+          id: u.id,
+          username: u.username || u.email || null,
+          isDev: !!u.isDev,
+          displayName: u.displayName || null,
+          isGuest: !!u.isGuest,
+          ...(normalizedPassword ? { password: normalizedPassword } : {}),
+        });
+        const payload = entry?.data || entry;
+        await storage.importUserData(up.id, payload);
+        count++;
+      }
+      return { ok: true, applied: true, imported: count };
+    }
+    // Single import (requires targetId usually, but here we might fetch global backup... userMeta should have ID)
+    const userMeta = parsed.user || parsed.data?.user;
+    let targetId = null;
+
+    // Internal user note: if apply=true is called from CLI/Startu, req.userId is undefined.
+    // If the backup has userMeta, we use it. If not, we can't easily guess targetId unless we assume single user system.
+    // But performRestoreFromGist is mostly for global backup restore.
+
+    if (userMeta) {
+      let normalizedPassword = null;
+      if (typeof userMeta.passwordHash === 'string' && userMeta.passwordHash.length > 0) {
+        normalizedPassword = userMeta.passwordHash;
+      } else if (typeof userMeta.password === 'string' && userMeta.password.length > 0) {
+        normalizedPassword = userMeta.password.startsWith('$2') ? userMeta.password : await bcrypt.hash(userMeta.password, 12);
+      }
+      const up = await storage.upsertUser({
+        id: userMeta.id,
+        username: userMeta.username || userMeta.email || null,
+        isDev: !!userMeta.isDev,
+        displayName: userMeta.displayName || null,
+        isGuest: !!userMeta.isGuest,
+        ...(normalizedPassword ? { password: normalizedPassword } : {}),
+      });
+      targetId = up.id;
+      const payload = parsed?.data || parsed;
+      await storage.importUserData(targetId, payload);
+      return { ok: true, applied: true, userId: targetId };
+    }
+
+    // If no userMeta, we can't restore single user data without knowing who. 
+    // This case might fail for single-user backups restored via startup script if ID is missing.
+    // But usually backup includes user meta.
+    throw new Error('Backup does not contain user metadata for identification');
+  }
+
+  return { content, applied: false };
+}
