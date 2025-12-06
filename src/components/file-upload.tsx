@@ -34,9 +34,9 @@ import chiri2 from "./data/chiri2.json";
 import Chemistry from "./data/Chemistry.json";
 import organic from "./data/organic.json";
 import rinri2 from "./data/rinri2.json";
-import chemistoryByIsii from "./data/chemistoryByIsii.json";
-import chemistoryByIsii2 from "./data/chemistoryByIsii2.json";
 
+import chemistoryByIshii from "./data/chemistoryByIshii.json";
+import chemistoryByIshii2 from "./data/chemistoryByIshii2.json";
 
 
 // 選択可能な内蔵JSONファイル
