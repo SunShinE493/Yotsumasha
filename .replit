@@ -7,10 +7,13 @@ channel = "stable-24_05"
 [deployment]
 run = ["sh", "-c", "npm run start"]
 
-
 [[ports]]
 localPort = 5000
 externalPort = 5000
+
+[[ports]]
+localPort = 34687
+externalPort = 80
 
 [agent]
 expertMode = true
