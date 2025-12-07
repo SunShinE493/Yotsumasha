@@ -165,11 +165,19 @@ export async function registerRoutes(app) {
 
       // Embed into backup payload
       if (Object.keys(extraFiles).length) all.extraFiles = extraFiles;
-      if (Object.keys(uploadedFiles).length) all.uploadedFiles = uploadedFiles;
+
+      // uploadedFiles are now handled as separate files in the gist, not embedded in backup.json
+      // We keep old logic (if (Object.keys(uploadedFiles).length) all.uploadedFiles = uploadedFiles;) mostly for migration safety? 
+      // User requested separate files, so we simply DON'T embed them here.
 
       const payload = {
         files: { [file]: { content: JSON.stringify(all, null, 2) } }
       };
+
+      // Add uploaded files as separate entries in 'files'
+      for (const [name, content] of Object.entries(uploadedFiles)) {
+        payload.files[name] = { content: content };
+      }
       const r = await fetch(`https://api.github.com/gists/${gistId}`, {
         method: 'PATCH',
         headers: {
@@ -986,6 +994,26 @@ export async function performRestoreFromGist(apply = false) {
 
       const payload = parsed?.data || parsed;
       await storage.importUserData(targetId, payload);
+
+      // Restore separate wordbook files if present in the gist
+      // data.files contains all files in the gist
+      if (data.files) {
+        const separateUploads = [];
+        for (const [fname, fileObj] of Object.entries(data.files)) {
+          // Skip backup.json itself or any other known system files if needed
+          if (fname === file || fname === 'backup.json') continue;
+          if (!fname.toLowerCase().endsWith('.json')) continue;
+
+          // If it looks like a wordbook (JSON content), try to restore it
+          if (fileObj.content) {
+            separateUploads.push({ name: fname, content: fileObj.content });
+          }
+        }
+        if (separateUploads.length > 0) {
+          await fileUtils.applyUploadedJsonFiles(separateUploads);
+        }
+      }
+
       return { ok: true, applied: true, userId: targetId };
     }
 

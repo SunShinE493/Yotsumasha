@@ -24,7 +24,14 @@ export function SmilesText({ smiles, className, width = 180, height = 120 }: Smi
         try {
             const options = {
                 width: width,
-                height: height
+                height: height,
+                themes: {
+                    light: {
+                        C: '#ffffff',
+                        BOND: '#ffffff',
+                        BACKGROUND: 'rgba(0,0,0,0)',
+                    }
+                }
             };
 
             const drawer = new SmilesDrawer.Drawer(options);
