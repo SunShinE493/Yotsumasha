@@ -2039,7 +2039,7 @@
   {
     "category": "糖類",
     "subcategory": "2",
-    "word": "smiles:O([C@H]1[C@H](O)[C@@H](O)C(O)O[C@@H]1CO)[C@H]2O[C@@H]([C@@H](O)[C@H](O)[C@@H]2CO)O:この構造式で表される化合物を(　)という。",
+    "word": "smiles:O([C@H]1[C@H](O)[C@@H](O)C(O)O[C@@H]1CO)[C@H]2O[C@@H]([C@@H](O)[C@H](O)[C@H]2O)CO:この構造式で表される化合物を(　)という。",
     "meaning": "マルトース",
     "difficulty": "1"
   },
