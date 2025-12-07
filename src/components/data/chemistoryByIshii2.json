@@ -1584,7 +1584,7 @@
   {
     "category": "芳香族",
     "subcategory": "4",
-    "word": "smiles:O=C(O)C1=CC=CC=C1:O=CC1=CC=CC=C1:トルエン ⌬-CH₃ やエチルベンゼン ⌬-CH₂CH₃ を過マンガン酸カリウム KMnO₄ で酸化すると(　)ができる。また、トルエンを穏やかに酸化すると(　)ができる。",
+    "word": "smiles:O=C(O)C1=CC=CC=C1:　smiles:O=CC1=CC=CC=C1:トルエン ⌬-CH₃ やエチルベンゼン ⌬-CH₂CH₃ を過マンガン酸カリウム KMnO₄ で酸化すると(　)ができる。また、トルエンを穏やかに酸化すると(　)ができる。",
     "meaning": "安息香酸/ベンズアルデヒド",
     "difficulty": "2;2"
   },
