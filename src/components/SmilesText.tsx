@@ -39,7 +39,13 @@ export function SmilesText({ smiles, className, width = 300, height = 200 }: Smi
                         }
                         setError(null);
                     } catch (drawErr: any) {
-                        console.error('[SmilesText] Failed to draw SMILES:', drawErr, 'String:', smiles);
+                        console.error('[SmilesText] Failed to draw SMILES. Error details:');
+                        console.error('Message:', drawErr.message);
+                        console.error('Name:', drawErr.name);
+                        console.error('Stack:', drawErr.stack);
+                        console.error('Keys:', Object.keys(drawErr));
+                        console.error('Stringified:', JSON.stringify(drawErr, Object.getOwnPropertyNames(drawErr)));
+                        console.error('Raw:', drawErr);
                         setError('Invalid SMILES');
                     }
                     setIsLoading(false);
