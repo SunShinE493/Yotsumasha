@@ -28,7 +28,18 @@ export function SmilesText({ smiles, className, width = 300, height = 200 }: Smi
                 height: height
             };
 
-            const drawer = new SmilesDrawer.Drawer(options);
+            console.log('[SmilesText] Imported Module:', SmilesDrawer);
+            let Drawer = SmilesDrawer.Drawer;
+            if (!Drawer && (SmilesDrawer as any).default) {
+                console.log('[SmilesText] Using .default export');
+                Drawer = (SmilesDrawer as any).default.Drawer;
+            }
+
+            if (!Drawer) {
+                throw new Error('SmilesDrawer.Drawer definition not found in import');
+            }
+
+            const drawer = new Drawer(options);
 
             SmilesDrawer.parse(
                 smiles,
