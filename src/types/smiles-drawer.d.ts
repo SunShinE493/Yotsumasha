@@ -1,11 +1,17 @@
 declare module 'smiles-drawer' {
-    export default class SmiDrawer {
-        constructor(options: any);
-        draw(data: string, target: HTMLElement, theme?: string, infoOnly?: boolean): void;
+    namespace SmilesDrawer {
+        class Drawer {
+            constructor(options?: any);
+            draw(tree: any, target: HTMLCanvasElement, theme?: string, infoOnly?: boolean): void;
+        }
+        
+        class SvgDrawer {
+            constructor(options?: any);
+            draw(tree: any, target: SVGElement, theme?: string): void;
+        }
+        
+        function parse(smiles: string, successCallback: (tree: any) => void, errorCallback?: (err: any) => void): void;
     }
-}
-
-declare module '*/smiles-drawer-lib.js' {
-    const SmiDrawer: any;
-    export default SmiDrawer;
+    
+    export = SmilesDrawer;
 }
