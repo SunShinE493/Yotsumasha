@@ -95,6 +95,7 @@ export function MathText({ text }: { text: string }) {
     if (!text) return text;
 
     // Check for "smiles:" prefix
+    // Format: smiles:<SMILES_STRING>:<remaining text>
     if (text.startsWith('smiles:')) {
       const rest = text.substring(7); // Remove "smiles:"
       const colonIndex = rest.indexOf(':');
