@@ -265,7 +265,7 @@ export default function ScorePage() {
                 <div>残り: <span className="text-foreground font-medium">{String(Math.floor(remaining / 60)).padStart(2, '0')}:{String(remaining % 60).padStart(2, '0')}</span></div>
               </div>
               <div className="text-center space-y-2">
-                <div className="text-xl font-semibold"><MathText text={current?.word ?? '読み込み中...'} /></div>
+                <div className="text-xl font-semibold"><MathText text={current?.word ?? '読み込み中...'} smilesVariant="black" /></div>
                 <div className="text-sm text-muted-foreground">意味を入力</div>
               </div>
               <div className="flex gap-2">
@@ -275,7 +275,7 @@ export default function ScorePage() {
                 <Button variant="outline" onClick={finishGame}>終了</Button>
               </div>
               {lastAnswer && (
-                <div className="text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(lastAnswer)} /></span></div>
+                <div className="text-sm text-muted-foreground">直前の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(lastAnswer)} smilesVariant="black" /></span></div>
               )}
             </CardContent>
           </Card>
@@ -294,7 +294,7 @@ export default function ScorePage() {
                 <div className="flex justify-between"><span className="text-muted-foreground">間違い</span><span className="text-foreground">{mistakes}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">スキップ</span><span className="text-foreground">{skips}</span></div>
                 {result.lastMeaning ? (
-                  <div className="flex justify-between sm:col-span-2"><span className="text-muted-foreground">最後の問題の答え</span><span className="text-foreground"><MathText text={formatMeaning(result.lastMeaning!)} /> {result.lastWord ? <span>（<MathText text={result.lastWord} />）</span> : ''}</span></div>
+                  <div className="flex justify-between sm:col-span-2"><span className="text-muted-foreground">最後の問題の答え</span><span className="text-foreground"><MathText text={formatMeaning(result.lastMeaning!)} smilesVariant="black" /> {result.lastWord ? <span>（<MathText text={result.lastWord} smilesVariant="black" />）</span> : ''}</span></div>
                 ) : null}
               </div>
               <div className="flex gap-2">

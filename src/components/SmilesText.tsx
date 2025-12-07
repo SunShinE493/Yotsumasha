@@ -6,9 +6,10 @@ interface SmilesTextProps {
     className?: string;
     width?: number;
     height?: number;
+    variant?: 'default' | 'black';
 }
 
-export function SmilesText({ smiles, className, width = 180, height = 120 }: SmilesTextProps) {
+export function SmilesText({ smiles, className, width = 180, height = 120, variant = 'default' }: SmilesTextProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -22,15 +23,21 @@ export function SmilesText({ smiles, className, width = 180, height = 120 }: Smi
         setIsLoading(true);
         setError(null);
         try {
+            const theme = variant === 'black' ? {
+                C: '#000000',
+                BOND: '#000000',
+                BACKGROUND: 'rgba(0,0,0,0)',
+            } : {
+                C: '#ffffff',
+                BOND: '#ffffff',
+                BACKGROUND: 'rgba(0,0,0,0)',
+            };
+
             const options = {
                 width: width,
                 height: height,
                 themes: {
-                    light: {
-                        C: '#ffffff',
-                        BOND: '#ffffff',
-                        BACKGROUND: 'rgba(0,0,0,0)',
-                    }
+                    light: theme
                 }
             };
 
@@ -68,7 +75,8 @@ export function SmilesText({ smiles, className, width = 180, height = 120 }: Smi
             setError('Invalid SMILES');
             setIsLoading(false);
         }
-    }, [smiles, width, height]);
+        setIsLoading(false);
+    }, [smiles, width, height, variant]);
 
     if (error) return <span className="text-destructive font-mono text-sm">{error}: {smiles}</span>;
 

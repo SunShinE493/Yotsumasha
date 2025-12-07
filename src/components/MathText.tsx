@@ -83,7 +83,7 @@ function renderSegments(text: string, katex: any): Array<React.ReactNode> {
   return nodes.length ? nodes : [text];
 }
 
-export function MathText({ text }: { text: string }) {
+export function MathText({ text, smilesVariant }: { text: string; smilesVariant?: 'default' | 'black' }) {
   const [ready, setReady] = useState<boolean>(!!window.katex);
   useEffect(() => {
     if (!ready) {
@@ -107,7 +107,7 @@ export function MathText({ text }: { text: string }) {
         const displayString = rest.substring(colonIndex + 1).trim();
         return (
           <div className="flex flex-col items-center">
-            <SmilesText smiles={smilesString} />
+            <SmilesText smiles={smilesString} variant={smilesVariant} />
             <div className="mt-2 text-center">
               {renderSegments(displayString, window.katex)}
             </div>
@@ -116,7 +116,7 @@ export function MathText({ text }: { text: string }) {
       } else {
         // Format is just smiles:SMILES_STRING
         const smilesString = rest.trim();
-        return <SmilesText smiles={smilesString} />;
+        return <SmilesText smiles={smilesString} variant={smilesVariant} />;
       }
     }
 
@@ -125,7 +125,7 @@ export function MathText({ text }: { text: string }) {
     const normalized = text.replace(/\t(?:ext)/g, '\\text');
     if (!window.katex) return normalized;
     return renderSegments(normalized, window.katex);
-  }, [text, ready]);
+  }, [text, ready, smilesVariant]);
 
   return <>{content}</>;
 }

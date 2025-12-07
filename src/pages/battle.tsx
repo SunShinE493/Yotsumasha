@@ -423,7 +423,7 @@ export default function BattlePage() {
                     </div>
                   </div>
                   <div className="font-semibold text-foreground" style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.25 }}>
-                    <MathText text={questionWord ?? (phase === 'ended' ? '終了しました' : '...')} />
+                    <MathText text={questionWord ?? (phase === 'ended' ? '終了しました' : '...')} smilesVariant="black" />
                   </div>
                 </div>
 
@@ -440,15 +440,15 @@ export default function BattlePage() {
                     {Object.entries(scores).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0)).map(([n, sc]) => (
                       <div key={n} className="flex items-center rounded-md border border-border bg-background px-3 py-2">
                         <div className="text-foreground">{n}</div>
-                        <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ? <MathText text={lastAnswerByName[n]} /> : ''}</div>
+                        <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ? <MathText text={lastAnswerByName[n]} smilesVariant="black" /> : ''}</div>
                         <div className="text-sm text-muted-foreground tabular-nums">{sc}</div>
                       </div>
                     ))}
                   </div>
                   {lastAnswer && (
                     <div className="mt-4 text-sm text-muted-foreground">
-                      直前の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(lastAnswer)} /></span>
-                      {lastAnswerWord ? <span className="text-muted-foreground">（<MathText text={lastAnswerWord} />）</span> : null}
+                      直前の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(lastAnswer)} smilesVariant="black" /></span>
+                      {lastAnswerWord ? <span className="text-muted-foreground">（<MathText text={lastAnswerWord} smilesVariant="black" />）</span> : null}
                       {lastAnswerer ? <span className="ml-2 text-xs text-muted-foreground">正解者: <span className="text-foreground font-medium">{lastAnswerer}</span></span> : null}
                     </div>
                   )}
@@ -465,8 +465,8 @@ export default function BattlePage() {
                       </div>
                       {finalLastMeaning && (
                         <div className="mt-3 text-sm text-muted-foreground">
-                          最後の問題の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(finalLastMeaning)} /></span>
-                          {finalLastWord ? <span className="text-muted-foreground">（<MathText text={finalLastWord} />）</span> : null}
+                          最後の問題の答え: <span className="text-foreground font-medium"><MathText text={formatMeaning(finalLastMeaning)} smilesVariant="black" /></span>
+                          {finalLastWord ? <span className="text-muted-foreground">（<MathText text={finalLastWord} smilesVariant="black" />）</span> : null}
                         </div>
                       )}
                     </div>
