@@ -96,8 +96,26 @@ export function MathText({ text }: { text: string }) {
 
     // Check for "smiles:" prefix
     if (text.startsWith('smiles:')) {
-      const smilesString = text.substring(7).trim(); // Remove "smiles:"
-      return <SmilesText smiles={smilesString} />;
+      const rest = text.substring(7); // Remove "smiles:"
+      const colonIndex = rest.indexOf(':');
+
+      if (colonIndex !== -1) {
+        // Format is smiles:SMILES_STRING:TEXT
+        const smilesString = rest.substring(0, colonIndex).trim();
+        const displayString = rest.substring(colonIndex + 1).trim();
+        return (
+          <div className="flex flex-col items-center">
+            <SmilesText smiles={smilesString} />
+            <div className="mt-2 text-center">
+              {renderSegments(displayString, window.katex)}
+            </div>
+          </div>
+        );
+      } else {
+        // Format is just smiles:SMILES_STRING
+        const smilesString = rest.trim();
+        return <SmilesText smiles={smilesString} />;
+      }
     }
 
     // Pre-normalize common JSON-escape pitfalls: "\text" becomes tab + "ext" if not double-escaped
