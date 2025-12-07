@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as SmilesDrawer from '../lib/smiles-drawer-lib.js';
+import SmilesDrawer from '../lib/smiles-drawer-lib.js';
 
 interface SmilesTextProps {
     smiles: string;
@@ -21,36 +21,13 @@ export function SmilesText({ smiles, className, width = 300, height = 200 }: Smi
 
         setIsLoading(true);
         setError(null);
-
         try {
             const options = {
                 width: width,
                 height: height
             };
 
-            console.log('[SmilesText] Imported Module:', SmilesDrawer);
-            let Drawer = SmilesDrawer.Drawer;
-
-            // Robust check for different export structures
-            // If SmilesDrawer doesn't have Drawer but has default, check default
-            if (!Drawer && (SmilesDrawer as any).default) {
-                console.log('[SmilesText] Checking .default for Drawer');
-                if ((SmilesDrawer as any).default.Drawer) {
-                    Drawer = (SmilesDrawer as any).default.Drawer;
-                    console.log('[SmilesText] Found Drawer on .default');
-                } else if ((SmilesDrawer as any).default.default && (SmilesDrawer as any).default.default.Drawer) {
-                    // Sometimes double default with vite/commonjs interaction
-                    Drawer = (SmilesDrawer as any).default.default.Drawer;
-                    console.log('[SmilesText] Found Drawer on .default.default');
-                }
-            }
-
-            if (!Drawer) {
-                console.error('[SmilesText] Import structure dump:', JSON.stringify(SmilesDrawer, null, 2));
-                throw new Error('SmilesDrawer.Drawer definition not found in import');
-            }
-
-            const drawer = new Drawer(options);
+            const drawer = new SmilesDrawer.Drawer(options);
 
             SmilesDrawer.parse(
                 smiles,
