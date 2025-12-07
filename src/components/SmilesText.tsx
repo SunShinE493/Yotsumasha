@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SmilesDrawer from 'smiles-drawer';
+import SmilesDrawer from '../lib/smiles-drawer-lib.js';
 
 interface SmilesTextProps {
     smiles: string;
@@ -27,7 +27,7 @@ export function SmilesText({ smiles, className, width = 300, height = 200 }: Smi
                 width: width,
                 height: height
             };
-            
+
             const drawer = new SmilesDrawer.Drawer(options);
 
             SmilesDrawer.parse(
