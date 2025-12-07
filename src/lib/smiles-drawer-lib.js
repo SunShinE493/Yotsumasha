@@ -16855,3 +16855,5 @@
 }, {}, [1])
 
 
+
+export default SmilesDrawer;
