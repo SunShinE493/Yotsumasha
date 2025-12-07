@@ -5601,7 +5601,7 @@
           svg.setAttributeNS(null, 'height', this.svgDrawer.opts.height + '');
 
           console.log('[Drawer] calling svgDrawer.draw');
-          this.svgDrawer.draw(data, svg, themeName, infoOnly, highlight_atoms);
+          this.svgDrawer.draw(data, svg, themeName, null, infoOnly, highlight_atoms);
 
           console.log('[Drawer] calling usage of toCanvas');
           if (this.svgDrawer.svgWrapper && this.svgDrawer.svgWrapper.toCanvas) {

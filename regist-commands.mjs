@@ -6,13 +6,14 @@ const commands = [];
 const foldersPath = path.join(process.cwd(), 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
-export default async() => {
+export default async () => {
   for (const folder of commandFolders) {
     const commandsPath = path.join(foldersPath, folder);
     const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.mjs'));
     for (const file of commandFiles) {
       const filePath = path.join(commandsPath, file);
-      await import(filePath).then(module => {
+      const { pathToFileURL } = await import('url');
+      await import(pathToFileURL(filePath).href).then(module => {
         commands.push(module.data.toJSON());
       });
     }
@@ -28,7 +29,7 @@ export default async() => {
         Routes.applicationCommands(process.env.APPLICATION_ID),
         { body: commands },
       );
-      
+
       const dataGuild = await rest.put(
         Routes.applicationCommands(process.env.APPLICATION_ID),
         { body: commands },

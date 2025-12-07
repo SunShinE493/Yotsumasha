@@ -2,6 +2,16 @@
 export function formatMeaning(meaning: string): string {
     if (!meaning) return meaning;
     const s = String(meaning);
+
+    // Split by / but preserve /r\d (used in r: type meanings)
+    // Regex: Match / only if NOT followed by r and a digit
+    const parts = s.split(/\/(?!r\d)/g);
+
+    const formattedParts = parts.map(part => formatSingleMeaning(part));
+    return formattedParts.join('/');
+}
+
+function formatSingleMeaning(s: string): string {
     if (s.startsWith('c:')) {
         const parts = s.split(':');
         return parts[parts.length - 1] || s;

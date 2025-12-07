@@ -8,7 +8,7 @@ interface SmilesTextProps {
     height?: number;
 }
 
-export function SmilesText({ smiles, className, width = 300, height = 200 }: SmilesTextProps) {
+export function SmilesText({ smiles, className, width = 180, height = 120 }: SmilesTextProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
