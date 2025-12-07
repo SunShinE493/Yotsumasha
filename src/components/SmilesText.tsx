@@ -30,12 +30,23 @@ export function SmilesText({ smiles, className, width = 300, height = 200 }: Smi
 
             console.log('[SmilesText] Imported Module:', SmilesDrawer);
             let Drawer = SmilesDrawer.Drawer;
+
+            // Robust check for different export structures
+            // If SmilesDrawer doesn't have Drawer but has default, check default
             if (!Drawer && (SmilesDrawer as any).default) {
-                console.log('[SmilesText] Using .default export');
-                Drawer = (SmilesDrawer as any).default.Drawer;
+                console.log('[SmilesText] Checking .default for Drawer');
+                if ((SmilesDrawer as any).default.Drawer) {
+                    Drawer = (SmilesDrawer as any).default.Drawer;
+                    console.log('[SmilesText] Found Drawer on .default');
+                } else if ((SmilesDrawer as any).default.default && (SmilesDrawer as any).default.default.Drawer) {
+                    // Sometimes double default with vite/commonjs interaction
+                    Drawer = (SmilesDrawer as any).default.default.Drawer;
+                    console.log('[SmilesText] Found Drawer on .default.default');
+                }
             }
 
             if (!Drawer) {
+                console.error('[SmilesText] Import structure dump:', JSON.stringify(SmilesDrawer, null, 2));
                 throw new Error('SmilesDrawer.Drawer definition not found in import');
             }
 
