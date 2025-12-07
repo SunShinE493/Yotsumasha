@@ -98,6 +98,7 @@ export function MathText({ text }: { text: string }) {
     // Format: smiles:<SMILES_STRING>:<remaining text>
     if (text.startsWith('smiles:')) {
       const rest = text.substring(7); // Remove "smiles:"
+      console.log('[MathText] Processing SMILES:', rest);
       const colonIndex = rest.indexOf(':');
 
       if (colonIndex !== -1) {

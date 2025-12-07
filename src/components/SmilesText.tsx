@@ -36,16 +36,17 @@ export function SmilesText({ smiles, className, width = 300, height = 200 }: Smi
                     try {
                         if (canvasRef.current) {
                             drawer.draw(tree, canvasRef.current, 'light', false);
+                            console.log('[SmilesText] Draw success:', smiles);
                         }
                         setError(null);
                     } catch (drawErr: any) {
-                        console.error('Failed to draw SMILES:', drawErr);
+                        console.error('[SmilesText] Failed to draw SMILES:', drawErr, 'String:', smiles);
                         setError('Invalid SMILES');
                     }
                     setIsLoading(false);
                 },
                 (parseErr: any) => {
-                    console.error('Failed to parse SMILES:', parseErr);
+                    console.error('[SmilesText] Failed to parse SMILES:', parseErr, 'String:', smiles);
                     setError('Invalid SMILES');
                     setIsLoading(false);
                 }

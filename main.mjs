@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import express from "express";
 import { Client, Collection, Events, GatewayIntentBits, ActivityType, EmbedBuilder, Partials } from "discord.js";
 import { createServer } from "http";
@@ -338,7 +339,7 @@ for (const folder of commandFolders) {
 
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
-    import(filePath).then((module) => {
+    import(pathToFileURL(filePath).href).then((module) => {
       client.commands.set(module.data.name, module);
     });
   }
@@ -351,7 +352,7 @@ const handlerFiles = fs.readdirSync(handlersPath).filter((file) => file.endsWith
 
 for (const file of handlerFiles) {
   const filePath = path.join(handlersPath, file);
-  import(filePath).then((module) => {
+  import(pathToFileURL(filePath).href).then((module) => {
     handlers.set(file.slice(0, -4), module);
   });
 }
@@ -388,7 +389,11 @@ YoutubeFeeds.sync({ alter: true });
 YoutubeNotifications.sync({ alter: true });
 
 CommandsRegister();
-client.login(process.env.TOKEN);
+if (process.env.TOKEN) {
+  client.login(process.env.TOKEN).catch(e => console.error("Discord login failed:", e));
+} else {
+  console.log("No Discord TOKEN provided, skipping login.");
+}
 runWebserver();
 
 async function trigger() {
@@ -728,10 +733,19 @@ const API_KEY = process.env.GOOGLE_API_KEY;
 if (API_KEY === undefined) {
   console.log("APIki-なし")
 }
-const ai = new GoogleGenAI(API_KEY, {});
+let ai;
+if (API_KEY) {
+  ai = new GoogleGenAI(API_KEY, {});
+} else {
+  console.log("API Key missing, AI features disabled.");
+}
 async function runai(content, message, aisikibetsu) {
   const talk = message.content;
   if (aisikibetsu === 0) {
+    if (!ai) {
+      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      return;
+    }
     max = 1000;
 
     const chat = await ai.models.generateContent({
@@ -749,6 +763,10 @@ async function runai(content, message, aisikibetsu) {
       console.log("字数エラー");
     }
   } else if (aisikibetsu === 1) {
+    if (!ai) {
+      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      return;
+    }
     message.channel.send('考え中です。これには数分かかる場合もあります。');
 
     try {
