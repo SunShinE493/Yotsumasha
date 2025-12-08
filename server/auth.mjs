@@ -26,7 +26,7 @@ passport.use(
       if (!isValidPassword) {
         return done(null, false);
       }
-      
+
       return done(null, user);
     } catch (error) {
       return done(error);
@@ -88,7 +88,7 @@ export function setupAuth(app) {
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
-  
+
   // Normalize CSRF header names from clients before CSRF middleware
   app.use((req, _res, next) => {
     const h = req.headers || {};
@@ -105,7 +105,7 @@ export function setupAuth(app) {
         // @ts-ignore
         req.cookies['csrf-token'] = token;
       }
-    } catch {}
+    } catch { }
     next();
   });
 
@@ -114,7 +114,7 @@ export function setupAuth(app) {
   const csrfMiddleware = csurf(csrfSecret, ["POST", "PUT", "PATCH", "DELETE"]);
   // Allow basic-dev-auth bypass for admin export/import and profile/backup updates (stability)
   app.use((req, res, next) => {
-    const bypassPaths = new Set(['/api/admin/export', '/api/admin/import', '/api/profile', '/api/admin/backup/gist', '/api/admin/backup/gist/fetch']);
+    const bypassPaths = new Set(['/api/admin/export', '/api/admin/import', '/api/profile', '/api/admin/backup/gist', '/api/admin/backup/gist/fetch', '/api/admin/files/builtin', '/api/admin/files/builtin/read']);
     if (bypassPaths.has(req.path)) {
       const envUser = process.env.BACKUP_ADMIN_EMAIL;
       const envPass = process.env.BACKUP_ADMIN_PASSWORD;
@@ -150,7 +150,7 @@ export function setupAuth(app) {
   app.post("/api/register", authRateLimit, async (req, res, next) => {
     try {
       const userData = insertUserSchema.parse(req.body);
-      
+
       // Check if user already exists
       const existingUser = await storage.getUserByUsername(userData.username);
       if (existingUser) {
@@ -175,7 +175,7 @@ export function setupAuth(app) {
           console.error('Session regeneration error:', regenerateErr);
           return res.status(500).json({ message: 'セッション作成に失敗しました' });
         }
-        
+
         req.login(user, (err) => {
           if (err) {
             console.error('Auto-login after registration error:', err);
@@ -187,9 +187,9 @@ export function setupAuth(app) {
       });
     } catch (error) {
       if (error.name === 'ZodError') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "入力データが無効です",
-          errors: error.errors 
+          errors: error.errors
         });
       }
       console.error("Registration error:", error);
@@ -233,7 +233,7 @@ export function setupAuth(app) {
           console.error("Login error:", err);
           return res.status(500).json({ message: "ログインに失敗しました" });
         }
-        
+
         if (!user) {
           return res.status(401).json({ message: "メールアドレスまたはパスワードが間違っています" });
         }
@@ -244,13 +244,13 @@ export function setupAuth(app) {
             console.error('Session regeneration error:', regenerateErr);
             return res.status(500).json({ message: 'セッション作成に失敗しました' });
           }
-          
+
           req.login(user, (err) => {
             if (err) {
               console.error("Session creation error:", err);
               return res.status(500).json({ message: "セッション作成に失敗しました" });
             }
-            
+
             const { password, ...userWithoutPassword } = user;
             res.json(userWithoutPassword);
           });
@@ -258,9 +258,9 @@ export function setupAuth(app) {
       })(req, res, next);
     } catch (error) {
       if (error.name === 'ZodError') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "入力データが無効です",
-          errors: error.errors 
+          errors: error.errors
         });
       }
       res.status(500).json({ message: "ログインに失敗しました" });
@@ -271,12 +271,12 @@ export function setupAuth(app) {
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
-      
+
       // Clear guest data if it was a guest session
       if (req.session.guestId) {
         storage.clearGuestData(req.session.guestId);
       }
-      
+
       // Destroy the session completely
       req.session.destroy((destroyErr) => {
         if (destroyErr) {

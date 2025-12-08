@@ -147,7 +147,7 @@ export async function registerRoutes(app) {
       // Read extra files (schedule.json, wordlist.json) if they exist
       const extraFiles = {};
       const fs = await import('fs/promises');
-      for (const fname of ['schedule.json', 'wordlist.json']) {
+      for (const fname of ['schedule.json', 'wordlist.json', 'word list.json']) {
         try {
           const content = await fs.readFile(fname, 'utf8');
           extraFiles[fname] = content;
@@ -401,6 +401,31 @@ export async function registerRoutes(app) {
         words = await storage.getVocabularyWordsInRange(userId, config.startRange, config.endRange);
       }
 
+      // Filter by difficulty if provided
+      if (config.selectedDifficulties && Array.isArray(config.selectedDifficulties) && config.selectedDifficulties.length > 0) {
+        const selectedDiffSet = new Set(config.selectedDifficulties.map(d => String(d)));
+        words = words.filter(w => {
+          // Allow words with no difficulty if we aren't strict, but usually if filtering we want specific ones.
+          // Requirement: "difficulty がない場合にはこの処理はしないようにしてください" -> This implies if difficulty exists in JSON, we filter.
+          // But if user SELECTS difficulties, we probably only want those matches.
+          // However, if the word has NO difficulty property, should it be included? 
+          // User said: "difficulty がある場合には、その難易度を選択できるようにしてください。(複数選択可)... difficulty がない場合にはこの処理はしない"
+          // Let's assume if word has difficulty, check it. If not, include it? OR exclude?
+          // Usually UI only shows selector if difficulties exist. If selector active, we probably expect filtering.
+          // Let's assume: if word.difficulty is present, it MUST match. If missing, maybe include or exclude?
+          // Safest: If word.difficulty exists, it must be in the set. If it doesn't exist, we likely include it unless we are strictly "Searching for level 1".
+          // But normally difficulty-tagged files have it on all words.
+          // Let's include if difficulty is missing OR matches.
+          if (w.difficulty === undefined || w.difficulty === null) return true;
+          // difficulty can be number or string "1" "2" "2;3".
+          // If "2;3", and we selected "2", it should match?
+          // User said: "difficulty が2;3のようになっている場合は... 難易度が1と2を選択していた場合... 表示するようにしてください"
+          // -> So if ANY of the word's difficulties match the selection, include it.
+          const wordDiffs = String(w.difficulty).split(';').map(s => s.trim());
+          return wordDiffs.some(d => selectedDiffSet.has(d));
+        });
+      }
+
       // Fetch current review list to either exclude or use exclusively
       const reviewProgress = await storage.getReviewWords(userId);
       if (config.reviewOnly) {
@@ -408,6 +433,15 @@ export async function registerRoutes(app) {
           .map((rp) => rp.word)
           .filter((w) => w && w.id && w.word && w.meaning);
         words = reviewOnlyWords;
+        // Re-apply difficulty filter for review session if needed?
+        if (config.selectedDifficulties && Array.isArray(config.selectedDifficulties) && config.selectedDifficulties.length > 0) {
+          const selectedDiffSet = new Set(config.selectedDifficulties.map(d => String(d)));
+          words = words.filter(w => {
+            if (w.difficulty === undefined || w.difficulty === null) return true;
+            const wordDiffs = String(w.difficulty).split(';').map(s => s.trim());
+            return wordDiffs.some(d => selectedDiffSet.has(d));
+          });
+        }
       } else {
         const reviewIds = new Set(reviewProgress.map((rp) => rp.word?.id || rp.wordId));
         words = (words || []).filter((w) => !reviewIds.has(w.id));
@@ -415,6 +449,13 @@ export async function registerRoutes(app) {
 
       if (config.order === "random") {
         words = words.sort(() => Math.random() - 0.5);
+      } else if (config.order === "difficulty") {
+        // Sort by difficulty (ascending)
+        words = words.sort((a, b) => {
+          const da = a.difficulty ? String(a.difficulty) : "999";
+          const db = b.difficulty ? String(b.difficulty) : "999";
+          return da.localeCompare(db, undefined, { numeric: true });
+        });
       }
 
       // Clamp to actual available words to avoid client/server count mismatches
@@ -423,12 +464,13 @@ export async function registerRoutes(app) {
 
       // Persist the actual totalWords to keep session metadata consistent
       try {
-        await storage.updateStudySession(userId, session.id, { totalWords: words.length });
+        await storage.updateStudySession(userId, session.id, { totalWords: words.length, selectedDifficulties: config.selectedDifficulties });
       } catch { }
 
       const sessionWithWords = {
         ...session,
         totalWords: words.length,
+        selectedDifficulties: config.selectedDifficulties,
         words,
         progress: [],
       };
@@ -982,7 +1024,7 @@ export async function performRestoreFromGist(apply = false) {
       if (parsed.extraFiles) {
         const fs = await import('fs/promises');
         for (const [fname, content] of Object.entries(parsed.extraFiles)) {
-          if (['schedule.json', 'wordlist.json'].includes(fname)) {
+          if (['schedule.json', 'wordlist.json', 'word list.json'].includes(fname)) {
             try { await fs.writeFile(fname, content, 'utf8'); } catch { }
           }
         }

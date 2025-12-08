@@ -252,6 +252,8 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
                 fontSizePx={fontSizePx}
                 rotationDeg={rotationDeg}
                 rotationTurn={rotationTurn}
+                selectedDifficulties={session.selectedDifficulties}
+                langMode={session.langMode}
               />
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <Button

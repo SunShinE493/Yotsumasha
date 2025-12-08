@@ -1,13 +1,39 @@
+// Helper to check if a difficulty value matches selected constraints
+function isDifficultySelected(d: string, selected?: (number | string)[]): boolean {
+    if (!selected || selected.length === 0) return true;
+    return selected.some(s => String(s) === d);
+}
 
-export function formatMeaning(meaning: string): string {
+export function formatMeaning(meaning: string, difficulty?: number | string | null, selectedDifficulties?: (number | string)[]): string {
     if (!meaning) return meaning;
     const s = String(meaning);
 
     // Split by / but preserve /r\d (used in r: type meanings)
-    // Regex: Match / only if NOT followed by r and a digit
     const parts = s.split(/\/(?!r\d)/g);
 
-    const formattedParts = parts.map(part => formatSingleMeaning(part));
+    // Apply difficulty filtering if applicable
+    let filteredParts = parts;
+    if (difficulty !== undefined && difficulty !== null && selectedDifficulties && selectedDifficulties.length > 0) {
+        const diffStr = String(difficulty);
+        // Only apply splitting logic if difficulty contains separator
+        if (diffStr.includes(';')) {
+            const diffParts = diffStr.split(';').map(d => d.trim());
+            // Map meaning parts to difficulties. 
+            // Assumption: 1-to-1 mapping. If lengths differ, fallback to showing all or matching indices?
+            // "difficulty が2;3 ... 答えも 答え1/答え2" -> implies 1-to-1
+            filteredParts = parts.filter((_, i) => {
+                const d = diffParts[i];
+                return !d || isDifficultySelected(d, selectedDifficulties);
+            });
+            if (filteredParts.length === 0) {
+                // If all filtered out (shouldn't happen if word was selected), show nothing or original?
+                // Logic says "If diff 3... do not display". So empty string.
+                return "";
+            }
+        }
+    }
+
+    const formattedParts = filteredParts.map(part => formatSingleMeaning(part));
     return formattedParts.join('/');
 }
 
@@ -45,6 +71,11 @@ export function validateAnswer(userInput: string, meaning: string): boolean {
     const input = normalize(userInput);
     const m = String(meaning);
 
+    // Check against formatted display string as well (e.g. m:A:B -> A(B))
+    // Requirement: "m: は答え(答え) のように変換されていると思いますが、この場合はどちらかが入っていれば丸になるようにしてください"
+    // Also "答えとして表示する文字列を使って正誤判定をし"
+    if (match(input, formatMeaning(m))) return true;
+
     if (m.startsWith('c:')) {
         const parts = m.split(':');
         const correct = parts[parts.length - 1];
@@ -70,26 +101,8 @@ export function validateAnswer(userInput: string, meaning: string): boolean {
                 items[items.length - 1] = last.split('/r')[0];
             }
         }
-        // Validation: All items must be present in the input?
-        // "CHOすべてが含まれていたら順番が違っても正解" -> "If C, H, O are all included"
-        // Does "included" mean "present as substring" or "input is a permutation"?
-        // Usually, for chemical formula-ish things like CHO, valid inputs are "CHO", "COH", "OHC" etc.
-        // If input is "CH", it's wrong (missing O).
-        // If input is "CHOO", is it wrong? (Duplicate O?)
-        // The requirements say: "CHOすべてが含まれていたら" (If CHO are all included).
-        // Let's assume strict permutation logic matching the characters/items?
-        // But items might be "C", "H", "O". Input "CHO".
-        // Or items "Na", "Cl". Input "NaCl".
-        // I will normalize input and check if it *starts* with or *equals* the permutation?
-        // Wait, regular match() does trim and slash check.
-        // User said: "contained regardless of order".
-        // Just checking ".includes()" for each item in the input string?
-        // If items are C,H,O. Input "CHO" -> OK. Input "Alcohol" (has C, h, o, l) -> OK? Probably not.
-        // Let's assume the user input should be generally equal to the combination of items, ignoring order.
-        // Implementation: Check if input contains every item.
-        // Ideally, check length matches too, but "included" is the keyword.
-        // I'll check if every item is present in the input string.
-        const normInput = input; // already normalized/trimmed
+        // Requirement: "含まれる語は順不同で丸にする" -> Every item must be present
+        const normInput = input;
         return items.every(item => normInput.includes(item));
     }
 

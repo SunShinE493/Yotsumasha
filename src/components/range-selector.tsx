@@ -1,4 +1,4 @@
-import { useState ,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -26,6 +26,8 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
   const [questionCount, setQuestionCount] = useState<number>(-1);
   const [order, setOrder] = useState<"sequential" | "random" | "difficulty">("random");
   const [reviewOnly, setReviewOnly] = useState(false);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<(number | string)[]>([]);
+  const [langMode, setLangMode] = useState<"en-jp" | "jp-en">("en-jp");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -86,6 +88,8 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
       ...(selectedJson?.isBuiltin && selectedJson.presets && selectedJson.presets.length > 0
         ? { sourceFile: selectedJson.name }
         : {}),
+      selectedDifficulties: selectedDifficulties.length > 0 ? selectedDifficulties : undefined,
+      langMode,
     };
 
     createSessionMutation.mutate(config);
@@ -225,7 +229,34 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
             </div>
           </div>
         </div>
-        <div className="mt-6 flex justify-center">
+
+        {/* Difficulty Selection */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-foreground mb-1">
+            難易度 (選択しない場合は全レベル)
+          </Label>
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map((level) => (
+              <Button
+                key={level}
+                variant={selectedDifficulties.includes(level) ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setSelectedDifficulties(prev =>
+                    prev.includes(level)
+                      ? prev.filter(p => p !== level)
+                      : [...prev, level]
+                  );
+                }}
+                className={selectedDifficulties.includes(level) ? "bg-primary text-primary-foreground" : ""}
+              >
+                Lv.{level}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-center items-center gap-4">
           <Button
             onClick={handleStartStudy}
             disabled={isStarting || !selectedJson}
@@ -239,6 +270,25 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
             )}
             学習を開始
           </Button>
+
+          <div className="flex items-center space-x-2 border rounded-md p-1 bg-muted/20">
+            <Button
+              variant={langMode === "en-jp" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setLangMode("en-jp")}
+              className="text-xs px-2 h-8"
+            >
+              日英(Word→Mean)
+            </Button>
+            <Button
+              variant={langMode === "jp-en" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setLangMode("jp-en")}
+              className="text-xs px-2 h-8"
+            >
+              英日(Mean→Word)
+            </Button>
+          </div>
         </div>
         {!selectedJson && (
           <p className="text-center text-sm text-muted-foreground mt-2">
@@ -246,6 +296,6 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
           </p>
         )}
       </CardContent>
-    </Card>
+    </Card >
   );
 }
