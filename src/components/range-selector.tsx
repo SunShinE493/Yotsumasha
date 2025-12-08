@@ -278,7 +278,7 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
               onClick={() => setLangMode("en-jp")}
               className="text-xs px-2 h-8"
             >
-              日英(Word→Mean)
+              w->m
             </Button>
             <Button
               variant={langMode === "jp-en" ? "secondary" : "ghost"}
@@ -286,7 +286,7 @@ export function RangeSelector({ selectedJson, onStartSession, isStarting, userId
               onClick={() => setLangMode("jp-en")}
               className="text-xs px-2 h-8"
             >
-              英日(Mean→Word)
+              m->w
             </Button>
           </div>
         </div>
