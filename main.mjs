@@ -729,6 +729,8 @@ let aisikibetsu, max;
 
 
 
+/**
+
 const API_KEY = process.env.GOOGLE_API_KEY;
 if (API_KEY === undefined) {
   console.log("APIki-なし")
@@ -749,7 +751,7 @@ async function runai(content, message, aisikibetsu) {
     max = 1000;
 
     const chat = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash-exp",
       contents: talk + "（##回答の内容は短く簡潔に。）",
       config: {
         maxOutputTokens: 1800,
@@ -772,7 +774,7 @@ async function runai(content, message, aisikibetsu) {
     try {
 
       let result = await ai.models.generateContentStream({
-        model: "gemini-2.5-pro",
+        model: "gemini-2.0-flash-thinking-exp",
         contents: content,
         config: { // 前回確認した通り、configで問題ないならこれでOK
           temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
@@ -838,5 +840,154 @@ async function runai(content, message, aisikibetsu) {
     }
 
 
+  }
+}
+
+*/
+
+
+import OpenAI from "openai";
+// キーの取得（名前は適宜合わせてください。DeepSeekのキーが入っている前提です）
+const D_API_KEY = process.env.Deepseek_API;
+
+if (D_API_KEY === undefined) {
+  console.log("APIキーなし");
+}
+
+let ai;
+if (D_API_KEY) {
+  // DeepSeek用に初期化 (BaseURLを設定)
+  ai = new OpenAI({
+    baseURL: 'https://api.groq.com/openai/v1',
+    apiKey: D_API_KEY
+  });
+} else {
+  console.log("API Key missing, AI features disabled.");
+}
+
+async function runai(content, message, aisikibetsu) {
+  const talk = message.content;
+
+  // --- パターン0: 通常の会話 (gemini-2.0-flash-exp 相当 -> deepseek-chat) ---
+  if (aisikibetsu === 0) {
+    if (!ai) {
+      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      return;
+    }
+
+    try {
+      const completion = await ai.chat.completions.create({
+        model: "llama-3.3-70b-versatile", // 高速な通常モデル
+        messages: [
+          { role: "user", content: talk + "（##回答の内容は短く簡潔に。）" }
+        ],
+        max_tokens: 1800, // maxOutputTokens の代わり
+        stream: false,
+      });
+
+      const responseText = completion.choices[0].message.content;
+      
+      console.log(responseText);
+      if (responseText) {
+        await message.channel.send(responseText);
+      } else {
+        await message.channel.send("エラー：回答が得られませんでした。");
+      }
+    } catch (e) {
+      console.error(e);
+      await message.channel.send("エラーが発生しました");
+    }
+
+  // --- パターン1: 思考/長文生成 (gemini-2.0-flash-thinking-exp 相当 -> deepseek-reasoner) ---
+  } else if (aisikibetsu === 1) {
+    if (!ai) {
+      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      return;
+    }
+    message.channel.send('考え中です。llama-3.3-70b-versatileが推論しています...');
+
+    try {
+      const stream = await ai.chat.completions.create({
+        model: "llama-3.3-70b-versatile", // 推論強化モデル (DeepSeek R1)
+        messages: [
+          { role: "user", content: content }
+        ],
+        stream: true,
+        // ※ DeepSeek Reasoner は temperature 等のパラメータ指定をサポートしていないため削除しました
+      });
+
+      let fullResponse = '';
+      const MAX_DISCORD_MESSAGE_LENGTH = 2000;
+
+      for await (const chunk of stream) {
+        // DeepSeekのストリームからテキストを取得
+        // reasonerモデルの場合、reasoning_content（思考過程）も返ってきますが、
+        // ここでは content（最終回答）のみを取得するようにしています。
+        const chunkText = chunk.choices[0]?.delta?.content || '';
+        
+        if (!chunkText) continue; // 空の場合はスキップ
+
+        fullResponse += chunkText;
+
+        // Discordの2000文字制限処理
+        if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH) {
+          const partToSend = fullResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
+          await message.channel.send(partToSend);
+          fullResponse = fullResponse.substring(MAX_DISCORD_MESSAGE_LENGTH);
+        }
+      }
+
+      // 残りのテキストを送信
+      if (fullResponse.length > 0) {
+        await message.channel.send(fullResponse);
+      }
+
+    } catch (error) {
+      console.error('DeepSeek APIからの応答中にエラーが発生しました:', error);
+      message.reply('DeepSeek APIからの応答中にエラーが発生しました。');
+    }
+
+  // --- パターン2: 既存メッセージの編集 (ストリーミング) ---
+  } else if (aisikibetsu === 2) {
+    // 元のコードで未定義だった部分を補完しています
+    if (!ai) return;
+
+    try {
+      const stream = await ai.chat.completions.create({
+        model: "deepseek-chat",
+        messages: [{ role: 'user', content: content }], // parts ではなく content を使用
+        stream: true
+      });
+
+      let fullText = '';
+      let msgToEdit = null; // 編集対象のメッセージ
+
+      // 最初に「考え中...」などのメッセージを送っておき、それを編集する場合
+      // もし既に編集したいメッセージがある場合はそれを引数で渡すなどの変更が必要です
+      // ここでは便宜上、新規にメッセージを送ってそれを編集していくスタイルにします
+      msgToEdit = await message.channel.send("生成中...");
+
+      let updateCount = 0; // API制限回避のため更新頻度を調整用
+
+      for await (const chunk of stream) {
+        const chunkText = chunk.choices[0]?.delta?.content || '';
+        fullText += chunkText;
+
+        // Discord APIのレート制限（Rate Limit）に引っかからないよう、
+        // 毎回 edit するのではなく、一定量たまるか時間が経過してから edit するのが定石ですが
+        // とりあえず元のロジックに近い形で書きます
+        
+        // (あまりに高速にeditするとDiscord APIでエラーになるため、本来は間引き処理が必要です)
+        updateCount++;
+        if (updateCount % 10 === 0) { // 10チャンクごとに更新（簡易的な間引き）
+             await msgToEdit.edit(fullText.substring(0, 2000)); // 2000文字以内で編集
+        }
+      }
+      // 最後に確実に全文で更新
+      await msgToEdit.edit(fullText.substring(0, 2000));
+
+    } catch (e) {
+      console.error(e);
+    }
   }
 }

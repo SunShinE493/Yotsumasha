@@ -1,254 +1,249 @@
 [
-    {
-        "word": "Chuckle",
-        "meaning": "くすくす笑う",
-        "category": "英単3"
-    },
-    {
-        "word": "soothe",
-        "meaning": "なだめる",
-        "category": "英単3"
-    },
-    {
-        "word": "tempt",
-        "meaning": "誘惑する",
-        "category": "英単3"
-    },
-    {
-        "word": "scold",
-        "meaning": "叱る",
-        "category": "英単3"
-    },
-    {
-        "word": "oppress",
-        "meaning": "圧迫する",
-        "category": "英単3"
-    },
-    {
-        "word": "astonish",
-        "meaning": "驚かせる",
-        "category": "英単3"
-    },
-    {
-        "word": "mourn",
-        "meaning": "嘆く",
-        "category": "英単3"
-    },
-    {
-        "word": "offend",
-        "meaning": "怒らせる",
-        "category": "英単3"
-    },
-    {
-        "word": "depress",
-        "meaning": "憂鬱にさせる",
-        "category": "英単3"
-    },
-    {
-        "word": "sacrifice",
-        "meaning": "犠牲にする",
-        "category": "英単3"
-    },
-    {
-        "word": "impulse",
-        "meaning": "衝動",
-        "category": "英単3"
-    },
-    {
-        "word": "stem",
-        "meaning": "原因である",
-        "category": "英単3"
-    },
-    {
-        "word": "trigger",
-        "meaning": "きっかけになる",
-        "category": "英単3"
-    },
-    {
-        "word": "consequence",
-        "meaning": "結果",
-        "category": "英単3"
-    },
-    {
-        "word": "resort",
-        "meaning": "訴える",
-        "category": "英単3"
-    },
-    {
-        "word": "formula",
-        "meaning": "方法",
-        "category": "英単3"
-    },
-    {
-        "word": "procedure",
-        "meaning": "手続き",
-        "category": "英単3"
-    },
-    {
-        "word": "extraordinary",
-        "meaning": "並外れた",
-        "category": "英単3"
-    },
-    {
-        "word": "absolute",
-        "meaning": "絶対的な",
-        "category": "英単3"
-    },
-    {
-        "word": "overwhelming",
-        "meaning": "圧倒的な",
-        "category": "英単3"
-    },
-    {
-        "word": "altogether",
-        "meaning": "完全に",
-        "category": "英単3"
-    },
-    {
-        "word": "entire",
-        "meaning": "すべての",
-        "category": "英単3"
-    },
-    {
-        "word": "tremendos",
-        "meaning": "すさまじい",
-        "category": "英単3"
-    },
-    {
-        "word": "sheer",
-        "meaning": "とてつもない〜の",
-        "category": "英単3"
-    },
-    {
-        "word": "partial",
-        "meaning": "部分的な",
-        "category": "英単3"
-    },
-    {
-        "word": "barely",
-        "meaning": "かろうじて",
-        "category": "英単3"
-    },
-    {
-        "word": "slight",
-        "meaning": "わずかな",
-        "category": "英単3"
-    },
-    {
-        "word": "approximately",
-        "meaning": "おおよそ",
-        "category": "英単3"
-    },
-    {
-        "word": "frequently",
-        "meaning": "頻繁に",
-        "category": "英単3"
-    },
-    {
-        "word": "apparently",
-        "meaning": "どうやら〜らしい",
-        "category": "英単3"
-    },
-    {
-        "word": "merely",
-        "meaning": "〜にすぎない",
-        "category": "英単3"
-    },
-    {
-        "word": "somehow",
-        "meaning": "何らかの方法で",
-        "category": "英単3"
-    },
-    {
-        "word": "thus",
-        "meaning": "それゆえに",
-        "category": "英単3"
-    },
-    {
-        "word": "pretty",
-        "meaning": "まあまあ",
-        "category": "英単3"
-    },
-    {
-        "word": "despite",
-        "meaning": "〜にもかかわらず",
-        "category": "英単3"
-    },
-    {
-        "word": "defy",
-        "meaning": "逆らう",
-        "category": "英単3"
-    },
-    {
-        "word": "condemn",
-        "meaning": "非難する",
-        "category": "英単3"
-    },
-    {
-        "word": "contradict",
-        "meaning": "矛盾する",
-        "category": "英単3"
-    },
-    {
-        "word": "articulate",
-        "meaning": "はっきり述べる",
-        "category": "英単3"
-    },
-    {
-        "word": "advocate",
-        "meaning": "提唱者",
-        "category": "英単3"
-    },
-    {
-        "word": "evolution",
-        "meaning": "進化",
-        "category": "英単3"
-    },
-    {
-        "word": "fluid",
-        "meaning": "流体",
-        "category": "英単3"
-    },
-    {
-        "word": "probe",
-        "meaning": "探査機",
-        "category": "英単3"
-    },
-    {
-        "word": "particle",
-        "meaning": "粒子",
-        "category": "英単3"
-    },
-    {
-        "word": "mutation",
-        "meaning": "突然変異",
-        "category": "英単3"
-    },
-    {
-        "word": "heredity",
-        "meaning": "遺伝",
-        "category": "英単3"
-    },
-    {
-        "word": "hypothesis",
-        "meaning": "仮説",
-        "category": "英単3"
-    },
-    {
-        "word": "specimen",
-        "meaning": "標本",
-        "category": "英単3"
-    },
-    {
-        "word": "microscope",
-        "meaning": "顕微鏡",
-        "category": "英単3"
-    },
-    {
-        "word": "realm",
-        "meaning": "領域",
-        "category": "英単3"
-    },
+  {
+    "word": "Chuckle",
+    "meaning": "くすくす笑う",
+    "category": "英単3"
+  },
+  {
+    "word": "tempt",
+    "meaning": "誘惑する",
+    "category": "英単3"
+  },
+  {
+    "word": "scold",
+    "meaning": "叱る",
+    "category": "英単3"
+  },
+  {
+    "word": "oppress",
+    "meaning": "圧迫する",
+    "category": "英単3"
+  },
+  {
+    "word": "astonish",
+    "meaning": "驚かせる",
+    "category": "英単3"
+  },
+  {
+    "word": "mourn",
+    "meaning": "嘆く",
+    "category": "英単3"
+  },
+  {
+    "word": "offend",
+    "meaning": "怒らせる",
+    "category": "英単3"
+  },
+  {
+    "word": "depress",
+    "meaning": "憂鬱にさせる",
+    "category": "英単3"
+  },
+  {
+    "word": "sacrifice",
+    "meaning": "犠牲にする",
+    "category": "英単3"
+  },
+  {
+    "word": "impulse",
+    "meaning": "衝動",
+    "category": "英単3"
+  },
+  {
+    "word": "stem",
+    "meaning": "原因である",
+    "category": "英単3"
+  },
+  {
+    "word": "trigger",
+    "meaning": "きっかけになる",
+    "category": "英単3"
+  },
+  {
+    "word": "consequence",
+    "meaning": "結果",
+    "category": "英単3"
+  },
+  {
+    "word": "resort",
+    "meaning": "訴える",
+    "category": "英単3"
+  },
+  {
+    "word": "formula",
+    "meaning": "方法",
+    "category": "英単3"
+  },
+  {
+    "word": "procedure",
+    "meaning": "手続き",
+    "category": "英単3"
+  },
+  {
+    "word": "extraordinary",
+    "meaning": "並外れた",
+    "category": "英単3"
+  },
+  {
+    "word": "absolute",
+    "meaning": "絶対的な",
+    "category": "英単3"
+  },
+  {
+    "word": "overwhelming",
+    "meaning": "圧倒的な",
+    "category": "英単3"
+  },
+  {
+    "word": "altogether",
+    "meaning": "完全に",
+    "category": "英単3"
+  },
+  {
+    "word": "entire",
+    "meaning": "すべての",
+    "category": "英単3"
+  },
+  {
+    "word": "tremendos",
+    "meaning": "すさまじい",
+    "category": "英単3"
+  },
+  {
+    "word": "sheer",
+    "meaning": "とてつもない〜の",
+    "category": "英単3"
+  },
+  {
+    "word": "partial",
+    "meaning": "部分的な",
+    "category": "英単3"
+  },
+  {
+    "word": "barely",
+    "meaning": "かろうじて",
+    "category": "英単3"
+  },
+  {
+    "word": "slight",
+    "meaning": "わずかな",
+    "category": "英単3"
+  },
+  {
+    "word": "approximately",
+    "meaning": "おおよそ",
+    "category": "英単3"
+  },
+  {
+    "word": "frequently",
+    "meaning": "頻繁に",
+    "category": "英単3"
+  },
+  {
+    "word": "apparently",
+    "meaning": "どうやら〜らしい",
+    "category": "英単3"
+  },
+  {
+    "word": "merely",
+    "meaning": "〜にすぎない",
+    "category": "英単3"
+  },
+  {
+    "word": "somehow",
+    "meaning": "何らかの方法で",
+    "category": "英単3"
+  },
+  {
+    "word": "thus",
+    "meaning": "それゆえに",
+    "category": "英単3"
+  },
+  {
+    "word": "pretty",
+    "meaning": "まあまあ",
+    "category": "英単3"
+  },
+  {
+    "word": "despite",
+    "meaning": "〜にもかかわらず",
+    "category": "英単3"
+  },
+  {
+    "word": "defy",
+    "meaning": "逆らう",
+    "category": "英単3"
+  },
+  {
+    "word": "condemn",
+    "meaning": "非難する",
+    "category": "英単3"
+  },
+  {
+    "word": "contradict",
+    "meaning": "矛盾する",
+    "category": "英単3"
+  },
+  {
+    "word": "articulate",
+    "meaning": "はっきり述べる",
+    "category": "英単3"
+  },
+  {
+    "word": "advocate",
+    "meaning": "提唱者",
+    "category": "英単3"
+  },
+  {
+    "word": "evolution",
+    "meaning": "進化",
+    "category": "英単3"
+  },
+  {
+    "word": "fluid",
+    "meaning": "流体",
+    "category": "英単3"
+  },
+  {
+    "word": "probe",
+    "meaning": "探査機",
+    "category": "英単3"
+  },
+  {
+    "word": "particle",
+    "meaning": "粒子",
+    "category": "英単3"
+  },
+  {
+    "word": "mutation",
+    "meaning": "突然変異",
+    "category": "英単3"
+  },
+  {
+    "word": "heredity",
+    "meaning": "遺伝",
+    "category": "英単3"
+  },
+  {
+    "word": "hypothesis",
+    "meaning": "仮説",
+    "category": "英単3"
+  },
+  {
+    "word": "specimen",
+    "meaning": "標本",
+    "category": "英単3"
+  },
+  {
+    "word": "microscope",
+    "meaning": "顕微鏡",
+    "category": "英単3"
+  },
+  {
+    "word": "realm",
+    "meaning": "領域",
+    "category": "英単3"
+  },
   {
     "word": "prosperity",
     "meaning": "繁栄"

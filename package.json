@@ -71,6 +71,7 @@
     "memorystore": "^1.6.7",
     "moment-timezone": "^0.5.48",
     "node-cron": "^3.0.3",
+    "openai": "^6.10.0",
     "openid-client": "^6.7.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
