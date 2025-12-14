@@ -19,7 +19,7 @@ export default function BattlePage() {
   const [openRooms, setOpenRooms] = useState<Array<{ id: string; state: string; playerCount: number }> | null>(null);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [rangeStart, setRangeStart] = useState<number | ''>(1);
-  const [rangeEnd, setRangeEnd] = useState<number | ''>(50);
+  const [rangeEnd, setRangeEnd] = useState<number |  ''>(50);
   const [limitSec, setLimitSec] = useState<number | ''>(30);
   const [questionCount, setQuestionCount] = useState<number | ''>(20);
   const [canStart, setCanStart] = useState(false);
