@@ -190,10 +190,13 @@ export async function execute(interaction) {
     const emojiId = interaction.options.getString('emojiid');
     const reactContent2 = interaction.options.getString('react_content2');
     const reactContent3 = interaction.options.getString('react_content3');
+    const reactContent4 = interaction.options.getString('react_content4');
     if(reactContent2){
          reactContent = reactContent2
     }else if(reactContent3){
          reactContent = reactContent3
+    }else if(reactContent4){
+         reactContent = reactContent4
     }
     
     try {
