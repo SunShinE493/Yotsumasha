@@ -654,6 +654,13 @@ client.on('messageReactionAdd', async (reaction, user) => {
     channel.send(`${user.toString()}あたま`);
 
   }
+  if (reaction.emoji.name === '💩') {
+  if (user.id === '1163105759492571156') {
+    // reaction から message を辿って channel を指定する
+    reaction.message.channel.send("<@1163105759492571156>うんこ置くな");
+  }
+}
+
 
 });
 

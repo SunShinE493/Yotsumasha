@@ -169,7 +169,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
         <CardContent className="p-8 text-center">
           <div className="space-y-4">
             <i className="fas fa-spinner fa-spin text-4xl text-primary"></i>
-            <p className="text-muted-foreground">単語を読み込んでいます...</p>
+            <p className="text-muted-foreground">単語を読み込んでいます...<br />(5秒後に自動終了します。)</p>
           </div>
         </CardContent>
       </Card>
