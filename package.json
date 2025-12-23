@@ -4,7 +4,7 @@
   "description": "MiniPotato Bot by EOi",
   "main": "main.mjs",
   "scripts": {
-    "start": "node --env-file=.env main.mjs",
+    "start": "node main.mjs",
     "build": "vite build",
     "dev": "npm run build && npm start"
   },
