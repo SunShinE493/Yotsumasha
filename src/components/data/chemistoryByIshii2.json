@@ -4,6 +4,7 @@
     "subcategory": "0",
     "word": "炭素を骨格とする化合物を何というか？",
     "meaning": "有機化合物",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -11,6 +12,7 @@
     "subcategory": "0",
     "word": "有機化合物以外の化合物を何というか？",
     "meaning": "無機化合物",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -18,6 +20,7 @@
     "subcategory": "0",
     "word": "有機化合物の主な成分元素はに( 化学式 )( 化学式 )( 化学式 )である。",
     "meaning": "r:1:C:H:O/r1/r1",
+    "answerType": "化学式/化学式/化学式",
     "difficulty": "1;1;1"
   },
   {
@@ -25,6 +28,7 @@
     "subcategory": "0",
     "word": "有機化合物は比較的に融点や沸点が(　)。",
     "meaning": "c:高い:低い:低い",
+    "answerType": "選択肢",
     "difficulty": "1"
   },
   {
@@ -32,6 +36,7 @@
     "subcategory": "0",
     "word": "有機化合物には(　)の物がおおい。",
     "meaning": "c:可燃性:不燃性:可燃性",
+    "answerType": "選択肢",
     "difficulty": "1"
   },
   {
@@ -39,6 +44,7 @@
     "subcategory": "0",
     "word": "有機化合物は(　)すると( 化学式 )や( 化学式 )を生じる。",
     "meaning": "完全燃焼/r:1:H2O:CO2/r1",
+    "answerType": "用語/化学式/化学式",
     "difficulty": "1;1;1"
   },
   {
@@ -46,6 +52,7 @@
     "subcategory": "0",
     "word": "有機化合物で炭素の割合が多いものは(　)して(　)を生じる。",
     "meaning": "不完全燃焼/すす",
+    "answerType": "用語/物質名",
     "difficulty": "1;1"
   },
   {
@@ -53,6 +60,7 @@
     "subcategory": "0",
     "word": "有機化合物は水よりもヘキサンやエーテルなどの(　)に溶けるものが多い。",
     "meaning": "有機溶媒",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -60,6 +68,7 @@
     "subcategory": "0",
     "word": "炭素と水素のみでできた化合物を何というか？",
     "meaning": "炭化水素",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -67,6 +76,7 @@
     "subcategory": "0",
     "word": "炭化水素の分子が鎖状構造の物を(　)炭化水素または(　)炭化水素といい、環状構造を含むものを(　)炭化水素という。",
     "meaning": "鎖式/脂肪族/環式",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -74,6 +84,7 @@
     "subcategory": "0",
     "word": "炭化水素の炭素原子間の結合が全て単結合のものを(　)炭化水素といい、そうでないものを(　)炭化水素という。",
     "meaning": "飽和/不飽和",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -81,6 +92,7 @@
     "subcategory": "0",
     "word": "鎖式炭化水素は炭素原子間の結合が飽和の物を(　)、不飽和で二重結合を持つものを(　)、三重結合をもつものを(　)という。",
     "meaning": "アルカン/アルケン/アルキン",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -88,6 +100,7 @@
     "subcategory": "0",
     "word": "環式炭化水素は飽和炭化水素を(　)、不飽和炭化水素が一つのものを(　)といいまとめて(　)という。",
     "meaning": "シクロアルカン/シクロアルケン/脂環式炭化水素",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -95,6 +108,7 @@
     "subcategory": "0",
     "word": "環式炭化水素のなかで(　)と呼ばれるC₆H₆の炭素骨格を持つものを(　)炭化水素という。",
     "meaning": "ベンゼン環/芳香族",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -102,6 +116,7 @@
     "subcategory": "1",
     "word": "分子から何個かの原子が取れた特定の原子団を(　)と言い、特に炭化水素分子からHが取れたものを(　)という。また、化合物の性質を決める特定の物を(　)という。",
     "meaning": "基/炭化水素基/官能基",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -109,6 +124,7 @@
     "subcategory": "1",
     "word": "官能基-OHの名前と一般名は？",
     "meaning": "ヒドロキシ基/アルコール",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -116,6 +132,7 @@
     "subcategory": "1",
     "word": "官能基-O-の名前と一般式は？",
     "meaning": "エーテル結合/エーテル",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -123,6 +140,7 @@
     "subcategory": "1",
     "word": "官能基-COHの名前と一般名は？",
     "meaning": "m:ホルミル基:アルデヒド基/アルデヒド'",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -130,6 +148,7 @@
     "subcategory": "1",
     "word": "官能基-CO-の名前と一般式は？",
     "meaning": "カルボニル基/ケトン",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -137,6 +156,7 @@
     "subcategory": "1",
     "word": "官能基-COOHの名前と一般式は？",
     "meaning": "カルボキシ基/カルボン酸",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -144,6 +164,7 @@
     "subcategory": "1",
     "word": "官能基-COOの名前と一般式は？",
     "meaning": "エステル結合/エステル",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -151,6 +172,7 @@
     "subcategory": "1",
     "word": "官能基-NO₂の名前と一般式は？",
     "meaning": "ニトロ基/ニトロ化合物",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -158,6 +180,7 @@
     "subcategory": "1",
     "word": "官能基-NH₂の名前と一般式は？",
     "meaning": "アミノ基/アミン",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -165,13 +188,15 @@
     "subcategory": "1",
     "word": "官能基-SO₃Hの名前と一般式は？",
     "meaning": "スルホ基/スルホン酸",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
     "category": "炭化水素",
     "subcategory": "1",
-    "word": "官能基-CONH-の名前と一般式は？",
+    "word": "官官能基-CONH-の名前と一般式は？",
     "meaning": "アミド結合/アミド",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -179,6 +204,7 @@
     "subcategory": "2",
     "word": "分子式が同じで構造が異なる化合物を互いに(　)という。",
     "meaning": "異性体",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -186,6 +212,7 @@
     "subcategory": "2",
     "word": "異性体のうち分子の構造式が異なるものを(　)、原子や基の立体的な配置が異なるものを(　)という。",
     "meaning": "構造異性体/立体異性体",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -193,6 +220,7 @@
     "subcategory": "2",
     "word": "立体異性体には二重結合に起因する(　)と左手右手のような関係の(　)がある。",
     "meaning": "m:幾何異性体:シス-トランス異性体/m:鏡像異性体:光学異性体",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -200,6 +228,7 @@
     "subcategory": "2",
     "word": "シス-トランス異性体は同種の原子や原子団が二重結合の同じ側にあるものを(　)形、そうでないものを(　)形という。",
     "meaning": "シス/トランス",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -207,6 +236,7 @@
     "subcategory": "2",
     "word": "鏡像異性体では結合する4つの原子や原子団が異なる炭素原子を(　)という。",
     "meaning": "不斉炭素原子",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -214,6 +244,7 @@
     "subcategory": "2",
     "word": "有機化合物を表す式には分子を構成する原子の種類と数を表した(　)とそこから官能基を抜き出した(　)、原子間の結合様式を全て線を用いて表す(　)などがある。",
     "meaning": "分子式/示性式/構造式",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -221,6 +252,7 @@
     "subcategory": "3",
     "word": "炭素と水素は酸化銅などの(　)で酸化して見分ける。\\n炭素からの生成物( 化学式 )と水素からの生成物( 化学式 )の検出で見分ける。",
     "meaning": "酸化剤/CO2/H2O",
+    "answerType": "用語/化学式/化学式",
     "difficulty": "2;2;2"
   },
   {
@@ -228,6 +260,7 @@
     "subcategory": "3",
     "word": "窒素は(　)と混合して加熱することで発生する( 化学式 )で見分ける。",
     "meaning": "ソーダ石灰/NH3",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -235,6 +268,7 @@
     "subcategory": "3",
     "word": "硫黄は(　)の小片とともに加熱融解することで発生する( 化学式 )で見分ける。",
     "meaning": "ナトリウム/Na2S",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -242,6 +276,7 @@
     "subcategory": "3",
     "word": "塩素は加熱した(　)に触れさせることで発生する( 化学式 )で見分ける。",
     "meaning": "銅線/CuCl2",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -249,6 +284,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で1は何か",
     "meaning": "モノ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -256,6 +292,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で2は何か",
     "meaning": "ジ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -263,6 +300,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で3は何か",
     "meaning": "トリ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -270,6 +308,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で4は何か",
     "meaning": "テトラ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -277,6 +316,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で5は何か",
     "meaning": "ペンタ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -284,6 +324,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で6は何か",
     "meaning": "ヘキサ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -291,6 +332,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で7は何か",
     "meaning": "ヘプタ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -298,6 +340,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で8は何か",
     "meaning": "オクタ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -305,6 +348,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で9は何か",
     "meaning": "ノナ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -312,6 +356,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で10は何か",
     "meaning": "デカ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -319,6 +364,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で11は何か",
     "meaning": "ウンデカ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -326,6 +372,7 @@
     "subcategory": "4",
     "word": "化学の数詞(ギリシャ数字)で12は何か",
     "meaning": "ドデカ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -333,6 +380,7 @@
     "subcategory": "4",
     "word": "smiles:C:CH4の物質名は何か",
     "meaning": "メタン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -340,6 +388,7 @@
     "subcategory": "4",
     "word": "smiles:CC:C2H6の物質名は何か",
     "meaning": "エタン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -347,6 +396,7 @@
     "subcategory": "4",
     "word": "smiles:CCC:C3H8の物質名は何か",
     "meaning": "プロパン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -354,6 +404,7 @@
     "subcategory": "4",
     "word": "smiles:CCCC:C4H10の物質名は何か",
     "meaning": "ブタン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -361,6 +412,7 @@
     "subcategory": "4",
     "word": "smiles:CCCCC:C5H12の物質名は何か",
     "meaning": "ペンタン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -368,6 +420,7 @@
     "subcategory": "4",
     "word": "smiles:CCCCCC:C6H14の物質名は何か",
     "meaning": "ヘキサン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -375,6 +428,7 @@
     "subcategory": "4",
     "word": "smiles:CCCCCCC:C7H16の物質名は何か",
     "meaning": "ヘプタン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -382,6 +436,7 @@
     "subcategory": "4",
     "word": "smiles:CCCCCCCC:C8H18の物質名は何か",
     "meaning": "オクタン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -389,6 +444,7 @@
     "subcategory": "4",
     "word": "smiles:CCCCCCCCC:9H20の物質名は何か",
     "meaning": "ノナン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -396,6 +452,7 @@
     "subcategory": "4",
     "word": "smiles:CCCCCCCCCC:C10H22の物質名は何か",
     "meaning": "デカン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -403,6 +460,7 @@
     "subcategory": "4",
     "word": "smiles:CCCCCCCCCCC:C11H24の物質名は何か",
     "meaning": "ウンデカン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -410,181 +468,207 @@
     "subcategory": "4",
     "word": "smiles:CCCCCCCCCCCC:C12H26の物質名は何か",
     "meaning": "ドデカン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H H\\n  | | |\\nH-C-C-C-H\\n  | | |\\n  H H H\\nこの物質の名前は？",
+    "word": "\\n H H H\\n | | |\\nH-C-C-C-H\\n | | |\\n H H H\\nこの物質の名前は？",
     "meaning": "プロパン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H H\\n  | | |\\nH-C-C-C-\\n  | | |\\n  H H H\\nこの物質の名前は？",
+    "word": "\\n H H H\\n | | |\\nH-C-C-C-\\n | | |\\n H H H\\nこの物質の名前は？",
     "meaning": "プロピル",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H H\\n  | | |\\nH-C-C-C-H\\n  | | |\\n  H | H\\n  H-C-H\\n    |\\n    H\\nこの物質の名前は？",
+    "word": "\\n H H H\\n | | |\\nH-C-C-C-H\\n | | |\\n H | H\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2-メチルプロパン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H H H\\n  | | | |\\nH-C-C-C-C-H\\n  | | | |\\n  H | H H\\n  H-C-H\\n    |\\n    H\\nこの物質の名前は？",
+    "word": "\\n H H H H\\n | | | |\\nH-C-C-C-C-H\\n | | | |\\n H | H H\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2-メチルブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H H H\\n  | | | |\\nH-C-C-C-C-H\\n  | | | |\\n  H H | H\\n    H-C-H\\n      |\\n      H\\nこの物質の名前は？",
+    "word": "\\n H H H H\\n | | | |\\nH-C-C-C-C-H\\n | | | |\\n H H | H\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2-メチルブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n    H\\n    |\\n  H-C-H\\n  H | H H\\n  | | | |\\nH-C-C-C-C-H\\n  | | | |\\n  H | H H\\n  H-C-H\\n    |\\n    H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\n H-C-H\\n H | H H\\n | | | |\\nH-C-C-C-C-H\\n | | | |\\n H | H H\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2.2-ジメチルブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n      H\\n      |\\n    H-C-H\\n  H H | H\\n  | | | |\\nH-C-C-C-C-H\\n  | | | |\\n  H | H H\\n  H-C-H\\n    |\\n    H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\n H-C-H\\n H H | H\\n | | | |\\nH-C-C-C-C-H\\n | | | |\\n H | H H\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2.3-ジメチルブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H H\\n  | | |\\nH-C-C-C-H\\n  | | |\\n  H | H\\n  H-C-H\\n    |\\n  H-C-H\\n    |\\n    H\\nこの物質の名前は？",
+    "word": "\\n H H H\\n | | |\\nH-C-C-C-H\\n | | |\\n H | H\\n H-C-H\\n |\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2-メチルブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n    H\\n    |\\n  H-C-H\\n  H | H\\n  | | |\\nH-C-C-C-H\\n  | | |\\n  H | H\\n  H-C-H\\n    |\\n    H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\n H-C-H\\n H | H\\n | | |\\nH-C-C-C-H\\n | | |\\n H | H\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2.2-ジメチルプロパン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\nH H H\\n| | |\\nC=C-C-H\\n|   |\\nH   H\\nこの物質の名前は？",
+    "word": "\\nH H H\\n| | |\\nC=C-C-H\\n| |\\nH H\\nこの物質の名前は？",
     "meaning": "プロピレン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\nH H H H\\n| | | |\\nC=C-C-C-H\\n|   | |\\nH   H H\\nこの物質の名前は？",
+    "word": "\\nH H H H\\n| | | |\\nC=C-C-C-H\\n| | |\\nH H H\\nこの物質の名前は？",
     "meaning": "1-ブテン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H   H\\n  | |   |\\nH-C-C=C-C-H\\n  |   | |\\n  H   H H\\nこの物質の名前は？",
+    "word": "\\n H H H\\n | | |\\nH-C-C=C-C-H\\n | | |\\n H H H\\nこの物質の名前は？",
     "meaning": "2-ブテン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H\\n  |\\nH-C-H\\nH | H\\n| | |\\nC=C-C-H\\n|   |\\nH   H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\nH-C-H\\nH | H\\n| | |\\nC=C-C-H\\n| |\\nH H\\nこの物質の名前は？",
     "meaning": "2-メチルプロペン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n    H\\n    |\\n  H-C-H\\n  H |   H\\n  | |   |\\nH-C-C=C-C-H\\n  | |   |\\n  H H   H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\n H-C-H\\n H | H\\n | | |\\nH-C-C=C-C-H\\n | | |\\n H H H\\nこの物質の名前は？",
     "meaning": "2-メチル-2-ブテン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n    H\\n    |\\n  H-C-H\\n  H |   H\\n  | |   |\\nH-C-C=C-C-H\\n  |   | |\\n  H   | H\\n    H-C-H\\n      |\\n      H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\n H-C-H\\n H | H\\n | | |\\nH-C-C=C-C-H\\n | | |\\n H | H\\n H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "2.3-ジメチル-2-ブテン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n  H H\\n  | |\\nH-C-C-H\\n  | |\\nH-C-C-H\\n  | |\\n  H H\\nこの物質の名前は？",
+    "word": "\\n H H\\n | |\\nH-C-C-H\\n | |\\nH-C-C-H\\n | |\\n H H\\nこの物質の名前は？",
     "meaning": "シクロブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "0",
-    "word": "\\n    H\\n    |\\n  H-C-H\\n   / \\ \\nH-C - C-H\\n  |    \\ \\n  H   H-C-H\\n        |\\n        H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\n H-C-H\\n / \\ \\nH-C - C-H\\n | \\ \\n H H-C-H\\n |\\n H\\nこの物質の名前は？",
     "meaning": "メチルシクロプロパン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "1",
-    "word": "\\n  F H H H\\n  | | | |\\nH-C-C-C-C-H\\n  | | | |\\n  H H H H\\nこの物質の名前は？",
+    "word": "\\n F H H H\\n | | | |\\nH-C-C-C-C-H\\n | | | |\\n H H H H\\nこの物質の名前は？",
     "meaning": "1-フルオロブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "1",
-    "word": "\\n  H I H H\\n  | | | |\\nH-C-C-C-C-H\\n  | | | |\\n  H H H H\\nこの物質の名前は？",
+    "word": "\\n H I H H\\n | | | |\\nH-C-C-C-C-H\\n | | | |\\n H H H H\\nこの物質の名前は？",
     "meaning": "2-ヨードブタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "1",
-    "word": "\\n  H Cl H H H\\n  | |  | | |\\nH-C-C--C-C-C-H\\n  | |  | | |\\n  H H Br H H\\nこの物質の名前は？",
+    "word": "\\n H Cl H H H\\n | | | | |\\nH-C-C--C-C-C-H\\n | | | | |\\n H H Br H H\\nこの物質の名前は？",
     "meaning": "2-クロロ-3-ブロモペンタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "1",
-    "word": "\\n  H Br H H H\\n  | |  | |\\nH-C-C-C-C-C-H\\n  | |  | |\\n  H Cl H H H\\nこの物質の名前は？",
+    "word": "\\n H Br H H H\\n | | | |\\nH-C-C-C-C-C-H\\n | | | |\\n H Cl H H H\\nこの物質の名前は？",
     "meaning": "2-ブロモ-2-クロロペンタン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "2",
-    "word": "\\n  H H H\\n  | | |\\nH-C-C-C-OH\\n  | | |\\n  H H H\\nこの物質の名前は？",
+    "word": "\\n H H H\\n | | |\\nH-C-C-C-OH\\n | | |\\n H H H\\nこの物質の名前は？",
     "meaning": "1-プロパノール",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "2",
-    "word": "\\n  H H H\\n  | | |\\nH-C-C-C-H\\n  | | |\\n  H O H\\n    H\\nこの物質の名前は？",
+    "word": "\\n H H H\\n | | |\\nH-C-C-C-H\\n | | |\\n H O H\\n H\\nこの物質の名前は？",
     "meaning": "2-プロパノール",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "2",
-    "word": "\\n    H\\n    |\\n  H-C-H\\n  H | H H\\n  | | | |\\nH-C-C-C-C-H\\n  | | | |\\n  H O H H\\n    H\\nこの物質の名前は？",
+    "word": "\\n H\\n |\\n H-C-H\\n H | H H\\n | | | |\\nH-C-C-C-C-H\\n | | | |\\n H O H H\\n H\\nこの物質の名前は？",
     "meaning": "2-メチル-2-ブタノール",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
     "category": "炭化水素の名称",
     "subcategory": "2",
-    "word": "\\n   H H\\n   | |\\nOH-C-C-OH\\n   | |\\n   H H\\nこの物質の名前は？",
+    "word": "\\n H H\\n | |\\nOH-C-C-OH\\n | |\\n H H\\nこの物質の名前は？",
     "meaning": "1.2-エタンジオール",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -592,6 +676,7 @@
     "subcategory": "0",
     "word": "鎖式炭化水素のうち飽和炭化水素のものを何というか。",
     "meaning": "アルカン",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -599,6 +684,7 @@
     "subcategory": "0",
     "word": "アルカンの分子式は炭素原子の数をnとするとなんと表せるか。",
     "meaning": "CnH2n+2",
+    "answerType": "化学式",
     "difficulty": "1"
   },
   {
@@ -606,6 +692,7 @@
     "subcategory": "0",
     "word": "分子式CnH2n+2で表されるアルカンのように共通の一般式で表される性質や構造が良く似た一群の化合物を何というか？",
     "meaning": "同族体",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -613,6 +700,7 @@
     "subcategory": "0",
     "word": "アルカンから水素原子を１つ取り除いてできる炭化水素基を何というか。",
     "meaning": "アルキル基",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -620,6 +708,7 @@
     "subcategory": "0",
     "word": "アルキル基の一般式は炭素原子の数をnとして(　)と表せる。",
     "meaning": "CnH2n+1",
+    "answerType": "化学式",
     "difficulty": "1"
   },
   {
@@ -627,6 +716,7 @@
     "subcategory": "0",
     "word": "メタンのアルキル基を何と言うか。",
     "meaning": "メチル基",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -634,6 +724,7 @@
     "subcategory": "0",
     "word": "エタンのアルキル基を何と言うか。",
     "meaning": "エチル基",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -641,6 +732,7 @@
     "subcategory": "0",
     "word": "メタンは(　)色(　)臭の(　)で、酢酸ナトリウムと水酸化ナトリウムの混合物を加熱すると発生する。",
     "meaning": "無/無/c:固体:液体:気体:気体",
+    "answerType": "色/色/選択肢",
     "difficulty": "2;2;2"
   },
   {
@@ -648,6 +740,7 @@
     "subcategory": "0",
     "word": "酢酸ナトリウムと水酸化ナトリウムの混合物を加熱し、メタンを発生させる化学反応式。\\n( 化学式 ) + NaOH → ( 化学式 ) + CH₄↑",
     "meaning": "CH3COONa/Na2CO3",
+    "answerType": "化学式/化学式",
     "difficulty": "2;2"
   },
   {
@@ -655,6 +748,7 @@
     "subcategory": "0",
     "word": "メタンと塩素を混ぜ、光を当てると(　)が起こる。",
     "meaning": "置換反応",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -662,6 +756,7 @@
     "subcategory": "0",
     "word": "置換反応によって F が付いたものをなんと呼ぶか。",
     "meaning": "フルオロ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -669,6 +764,7 @@
     "subcategory": "0",
     "word": "置換反応によって Cl が付いたものをなんと呼ぶか。",
     "meaning": "クロロ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -676,6 +772,7 @@
     "subcategory": "0",
     "word": "置換反応によって Br が付いたものをなんと呼ぶか。",
     "meaning": "ブロモ",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -683,6 +780,7 @@
     "subcategory": "0",
     "word": "置換反応によって I が付いたものをなんと呼ぶか。",
     "meaning": "ヨード",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -690,6 +788,7 @@
     "subcategory": "1",
     "word": "環式炭化水素のうち飽和炭化水素のものを何と言うか。",
     "meaning": "シクロアルカン",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -697,6 +796,7 @@
     "subcategory": "1",
     "word": "シクロアルカンの分子式は炭素原子の数をnとするとなんと表せるか。",
     "meaning": "CnH2n",
+    "answerType": "化学式",
     "difficulty": "1"
   },
   {
@@ -704,6 +804,7 @@
     "subcategory": "2",
     "word": "鎖式不飽和炭化水素のうち二重結合を１つ持つものを何と言うか。",
     "meaning": "アルケン",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -711,6 +812,7 @@
     "subcategory": "2",
     "word": "アルケンの分子式は炭素原子の数をnとするとなんと表せるか。",
     "meaning": "CnH2n",
+    "answerType": "化学式",
     "difficulty": "1"
   },
   {
@@ -718,6 +820,7 @@
     "subcategory": "2",
     "word": "smiles:C=C:C₂H₄の慣用名は？",
     "meaning": "エチレン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -725,6 +828,7 @@
     "subcategory": "2",
     "word": "アルケンは二重結合の部分に(　)反応が起こりやすい",
     "meaning": "付加",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -732,6 +836,7 @@
     "subcategory": "2",
     "word": "CH₂=CH₂とBrの付加反応はBr₂の(　)色が(　)色になるので(　)の検出に利用される。",
     "meaning": "赤褐/無/二重結合",
+    "answerType": "色/色/用語",
     "difficulty": "2;2;2"
   },
   {
@@ -739,6 +844,7 @@
     "subcategory": "2",
     "word": "分子量の小さい物質(　)が繰り返し結合して分子量の大きい物質(　)になる反応を(　)といい、特に付加反応によるものを(　)という。",
     "meaning": "m:単量体:モノマー/m:重合体:ポリマー/重合/付加重合",
+    "answerType": "用語/用語/用語/用語",
     "difficulty": "2;2;2;2"
   },
   {
@@ -746,6 +852,7 @@
     "subcategory": "3",
     "word": "鎖式不飽和炭化水素のうち三重結合を１つ持つものを何と言うか。",
     "meaning": "アルキン",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -753,6 +860,7 @@
     "subcategory": "3",
     "word": "アルキンの分子式は炭素原子の数をnとするとなんと表せるか。",
     "meaning": "CnH2n-2",
+    "answerType": "化学式",
     "difficulty": "1"
   },
   {
@@ -760,6 +868,7 @@
     "subcategory": "3",
     "word": "smiles:C#C:C₂H₂の慣用名は？",
     "meaning": "アセチレン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -767,6 +876,7 @@
     "subcategory": "3",
     "word": "三重結合は二重結合よりも炭素原子間の距離が(　)。",
     "meaning": "c:近い:遠い:近い",
+    "answerType": "選択肢",
     "difficulty": "1"
   },
   {
@@ -774,6 +884,7 @@
     "subcategory": "3",
     "word": "アセチレンは(　)に(　)を加えると発生する",
     "meaning": "炭化カルシウム/水",
+    "answerType": "物質名/物質名",
     "difficulty": "2;2"
   },
   {
@@ -781,6 +892,7 @@
     "subcategory": "3",
     "word": "炭化カルシウムからアセチレンを発生させる化学式。( 化学式 ) + 2H₂O → ( 化学式 ) + C₂H₂",
     "meaning": "CaC2/Ca(OH)2",
+    "answerType": "化学式/化学式",
     "difficulty": "2;2"
   },
   {
@@ -788,6 +900,7 @@
     "subcategory": "3",
     "word": "アセチレンの三重結合も(　)反応を起こす。",
     "meaning": "付加",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -795,6 +908,7 @@
     "subcategory": "3",
     "word": "smiles:OC=C:アセチレンと水の付加反応によって出来る物質の名前と化学式は？",
     "meaning": "ビニルアルコール/CH2=CHOH",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -802,6 +916,7 @@
     "subcategory": "3",
     "word": "smiles:ClC=C:アセチレンと塩酸の付加反応によって出来る物質の名前と化学式は？",
     "meaning": "塩化ビニル/CH2CHCl",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -809,6 +924,7 @@
     "subcategory": "3",
     "word": "smiles:N#CC=C:アセチレンと青酸の付加反応によって出来る物質の名前と化学式は？",
     "meaning": "アクリロニトリル/CH2CHCN",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -816,13 +932,15 @@
     "subcategory": "3",
     "word": "smiles:CC(=O)OC=C:アセチレンと酢酸の付加反応によって出来る物質の名前と化学式は？",
     "meaning": "酢酸ビニル/CH2CHOCOCH3",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
     "category": "脂肪族炭化水素",
     "subcategory": "3",
-    "word": "\\nH  H\\n|  |\\nC≡C\\n|  |\\nH\\nこれを何と言うか。",
+    "word": "\\nH H\\n| |\\nC≡C\\n| |\\nH\\nこれを何と言うか。",
     "meaning": "ビニル基",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -830,20 +948,23 @@
     "subcategory": "0",
     "word": "ヒドロキシ基(R-OH)をもつ炭化水素を何と言うか。",
     "meaning": "アルコール",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
     "category": "アルコール",
     "subcategory": "0",
-    "word": "smiles:CO:CH₃OHの物質名は？",
+    "word": "smiles:CO:CH₃OH의 物質名は？",
     "meaning": "メタノール",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
     "category": "アルコール",
     "subcategory": "0",
-    "word": "smiles:CCO:C₂H₅OHの物質名は？",
+    "word": "smiles:CCO:C₂H₅OH의 物質名は？",
     "meaning": "エタノール",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -851,6 +972,7 @@
     "subcategory": "0",
     "word": "分子中のヒドロキシ基の数がn個のアルコールを(　)アルコールと言う。",
     "meaning": "n価",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -858,6 +980,7 @@
     "subcategory": "0",
     "word": "ヒドロキシ基がついた炭素原子に結合している炭素の数がn個のものを(　)アルコールと言う。",
     "meaning": "第n級",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -865,6 +988,7 @@
     "subcategory": "0",
     "word": "smiles:CO:CH₃OHは(　)価アルコールで第(　)級アルコールである。",
     "meaning": "m:1:一/m:1:一",
+    "answerType": "数/数",
     "difficulty": "1;1"
   },
   {
@@ -872,6 +996,7 @@
     "subcategory": "0",
     "word": "smiles:CCO:C₂H₅OHは(　)価アルコールで、第(　)級アルコールである。",
     "meaning": "m:1:一/m:1:一",
+    "answerType": "数/数",
     "difficulty": "1;1"
   },
   {
@@ -879,6 +1004,7 @@
     "subcategory": "0",
     "word": "メタノールは工業的には(　)と水素からつくる。\\n( 化学式 ) + 2H₂O　→ CH₃OH",
     "meaning": "一酸化炭素/CO",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -886,6 +1012,7 @@
     "subcategory": "0",
     "word": "エタノールは工業的にはアルコール発酵か(　)に水を付加してつくる。\\n( 化学式 ) + H₂O → C2H5OH",
     "meaning": "エチレン/C2H4",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -893,6 +1020,7 @@
     "subcategory": "0",
     "word": "アルコールは-OHを持ち、(　)をつくるので沸点が(　)。",
     "meaning": "水素結合/c:高い:低い:高い",
+    "answerType": "用語/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -900,6 +1028,7 @@
     "subcategory": "0",
     "word": "アルコールはナトリウムと反応し、( 化学式 )を発生して(　)になる。",
     "meaning": "H2/ナトリウムアルコキシド",
+    "answerType": "化学式/用語",
     "difficulty": "2;2"
   },
   {
@@ -907,6 +1036,7 @@
     "subcategory": "0",
     "word": "メタノールにナトリウムを加えて(　)と水素にする反応。\\n2CH₃OH + 2Na → 2( 化学式 ) + H₂↑",
     "meaning": "ナトリウムメトキシド/CH3ONa",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -914,6 +1044,7 @@
     "subcategory": "0",
     "word": "エタノールにナトリウムを加えて(　)と水素にする反応。\\n2C2H5OH + 2Na → 2( 化学式 ) + H₂↑",
     "meaning": "ナトリウムエトキシド/C2H5ONa",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -921,6 +1052,7 @@
     "subcategory": "0",
     "word": "第一級アルコールは、酸化すると(　)を経て(　)になる。",
     "meaning": "アルデヒド/カルボン酸",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -928,6 +1060,7 @@
     "subcategory": "0",
     "word": "第二級アルコールは、酸化すると(　)になる。",
     "meaning": "ケトン",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -935,6 +1068,7 @@
     "subcategory": "0",
     "word": "第三級アルコールは、(　)。",
     "meaning": "c:酸化されやすい:酸化されにくい:酸化されない:酸化されにくい",
+    "answerType": "選択肢",
     "difficulty": "1"
   },
   {
@@ -942,6 +1076,7 @@
     "subcategory": "1",
     "word": "二つの炭化水素基がOとくっついてR-O-R'のかたちのものを何と言うか。",
     "meaning": "エーテル",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -949,6 +1084,7 @@
     "subcategory": "1",
     "word": "smiles:CCOC:C₂H₅OCH₃の名前は？",
     "meaning": "エチルメチルエーテル",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -956,6 +1092,7 @@
     "subcategory": "1",
     "word": "smiles:COC:CH₃OCH₃の名前は？",
     "meaning": "ジメチルエーテル",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -963,6 +1100,7 @@
     "subcategory": "1",
     "word": "ジエチルエーテルは(　)に濃硫酸を加え、(　)℃～(　)℃に加熱すると生成する。",
     "meaning": "エタノール/130/140",
+    "answerType": "物質名/数/数",
     "difficulty": "2;2;2"
   },
   {
@@ -970,6 +1108,7 @@
     "subcategory": "1",
     "word": "エタノールに濃硫酸を加え、160℃～170℃に加熱すると(　)を生成する。C₂H₅OH → ( 化学式 ) + H₂O",
     "meaning": "エチレン/C2H4",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -977,6 +1116,7 @@
     "subcategory": "1",
     "word": "エタノールに濃硫酸を加え、130℃～140℃に加熱すると(　)が生成する。2C₂H₅OH → ( 化学式 ) + H₂O",
     "meaning": "ジエチルエーテル/C2H5OC2H5",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -984,6 +1124,7 @@
     "subcategory": "1",
     "word": "エーテルは溶解においては(　)として扱うことができ、水に(　)。",
     "meaning": "c:極性分子:無極性分子:無極性分子/c:溶けやすい:溶けにくい:溶けにくい",
+    "answerType": "選択肢/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -991,6 +1132,7 @@
     "subcategory": "0",
     "word": "ホルミル基(R-CHO)をもつ炭化水素を何と言うか。",
     "meaning": "アルデヒド",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -998,6 +1140,7 @@
     "subcategory": "0",
     "word": "ホルミル基は(　)を持つ。",
     "meaning": "c:酸化性:還元性:還元性",
+    "answerType": "選択肢",
     "difficulty": "1"
   },
   {
@@ -1005,6 +1148,7 @@
     "subcategory": "0",
     "word": "smiles:C=O:H-CHOの名前は？",
     "meaning": "ホルムアルデヒド",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1012,6 +1156,7 @@
     "subcategory": "0",
     "word": "smiles:CC=O:CH₃-CHOの名前は？",
     "meaning": "アセトアルデヒド",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1019,6 +1164,7 @@
     "subcategory": "0",
     "word": "アルデヒドは第(　)級アルコールの酸化で得られる。",
     "meaning": "m:1:一",
+    "answerType": "数",
     "difficulty": "1"
   },
   {
@@ -1026,6 +1172,7 @@
     "subcategory": "0",
     "word": "ホルムアルデヒドは(　)の酸化で得られる。( 化学式 ) → H-CHO",
     "meaning": "m:メタノール:メチルアルコール/CH3OH",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -1033,6 +1180,7 @@
     "subcategory": "0",
     "word": "アセトアルデヒドは(　)の酸化で得られる。( 化学式 ) → CH₃-CHO",
     "meaning": "m:エタノール:エチルアルコール/C2H5OH",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -1040,6 +1188,7 @@
     "subcategory": "0",
     "word": "アルデヒドは酸化すると(　)になる。この時相手の物質を(　)する。",
     "meaning": "カルボン酸/c:酸化:還元:還元",
+    "answerType": "用語/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -1047,6 +1196,7 @@
     "subcategory": "0",
     "word": "ホルムアルデヒドは酸化すると(　)になる。H-CHO → ( 化学式 )",
     "meaning": "ギ酸/HCOOH",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -1054,6 +1204,7 @@
     "subcategory": "0",
     "word": "アセトアルデヒドは酸化すると(　)になる。CH₃-CHO → ( 化学式 )",
     "meaning": "酢酸/CH3COOH",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -1061,6 +1212,7 @@
     "subcategory": "0",
     "word": "アンモニア性硝酸銀水溶液を還元性物質(アルデヒド)と加熱することで、Ag⁺が還元されAgが析出する反応を何と言うか。",
     "meaning": "銀鏡反応",
+    "answerType": "用語",
     "difficulty": "2;2"
   },
   {
@@ -1068,6 +1220,7 @@
     "subcategory": "0",
     "word": "フェーリング液を還元性物質(アルデヒド)と加熱すると、Cu²⁺が還元されて(　)色の( 化学式 )の沈殿を生じる反応を何と言うか。",
     "meaning": "赤褐/Cu2+/フエーリング液の還元",
+    "answerType": "色/化学式/用語",
     "difficulty": "2;2;2"
   },
   {
@@ -1075,6 +1228,7 @@
     "subcategory": "1",
     "word": "二つの炭化水素基がカルボニル基と結合した炭化水素(R-CO-R')を何と言うか。",
     "meaning": "ケトン",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1082,6 +1236,7 @@
     "subcategory": "1",
     "word": "smiles:CC(=O)C:CH₃COCH₃の一般名は？",
     "meaning": "アセトン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1089,6 +1244,7 @@
     "subcategory": "1",
     "word": "ケトンは第(　)級アルコールの酸化で得られる。",
     "meaning": "m:2:ニ",
+    "answerType": "数",
     "difficulty": "1"
   },
   {
@@ -1096,6 +1252,7 @@
     "subcategory": "1",
     "word": "アセトンは(　)の酸化や(　)の乾留で得られる。",
     "meaning": "2-プロパノール/酢酸カルシウム",
+    "answerType": "物質名/物質名",
     "difficulty": "2;2"
   },
   {
@@ -1103,6 +1260,7 @@
     "subcategory": "1",
     "word": "2-プロパノールの酸化。C₃H₇OH → ( 化学式 )",
     "meaning": "CH3COCH3",
+    "answerType": "化学式",
     "difficulty": "2"
   },
   {
@@ -1110,6 +1268,7 @@
     "subcategory": "1",
     "word": "酢酸カルシウムの乾留。(CH₃COO)₂Ca → ( 化学式　) + CaCO₃",
     "meaning": "CH3COCH3",
+    "answerType": "化学式",
     "difficulty": "2"
   },
   {
@@ -1117,6 +1276,7 @@
     "subcategory": "1",
     "word": "アセトンに水酸化ナトリウム水溶液とヨウ素溶液を加えてあたためると(　)色(　)臭の(　)( 化学式 )が沈殿する。この反応を何と言うか。",
     "meaning": "無/特異/ヨードホルム/CHI3/ヨードホルム反応",
+    "answerType": "色/用語/物質名/化学式/用語",
     "difficulty": "2;2;2;2;2"
   },
   {
@@ -1124,6 +1284,7 @@
     "subcategory": "1",
     "word": "(　)はCH₃-CO-RやCH₃-CHOH-Rの構造をもつ化合物で起こる。",
     "meaning": "ヨードホルム反応",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -1131,6 +1292,7 @@
     "subcategory": "0",
     "word": "分子中にカルボキシ基(R-COOH)を持つ化合物を何と言うか。",
     "meaning": "カルボン酸",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1138,6 +1300,7 @@
     "subcategory": "0",
     "word": "脂肪族の1価のカルボン酸を特に何と言うか。",
     "meaning": "m:脂肪酸:脂肪族モノカルボン酸",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -1145,6 +1308,7 @@
     "subcategory": "0",
     "word": "カルボン酸はカルボキシ基の数をnとすると(　)カルボン酸という。",
     "meaning": "n価",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1152,6 +1316,7 @@
     "subcategory": "0",
     "word": "カルボン酸を構成する炭素原子の数が多いものを(　)カルボン酸、少ないものを(　)カルボン酸という。",
     "meaning": "高級/低級",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
@@ -1159,6 +1324,7 @@
     "subcategory": "0",
     "word": "カルボン酸のうち炭化水素基が単結合のみのものを(　)カルボン酸、そうでないものを(　)カルボン酸という。",
     "meaning": "飽和/不飽和",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
@@ -1166,6 +1332,7 @@
     "subcategory": "0",
     "word": "カルボン酸は水溶液中で僅かに電離し、(　)を示す。CH₃COOH → ( 化学式 ) + H+",
     "meaning": "c:強酸性:強塩基性:弱酸性:弱塩基性:弱酸性/CH3COO-",
+    "answerType": "選択肢/化学式",
     "difficulty": "2;2"
   },
   {
@@ -1173,6 +1340,7 @@
     "subcategory": "0",
     "word": "カルボン酸は塩基と中和して塩と水を生じる。CH₃COOH + NaOH → ( 化学式 ) + H₂O",
     "meaning": "CH3COONa",
+    "answerType": "化学式",
     "difficulty": "2"
   },
   {
@@ -1180,6 +1348,7 @@
     "subcategory": "0",
     "word": "smiles:C(=O)O:HCOOHを何と言うか。",
     "meaning": "ギ酸",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1187,6 +1356,7 @@
     "subcategory": "0",
     "word": "smiles:CC(=O)O:CH₃COOHを何と言うか。",
     "meaning": "酢酸",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1194,6 +1364,7 @@
     "subcategory": "0",
     "word": "smiles:CCC(=O)O:C2H5COOHを何と言うか。",
     "meaning": "プロピオン酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1201,6 +1372,7 @@
     "subcategory": "0",
     "word": "smiles:CCCC(=O)O:C3H7COOHを何と言うか。",
     "meaning": "ブタン酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1208,6 +1380,7 @@
     "subcategory": "0",
     "word": "カルボン酸は(　)の酸化で得られる。",
     "meaning": "アルデヒド",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1215,6 +1388,7 @@
     "subcategory": "0",
     "word": "ギ酸は(　)の酸化で得られる。( 化学式 ) → HCOOH",
     "meaning": "ホルムアルデヒド/HCHO",
+    "answerType": "物質名/化学式",
     "difficulty": "1;1"
   },
   {
@@ -1222,6 +1396,7 @@
     "subcategory": "0",
     "word": "酢酸は(　)の酸化で得られる。( 化学式 ) → CH₃COOH",
     "meaning": "アセトアルデヒド/CH3CHO",
+    "answerType": "物質名/化学式",
     "difficulty": "1;1"
   },
   {
@@ -1229,6 +1404,7 @@
     "subcategory": "0",
     "word": "ギ酸は(　)を持つので(　)を示す。",
     "meaning": "m:ホルミル基:アルデヒド基/c:酸化性:還元性:還元性",
+    "answerType": "用語/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -1236,6 +1412,7 @@
     "subcategory": "0",
     "word": "ギ酸に濃硫酸を加えて加熱すると(　)を発生する。HCOOH → H₂O + ( 化学式 )",
     "meaning": "一酸化炭素/CO",
+    "answerType": "物質名/化学式",
     "difficulty": "2;2"
   },
   {
@@ -1243,6 +1420,7 @@
     "subcategory": "0",
     "word": "酢酸は融点が17℃で純粋なものは(　)と呼ばれ冬に固まる。",
     "meaning": "氷酢酸",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -1250,6 +1428,7 @@
     "subcategory": "0",
     "word": "smiles:OC(=O)COCC(=O)O:2個のカルボキシ基から1分子の水がとれて結合した形の化合物を(　)といい、酢酸のそれを(　)という。",
     "meaning": "酸無水物/無水酢酸",
+    "answerType": "用語/物質名",
     "difficulty": "2;2"
   },
   {
@@ -1257,6 +1436,7 @@
     "subcategory": "0",
     "word": "smiles:OC(=O)\\C=C/C(=O)O:OC(=O)\\C=C\\C(=O)O:COOH-CH=CH-COOHで表される2価のカルボン酸には(　)異性体がある。シス形を(　)、トランス形を(　)という。",
     "meaning": "m:幾何:シス・トランス/マレイン酸/フマル酸",
+    "answerType": "用語/物質名/物質名",
     "difficulty": "1;2;2"
   },
   {
@@ -1264,6 +1444,7 @@
     "subcategory": "0",
     "word": "smiles:C1=CC(=O)OC1=O:マレイン酸を加熱すると分子内脱水が起こり、(　)か生成する。これは2個のカルボキシ基が近いからであり、フマル酸においてこれは(　)。",
     "meaning": "無水マレイン酸/c:起こる:起こらない:起こらない",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -1271,6 +1452,7 @@
     "subcategory": "0",
     "word": "smiles:CC(O)C(=O)O:CH₃CH(OH)COOHを何と言うか。",
     "meaning": "乳酸",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -1278,13 +1460,15 @@
     "subcategory": "0",
     "word": "乳酸はカルボキシ基のほかに(　)をもち、そのようなカルボン酸を(　)という。",
     "meaning": "ヒドロキシ基/ヒドロキシ酸",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
     "category": "カルボン酸",
     "subcategory": "0",
-    "word": "乳酸には(　)炭素原子をもつので(　)異性体が存在する。",
+    "word": "乳酸には(　)炭素原子を持つので(　)異性体が存在する。",
     "meaning": "不斉/m:鏡像:光学",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
@@ -1292,6 +1476,7 @@
     "subcategory": "0",
     "word": "分子中にエステル結合(R-COO-R')を含む化合物を何と言うか。",
     "meaning": "エステル",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1299,6 +1484,7 @@
     "subcategory": "0",
     "word": "カルボン酸とアルコールが縮合(H₂Oが取れる)してできる化合物を(　)といい、この反応を(　)という。",
     "meaning": "エステル/エステル化",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -1306,6 +1492,7 @@
     "subcategory": "0",
     "word": "エステル化は可逆反応であり、その逆は(　)である。",
     "meaning": "加水分解",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1313,6 +1500,7 @@
     "subcategory": "0",
     "word": "smiles:CC(=O)OCC:酢酸とエタノールに濃硫酸を加えて加熱すると(　)が生成する。CH₃COOH + C2H5OH → ( 化学式 ) + H₂O",
     "meaning": "酢酸エチル/CH3COOC2H5",
+    "answerType": "物質名/化学式",
     "difficulty": "1;1"
   },
   {
@@ -1320,6 +1508,7 @@
     "subcategory": "0",
     "word": "エステルに酸を加えて加熱すると(　)と(　)になる。CH₃COOC₂H₅ + H₂O → ( 化学式 ) + ( 化学式 )",
     "meaning": "r:1:カルボン酸:アルコール/r1/r:2:CH3COOH:C2H5OH/r2",
+    "answerType": "物質名/物質名/化学式/化学式",
     "difficulty": "1;1;2;2"
   },
   {
@@ -1327,6 +1516,7 @@
     "subcategory": "0",
     "word": "エステルに水酸化ナトリウムなどの塩基を加えて加熱するとカルボン酸の塩とアルコールが生じる。この反応を(　)という。",
     "meaning": "けん化",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1334,6 +1524,7 @@
     "subcategory": "1",
     "word": "(　)価アルコールのグリセリン( 化学式 )と高級脂肪酸のエステルの化合物を(　)という。",
     "meaning": "m:3:三/C3H5(OH)3/油脂",
+    "answerType": "数/化学式/用語",
     "difficulty": "1;2;1"
   },
   {
@@ -1341,6 +1532,7 @@
     "subcategory": "1",
     "word": "油脂は炭化水素基が飽和だと常温で(　)の(　)、不飽和だと常温で(　)の(　)になりやすい。",
     "meaning": "c:気体:液体:固体:固体/脂肪/c:気体:液体:固体:液体/脂肪油",
+    "answerType": "選択肢/物質名/選択肢/物質名",
     "difficulty": "2;2;2;2"
   },
   {
@@ -1348,6 +1540,7 @@
     "subcategory": "1",
     "word": "(　)を触媒として脂肪油に水素を付加させ炭化水素基を飽和にすると常温で(　)の(　)になる。",
     "meaning": "ニッケル/c:気体:液体:固体:固体/硬化油",
+    "answerType": "物質名/選択肢/物質名",
     "difficulty": "2;2;2"
   },
   {
@@ -1355,6 +1548,7 @@
     "subcategory": "1",
     "word": "油脂を水酸化ナトリウムでけん化するとグリセリンと高級脂肪酸のナトリウム塩(　)が生じる。",
     "meaning": "セッケン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1362,6 +1556,7 @@
     "subcategory": "1",
     "word": "セッケンは水に溶けにくい(　)と水に溶けやすい(　)からなり、(　)を示すため羊毛や絹の洗濯には向かない。",
     "meaning": "m:親油基:疎水基/m:親水基:疎油基/c:強酸性:強塩基性:弱酸性:弱塩基性:弱塩基性",
+    "answerType": "用語/用語/選択肢",
     "difficulty": "1;1;1"
   },
   {
@@ -1369,6 +1564,7 @@
     "subcategory": "1",
     "word": "セッケンを水に溶かすと疎水性部分を(　)、親水性部分を(　)にして40~60個が集まりコロイド粒子の(　)をつくる。",
     "meaning": "c:内側:外側:内側/c:内側:外側:外側/ミセル",
+    "answerType": "選択肢/選択肢/用語",
     "difficulty": "2;2;3"
   },
   {
@@ -1376,6 +1572,7 @@
     "subcategory": "1",
     "word": "液面にある脂肪酸イオンは疎水性部分を(　)、親水性部分を(　)にしてならび水の(　)を低下させる。",
     "meaning": "c:空気側:水側:空気側/c:空気側:水側:水側/表面張力",
+    "answerType": "選択肢/選択肢/用語",
     "difficulty": "2;2;3"
   },
   {
@@ -1383,6 +1580,7 @@
     "subcategory": "1",
     "word": "セッケン水に脂肪酸や灯油を入れて振ると(　)となる。これは脂肪酸イオンが疎水性部分を油に向けて小滴を囲む働き(　)によるものである。",
     "meaning": "乳濁液/乳化作用",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
@@ -1390,6 +1588,7 @@
     "subcategory": "1",
     "word": "セッケンは( 化学式 )や( 化学式 )と沈殿を作るため、硬水では泡立ちが悪い。",
     "meaning": "r:1:Mg2+:Ca2+/r1",
+    "answerType": "化学式/化学式",
     "difficulty": "2;2"
   },
   {
@@ -1397,6 +1596,7 @@
     "subcategory": "1",
     "word": "硫酸アルキルナトリウムや直鎖アルキルベンゼンスルホン酸ナトリウムなども疎水基と親水基をもち、(　)とよばれ(　)を示す。",
     "meaning": "m:合成洗剤:中性洗剤/c:酸性:中性:塩基性:中性",
+    "answerType": "用語/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -1404,6 +1604,7 @@
     "subcategory": "1",
     "word": "合成洗剤は(　)とも呼ばれ、硬水中でも沈殿を作らず羊毛や絹も洗濯できる。",
     "meaning": "中性洗剤",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -1411,6 +1612,7 @@
     "subcategory": "2",
     "word": "smiles:CCCCCCCCCCCCCCCC(=O)O:C₁₅H₃₁COOHの名前は？",
     "meaning": "パルミチン酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1418,6 +1620,7 @@
     "subcategory": "2",
     "word": "smiles:CCCCCCCCCCCCCCCCCC(=O)O:C₁₇H₃₅COOHの名前は？",
     "meaning": "ステアリン酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1425,6 +1628,7 @@
     "subcategory": "2",
     "word": "smiles:CCCCCCCC\\C=C/CCCCCCCC(O)=O:C₁₇H₃₃COOHの名前は？",
     "meaning": "オレイン酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1432,6 +1636,7 @@
     "subcategory": "2",
     "word": "smiles:CCCCC/C=C\\C/C=C\\CCCCCCCC(=O)O:C₁₇H₃₁COOHの名前は？",
     "meaning": "リノール酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1439,6 +1644,7 @@
     "subcategory": "2",
     "word": "smiles:CC/C=C\\C/C=C\\C/C=C\\CCCCCCCC(=O)O:O=C(O)CCCC\\C=C/C\\C=C/C\\C=C/CCCCC:C₁₇H₂₉COOHの名前は？",
     "meaning": "リノレン酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1446,6 +1652,7 @@
     "subcategory": "0",
     "word": "C₆H₆で表される正六角形環状構造を(　)といい、(　)と表される。",
     "meaning": "ベンゼン環/m:⌬:⏣",
+    "answerType": "用語/化学式",
     "difficulty": "1;1"
   },
   {
@@ -1453,6 +1660,7 @@
     "subcategory": "0",
     "word": "smiles:c1c2ccccc2ccc1:この構造式で表される化学式C₁₀H₈を何と言うか。",
     "meaning": "ナフタレン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1460,6 +1668,7 @@
     "subcategory": "0",
     "word": "smiles:c1c2cc3ccccc3cc2ccc1:この構造式で表される化学式C₁₄H₁₀を何と言うか。",
     "meaning": "アントラセン",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1467,6 +1676,7 @@
     "subcategory": "0",
     "word": "smiles:Cc1ccccc1:この構造式で表される化学式C₆H₅CH₃を何と言うか。",
     "meaning": "トルエン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1474,6 +1684,7 @@
     "subcategory": "0",
     "word": "smiles:Cc1c(C)cccc1:この構造式で表される化学式C₆H₄(CH₃)₂を何と言うか。",
     "meaning": "o-キシレン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1481,6 +1692,7 @@
     "subcategory": "0",
     "word": "smiles:Cc1cc(C)ccc1:この構造式で表される化学式C₆H₄(CH₃)₂を何と言うか。",
     "meaning": "m-キシレン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1488,6 +1700,7 @@
     "subcategory": "0",
     "word": "smiles:Cc1ccc(C)cc1:この構造式で表される化学式C₆H₄(CH₃)₂を何と言うか。",
     "meaning": "p-キシレン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1495,6 +1708,7 @@
     "subcategory": "0",
     "word": "smiles:C=CC1=CC=CC=C1:化学式C₆H₅C₂H₃を何と言うか。",
     "meaning": "スチレン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1502,6 +1716,7 @@
     "subcategory": "1",
     "word": "smiles:Clc1ccccc1:ベンゼンに鉄や塩化鉄を触媒として塩素を反応させると(　)ができる。",
     "meaning": "m:クロロベンゼン:モノクロロベンゼン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1509,6 +1724,7 @@
     "subcategory": "1",
     "word": "置換反応によってハロゲン化物ができる反応を(　)といい、塩素化合物ができる反応を(　)という。",
     "meaning": "ハロゲン化/塩素化",
+    "answerType": "用語/用語",
     "difficulty": "1"
   },
   {
@@ -1516,6 +1732,7 @@
     "subcategory": "2",
     "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:濃硝酸と濃硫酸の混合物(　)をベンゼンに加えると(　)ができる。",
     "meaning": "混酸/ニトロベンゼン",
+    "answerType": "物質名/物質名",
     "difficulty": "1"
   },
   {
@@ -1523,6 +1740,7 @@
     "subcategory": "2",
     "word": "水素原子がニトロ基-NO₂ で置換される反応を(　)といい、炭素原子にニトロ基が直接結合した化合物を(　)という。",
     "meaning": "ニトロ化/ニトロ化合物",
+    "answerType": "用語/用語",
     "difficulty": "1"
   },
   {
@@ -1530,6 +1748,7 @@
     "subcategory": "2",
     "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:この構造式で表される(　)は特有の甘い香りのある(　)色～(　)色の(　)で水より重く、水に(　)、有機溶媒に(　)",
     "meaning": "ニトロベンゼン/無/淡黄/c:固体:液体:気体:液体/c:よく溶ける:溶けにくい:溶けない:溶けにくい/c:よく溶ける:溶けにくい:溶けない:よく溶ける",
+    "answerType": "物質名/色/色/選択肢/選択肢/選択肢",
     "difficulty": "2;2;2;2;2;2"
   },
   {
@@ -1537,6 +1756,7 @@
     "subcategory": "2",
     "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:　smiles:CC1=C(C=C(C=C1[N+](=O)[O-])[N+](=O)[O-])[N+](=O)[O-]:トルエンを混酸でニトロ化すると、o-位やp-位が酸化されて C₆H₆(CH₃)NO₂ (　)ができ、さらにニトロ化が進むと(　)ができる。",
     "meaning": "m:ニトロトルエン:メチルニトロベンゼン/m:2.4.6-トリニトロトルエン:TNT",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -1544,6 +1764,7 @@
     "subcategory": "3",
     "word": "smiles:OS(=O)(=O)C1=CC=CC=C1:ベンゼンに濃硫酸を加えて加熱すると(　)ができる。",
     "meaning": "ベンゼンスルホン酸",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -1551,6 +1772,7 @@
     "subcategory": "3",
     "word": "水素原子がスルホ基-SO₃H で置換される反応を(　)という。",
     "meaning": "スルホン化",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1558,6 +1780,7 @@
     "subcategory": "3",
     "word": "smiles:OS(=O)(=O)C1=CC=CC=C1:この構造式で表される(　)は(　)の(　)色・板状の結晶で(　)が大きい。水やエタノールに(　)、有機溶媒に(　)。",
     "meaning": "ベンゼンスルホン酸/c:強酸性:強塩基性:弱酸性:弱塩基性:強酸性/無/潮解性/c:よく溶ける:溶けにくい:溶けない:よく溶ける/c:よく溶ける:溶けにくい:溶けない:溶けにくい",
+    "answerType": "物質名/選択肢/色/用語/選択肢/選択肢",
     "difficulty": "1;2;2;2;2;2"
   },
   {
@@ -1565,6 +1788,7 @@
     "subcategory": "4",
     "word": "smiles:ClC1C(Cl)C(Cl)C(Cl)C(Cl)C1Cl:ベンゼンと塩素の混合物に光(紫外線)を当てると(　)ができる。",
     "meaning": "m:1.2.3.4.5.6-ヘキサクロロシクロヘキサン:ベンゼンヘキサクロリド:BHC",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1572,6 +1796,7 @@
     "subcategory": "4",
     "word": "smiles:C1CCCCC1:ベンゼンにニッケルなどを触媒として水素を付加させると(　)ができる",
     "meaning": "シクロヘキサン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1579,6 +1804,7 @@
     "subcategory": "4",
     "word": "ベンゼン環に結合した-CH₃ や-C₂H₅ などの炭化水素基を過マンガン酸カリウムで酸化すると(　)になる。",
     "meaning": "カルボキシ基",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -1586,6 +1812,7 @@
     "subcategory": "4",
     "word": "smiles:O=C(O)C1=CC=CC=C1:　smiles:O=CC1=CC=CC=C1:トルエン ⌬-CH₃ やエチルベンゼン ⌬-CH₂CH₃ を過マンガン酸カリウム KMnO₄ で酸化すると(　)ができる。また、トルエンを穏やかに酸化すると(　)ができる。",
     "meaning": "安息香酸/ベンズアルデヒド",
+    "answerType": "物質名/物質名",
     "difficulty": "2;2"
   },
   {
@@ -1593,6 +1820,7 @@
     "subcategory": "0",
     "word": "ベンゼン環のH原子がヒドロキシ基-OHで置換された化合物を(　)という。",
     "meaning": "フェノール類",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1600,6 +1828,7 @@
     "subcategory": "0",
     "word": "smiles:c1ccccc1O: この構造式で表される(　)は常温で(　)で FeCl₃aq と反応して(　)を示す。",
     "meaning": "フェノール/c:固体:液体:気体:固体/m:紫:紫色",
+    "answerType": "物質名/選択肢/色",
     "difficulty": "1;1;1"
   },
   {
@@ -1607,6 +1836,7 @@
     "subcategory": "0",
     "word": "smiles:Cc1c(O)cccc1:この構造式で表される(　)は常温で(　)で FeCl₃aq と反応して(　)を示す。",
     "meaning": "o-クレゾール/c:固体:液体:気体:固体/m:青:青色",
+    "answerType": "物質名/選択肢/色",
     "difficulty": "1;1;1"
   },
   {
@@ -1614,6 +1844,7 @@
     "subcategory": "0",
     "word": "smiles:Cc1cc(O)ccc1:この構造式で表される(　)は常温で(　)で FeCl₃aq と反応して(　)を示す。",
     "meaning": "m-クレゾール/c:固体:液体:気体:液体/m:青:青色",
+    "answerType": "物質名/選択肢/色",
     "difficulty": "1;1;1"
   },
   {
@@ -1621,6 +1852,7 @@
     "subcategory": "0",
     "word": "smiles:Cc1ccc(O)cc1:この構造式で表される(　)は常温で(　)で FeCl₃aq と反応して(　)を示す。",
     "meaning": "p-クレゾール/c:固体:液体:気体:固体/m:青:青色",
+    "answerType": "物質名/選択肢/色",
     "difficulty": "1;1;1"
   },
   {
@@ -1628,6 +1860,7 @@
     "subcategory": "0",
     "word": "smiles:c1c2c(O)cccc2ccc1:この構造式で表される(　)は常温で(　)で FeCl₃aq と反応して(　)を示す。",
     "meaning": "1-ナフトール/c:固体:液体:気体:固体/m:紫:紫色",
+    "answerType": "物質名/選択肢/色",
     "difficulty": "1;1;1"
   },
   {
@@ -1635,6 +1868,7 @@
     "subcategory": "0",
     "word": "smiles:c1c2cc(O)ccc2ccc1:この構造式で表される(　)は常温で(　)で FeCl₃aq と反応して(　)を示す。",
     "meaning": "2-ナフトール/c:固体:液体:気体:固体/m:緑:緑色",
+    "answerType": "物質名/選択肢/色",
     "difficulty": "1;1;1"
   },
   {
@@ -1642,6 +1876,7 @@
     "subcategory": "0",
     "word": "smiles:O=C(O)c1ccccc1O:この構造式で表される(　)は常温で(　)で FeCl₃aq と反応して(　)を示す。",
     "meaning": "サリチル酸/c:固体:液体:気体:液体/m:赤紫:赤紫色",
+    "answerType": "物質名/選択肢/色",
     "difficulty": "1;1;1"
   },
   {
@@ -1649,6 +1884,7 @@
     "subcategory": "0",
     "word": "フェノール類はアルコールと同様にナトリウムと反応して( 化学式 )を発生する。また、酸無水物やカルボン酸と反応し(　)をつくる。",
     "meaning": "H2/エステル",
+    "answerType": "化学式/用語",
     "difficulty": "1;1"
   },
   {
@@ -1656,6 +1892,7 @@
     "subcategory": "0",
     "word": "smiles:c1ccccc1[O-][Na+]:フェノールはナトリウムと反応し(　)となる。",
     "meaning": "ナトリウムフェノキシド",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1663,6 +1900,7 @@
     "subcategory": "0",
     "word": "フェノール類はアルコールと異なり塩化鉄(Ⅲ)aqと(　)を起こし、特有の色を示す。",
     "meaning": "呈色反応",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1670,6 +1908,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(O)C1=CC=CC=C1:この構造式で表され、分子式 C₇H₇O₂ を(　)という。",
     "meaning": "安息香酸",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1677,6 +1916,7 @@
     "subcategory": "1",
     "word": "smiles:OC(=O)C1=C(C(=O)O)C=CC=C1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
     "meaning": "フタル酸",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1684,6 +1924,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(O)C1=CC=CC(C(=O)O)=C1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
     "meaning": "イソフタル酸",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1691,6 +1932,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(O)C1=CC=C(C(=O)O)C=C1:この構造式で表され、分子式 C₈H₈O₄ を(　)という。",
     "meaning": "テレフタル酸",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1698,6 +1940,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(O)C1=CC=CC=C1O:この構造式で表され、分子式 C₇H₈O₃ を(　)という。",
     "meaning": "サリチル酸",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1705,6 +1948,7 @@
     "subcategory": "1",
     "word": "芳香族カルボン酸は、(　)を示し水に(　)。しかし、(　)や(　)と反応して塩をつくると水に(　)なる。",
     "meaning": "c:強酸性:強塩基性:弱酸性:弱塩基性:弱酸性/c:よく溶ける:溶けにくい:溶けない:溶けにくい/r:1:炭酸水素ナトリウム:水酸化ナトリウム/r1/c:溶けやすく:溶けにくく:溶けなく:溶けやすく",
+    "answerType": "選択肢/選択肢/物質名/物質名/選択肢",
     "difficulty": "2;2;2;2;2"
   },
   {
@@ -1712,6 +1956,7 @@
     "subcategory": "1",
     "word": "smiles:O=C([O-][Na+])c1ccccc1:安息香酸に炭酸水素ナトリウムや水酸化ナトリウムを加えると(　)になる。",
     "meaning": "安息香酸ナトリウム",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -1719,6 +1964,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(O)C1=CC=CC=C1:この構造式で表される(　)は(　)の酸化で得られる。",
     "meaning": "安息香酸/トルエン",
+    "answerType": "物質名/物質名",
     "difficulty": "1;2"
   },
   {
@@ -1726,6 +1972,7 @@
     "subcategory": "1",
     "word": "smiles:OC(=O)C1=C(C(=O)O)C=CC=C1:この構造式で表される(　)は(　)の酸化で得られる。",
     "meaning": "フタル酸/o-キシレン",
+    "answerType": "物質名/物質名",
     "difficulty": "1;2"
   },
   {
@@ -1733,6 +1980,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(O)C1=CC=C(C(=O)O)C=C1:この構造式で表される(　)は(　)の酸化で得られる。",
     "meaning": "テレフタル酸/p-キシレン",
+    "answerType": "物質名/物質名",
     "difficulty": "1;2"
   },
   {
@@ -1740,6 +1988,7 @@
     "subcategory": "1",
     "word": "smiles:O=C1OC(=O)c2ccccc12:フタル酸は2個のカルボキシ基が近いので加熱すると分子内脱水が起こり(　)になる。ただし、2個のカルボキシ基がm-やp-位置ではこの反応は起こらない。",
     "meaning": "無水フタル酸",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -1747,6 +1996,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(O)C1=CC=CC=C1O:この構造式で表される(　)はナトリウムフェノキシドを高温・高圧で( 化学式 )と反応させた後、希硫酸を作用させて作る。",
     "meaning": "サリチル酸/CO2",
+    "answerType": "物質名/化学式",
     "difficulty": "1;2"
   },
   {
@@ -1754,6 +2004,7 @@
     "subcategory": "1",
     "word": "smiles:O=C(OC)C1=CC=CC=C1O:サリチル酸にメタノールと濃硫酸を作用させる((　)する)と、(　)に使われる(　)ができる。",
     "meaning": "エステル化/m:鎮痛消炎剤:消炎塗布剤:湿布薬/m:サリチル酸メチル:サロメチール",
+    "answerType": "用語/用語/物質名",
     "difficulty": "1;2"
   },
   {
@@ -1761,6 +2012,7 @@
     "subcategory": "1",
     "word": "smiles:CC(=O)OC1=CC=CC=C1C(=O)O:サリチル酸に無水酢酸を作用させる((　)する)と、(　)に使われる(　)ができる。",
     "meaning": "アセチル化/解熱鎮痛剤/アセチルサリチル酸",
+    "answerType": "用語/用語/物質名",
     "difficulty": "2;2"
   },
   {
@@ -1768,6 +2020,7 @@
     "subcategory": "0",
     "word": "smiles:[N+](=O)([O-])C1=CC=CC=C1:この構造式で表される(　)ようにベンゼン環のH原子が(　) -NO₂ で置換された化合物を(　)という。",
     "meaning": "ニトロベンゼン/ニトロ基/芳香族ニトロ化合物",
+    "answerType": "物質名/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -1775,6 +2028,7 @@
     "subcategory": "0",
     "word": "芳香族ニトロ化合物は(　)色(　)の(　)で水に(　)。",
     "meaning": "淡黄/油状/c:固体:液体:気体:液体/c:よく溶ける:溶けにくい:溶けない:溶けにくい",
+    "answerType": "色/用語/選択肢/選択肢",
     "difficulty": "2;2;2;2"
   },
   {
@@ -1782,6 +2036,7 @@
     "subcategory": "1",
     "word": "smiles:Nc1ccccc1:この構造式で表される(　)は(　)をスズまたは鉄と塩酸で(　)して作る。",
     "meaning": "アニリン/ニトロベンゼン/c:酸化:還元:還元",
+    "answerType": "物質名/物質名/選択肢",
     "difficulty": "1;2;2"
   },
   {
@@ -1789,6 +2044,7 @@
     "subcategory": "1",
     "word": "smiles:Nc1ccccc1:アンモニアのH原子を炭化水素基で置換した化合物を(　)といい、特にこの構造式で表される(　)のように芳香族の基を持つものを(　)という。",
     "meaning": "アミン/アニリン/芳香族アミン",
+    "answerType": "用語/物質名/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -1796,6 +2052,7 @@
     "subcategory": "1",
     "word": "アミンは(　)を示し芳香族アミンは水に(　)が、塩酸と反応して塩をつくると(　)なる。",
     "meaning": "c:強酸性:強塩基性:弱酸性:弱塩基性:弱塩基性/c:溶けやすい:溶けにくい:溶けない:溶けにくい/c:溶けやすく:溶けにくく:溶けなく:溶けやすく",
+    "answerType": "選択肢/選択肢/選択肢",
     "difficulty": "1;2;2"
   },
   {
@@ -1803,6 +2060,7 @@
     "subcategory": "1",
     "word": "アニリンは水に(　)が、アニリン塩酸塩は水に(　)。",
     "meaning": "c:溶けやすい:溶けにくい:溶けない:溶けにくい/c:溶けやすい:溶けにくい:溶けない:溶けやすい",
+    "answerType": "選択肢/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -1810,6 +2068,7 @@
     "subcategory": "1",
     "word": "smiles:CC(=O)Nc1ccccc1:アニリンに無水酢酸を作用させると(　)が起こり、(　)を失いアミド結合を持つ(　)かできる。",
     "meaning": "アセチル化/塩基性/アセトアニリド",
+    "answerType": "用語/用語/物質名",
     "difficulty": "2;2;2"
   },
   {
@@ -1817,6 +2076,7 @@
     "subcategory": "1",
     "word": "smiles:CC(=O)Nc1ccccc1:アセトアニリドは(　)色(　)臭の結晶で、(　)を持つ(　)である。",
     "meaning": "無/無/アミド結合/アミン",
+    "answerType": "色/色/用語/用語",
     "difficulty": "1;1;1;1"
   },
   {
@@ -1824,6 +2084,7 @@
     "subcategory": "1",
     "word": "アニリンは(　)色の(　)だが、空気中で徐々に酸化されると(　)色に、さらし粉水溶液で酸化すると(　)色に、硫酸酸性のニクロム酸カリウム水溶液で酸化すると(　)色の(　)になる。",
     "meaning": "無/c:固体:液体:気体:液体/褐/赤紫/黒/アニリンブラック",
+    "answerType": "色/選択肢/色/色/色/物質名",
     "difficulty": "2;1;2;2"
   },
   {
@@ -1831,6 +2092,7 @@
     "subcategory": "0",
     "word": "一般に分子量が一万をこえるような巨大な分子を(　)といい、その化合物を(　)という。",
     "meaning": "高分子/高分子化合物",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -1838,6 +2100,7 @@
     "subcategory": "0",
     "word": "高分子化合物には炭素を骨格とした(　)とリンやケイ素、酸素を骨格とした(　)に分類される。",
     "meaning": "有機高分子化合物/無機高分子化合物",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -1845,6 +2108,7 @@
     "subcategory": "0",
     "word": "高分子化合物のうち、デンプンやタンパク質などの自然界に存在するものを(　)、ポリエチレンやポリエステルなど石油などから人工的に合成したものを(　)という。",
     "meaning": "天然高分子化合物/合成高分子化合物",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -1852,6 +2116,7 @@
     "subcategory": "0",
     "word": "高分子1分子を構成する繰り返しの単位の数を(　)といい、記号nで表す。",
     "meaning": "重合度",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -1859,6 +2124,7 @@
     "subcategory": "0",
     "word": "高分子化合物では、分子量にばらつきが出るので(　)を用いて表す。",
     "meaning": "平均分子量",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -1866,6 +2132,7 @@
     "subcategory": "0",
     "word": "高分子化合物は一定の融点を示さず、徐々に柔らかくなる温度(　)をもつ。また、分子間力の(　)部分から軟化する。",
     "meaning": "軟化点/c:強い:弱い:弱い",
+    "answerType": "用語/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -1873,6 +2140,7 @@
     "subcategory": "0",
     "word": "高分子化合物の平均分子量を求めるには、(　)や(　)による測定をする。",
     "meaning": "r:1:浸透圧:粘度計/r1",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -1880,6 +2148,7 @@
     "subcategory": "0",
     "word": "一般式Cm(H2O)nで表されるグルコースやデンプン、セルロースなどの化合物を(　)という。",
     "meaning": "糖類",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1887,6 +2156,7 @@
     "subcategory": "0",
     "word": "グルコースなどの酸を加えて加熱してもこれ以上加水分解されない糖類を(　)といい、それら二つが(　)してできるものを(　)、多数が(　)してできるものを(　)という。",
     "meaning": "m:単糖類:単糖/脱水縮合/m:二糖類:二糖/縮合重合/m:多糖類:多糖",
+    "answerType": "用語/用語/用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -1894,6 +2164,7 @@
     "subcategory": "1",
     "word": "smiles:C([C@@H]1[C@H]([C@@H]([C@H]([C@H](O1)O)O)O)O)O:この構造式で表される化合物を(　)といい、これは立体異性体を持つ。HとOHが同じ側のものを(　)、反対側のものを(　)という。",
     "meaning": "グルコース/a-グルコース/b-グルコース",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "1;1;1"
   },
   {
@@ -1901,6 +2172,7 @@
     "subcategory": "1",
     "word": "smiles:OC(=O)C(O)C(O)C(O)C(O)CO:グルコースは水に溶けると少量だが鎖状構造もとるため水溶液中ではa-、b-含めた三種類の異性体が平衡状態にあり、鎖状構造は -CHO(　)を持つため水溶液は還元性を(　)。",
     "meaning": "アルデヒド基/c:示す:示さない:示す",
+    "answerType": "用語/選択肢",
     "difficulty": "1;1"
   },
   {
@@ -1908,6 +2180,7 @@
     "subcategory": "1",
     "word": "smiles:*OC(O)*:このような -OCH(OH)- で表される構造を(　)といい、C-O結合が切れてアルデヒド基になるのでこれをもつ化合物は還元性を(　)",
     "meaning": "ヘミアセタール構造/c:示す:示さない:示す",
+    "answerType": "用語/選択肢",
     "difficulty": "1;1"
   },
   {
@@ -1915,6 +2188,7 @@
     "subcategory": "1",
     "word": "グルコースは結晶中で6つの原子が環状に繋がった(　)をとる。",
     "meaning": "六員環構造",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -1922,6 +2196,7 @@
     "subcategory": "1",
     "word": "smiles:O[C@H]1[C@H](O)[C@H](O[C@]1(O)CO)CO:この構造式で表される化合物を(　)という。",
     "meaning": "フルクトース",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -1929,6 +2204,7 @@
     "subcategory": "1",
     "word": "フルクトースは結晶中では(　)構造をとり、水溶液中では鎖状構造や(　)構造もとる。",
     "meaning": "六員環/五員環",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -1936,6 +2212,7 @@
     "subcategory": "1",
     "word": "smiles:*C(=O)CO:フルクトースは鎖状構造のケトン基を含むこの部分が酸化されやすく、水溶液は還元性を(　)。",
     "meaning": "c:示す:示さない:示す",
+    "answerType": "選択肢",
     "difficulty": "1"
   },
   {
@@ -1943,6 +2220,7 @@
     "subcategory": "1",
     "word": "グルコースやフルクトースなどの単糖類は酵母菌のもつ(　)の働きによる(　)で(　)と二酸化炭素になる。",
     "meaning": "チアーゼ/m:アルコール発酵:酒精発酵/エタノール",
+    "answerType": "物質名/用語/物質名",
     "difficulty": "3;3;2"
   },
   {
@@ -1950,6 +2228,7 @@
     "subcategory": "1",
     "word": "smiles:O[C@H]1[C@@H](O)[C@H](O[C@H](O)[C@@H]1O)CO:この構造式で表される化合物を(　)という。",
     "meaning": "ガラクトース",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -1957,6 +2236,7 @@
     "subcategory": "1",
     "word": "ガラクトースは α型 β型があり、水溶液は還元性を(　)。",
     "meaning": "c:示す:示さない:示す",
+    "answerType": "選択肢",
     "difficulty": "2"
   },
   {
@@ -1964,6 +2244,7 @@
     "subcategory": "1",
     "word": "単糖類のうちCを６個持つ(　)とCを５個持つ(　)がある。",
     "meaning": "m:ヘキソース:六炭糖/m:ペントース:五炭糖",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -1971,6 +2252,7 @@
     "subcategory": "1",
     "word": "単糖類のうちグルコースのようにアルデヒド基を持つものを(　)、フルクトースのようにカルボニル基を持つものを(　)という。",
     "meaning": "アルドース/ケトース",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -1978,6 +2260,7 @@
     "subcategory": "1",
     "word": "六員環構造を持つものを(　)型、五員環構造を持つものを(　)型という。",
     "meaning": "ピラノース/フラノース",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -1985,6 +2268,7 @@
     "subcategory": "1",
     "word": "smiles:C([C@@H]1[C@H]([C@@H]([C@@H](C(O1)O)O)O)O)O:このような構造式で表される化合物を(　)といい、マンナンやグルコマンナンの加水分解で得られる。",
     "meaning": "マンノース",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -1992,6 +2276,7 @@
     "subcategory": "1",
     "word": "キシロースから作られるキシリトールなどの自然界に少ししか存在しない単糖類とその誘導体を(　)という。",
     "meaning": "希少糖",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -1999,6 +2284,7 @@
     "subcategory": "1",
     "word": "smiles:OC[C@@H](O)[C@H](O)[C@@H](O)CO:この構造式で表される化合物を(　)といい、スクロースと同程度の甘味があるが低カロリーである。また、水に溶かすと(　)するため、口に含むと清涼感がある。",
     "meaning": "キシリトール/c:発熱:吸熱:吸熱",
+    "answerType": "物質名/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -2006,6 +2292,7 @@
     "subcategory": "2",
     "word": "二糖類は2個の単糖類分子が脱水縮合した構造(　)をもち、加水分解すると2個の単糖類分子が生じる。",
     "meaning": "グリコシド結合",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2013,6 +2300,7 @@
     "subcategory": "2",
     "word": "smiles:O1[C@H](CO)[C@@H](O)[C@H](O)[C@@H](O)[C@H]1O[C@@]2(O[C@@H]([C@@H](O)[C@@H]2O)CO)CO:この構造式で表される化合物を(　)という。",
     "meaning": "スクロース",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -2020,6 +2308,7 @@
     "subcategory": "2",
     "word": "スクロースは(　)という酵素で加水分解すると(　)と(　)が生成する。",
     "meaning": "m:スクラーゼ:インベルターゼ/r:1:a-グルコース:フルクトース/r1",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "1;1;1"
   },
   {
@@ -2027,6 +2316,7 @@
     "subcategory": "2",
     "word": "スクロースを加水分解することを(　)といい、これによって生成するa-グルコースとフルクトースの混合物を(　)という。また、それは還元性を(　)。",
     "meaning": "転化/転化糖/c:示す:示さない:示す",
+    "answerType": "用語/物質名/選択肢",
     "difficulty": "2;2;1"
   },
   {
@@ -2034,6 +2324,7 @@
     "subcategory": "2",
     "word": "スクロースはa-グルコースの¹Cとフルクトースの²Cそれぞれの-OHが脱水縮合した構造(　)で、(　)がないので還元性を(　)。",
     "meaning": "a-1-b-2-グリコシド結合/ヘミアセタール構造/c:示す:示さない:示さない",
+    "answerType": "用語/用語/選択肢",
     "difficulty": "2;1;1"
   },
   {
@@ -2041,6 +2332,7 @@
     "subcategory": "2",
     "word": "smiles:O([C@H]1[C@H](O)[C@@H](O)C(O)O[C@@H]1CO)[C@H]2O[C@@H]([C@@H](O)[C@H](O)[C@H]2O)CO:この構造式で表される化合物を(　)という。",
     "meaning": "マルトース",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -2048,6 +2340,7 @@
     "subcategory": "2",
     "word": "マルトースは(　)という酵素で加水分解すると２つの(　)を生じる。",
     "meaning": "マルターゼ/a-グルコース",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2055,6 +2348,7 @@
     "subcategory": "2",
     "word": "マルトースはa-グルコース２分子が¹Cと⁴Cの -OH の間で脱水縮合した構造(　)で、(　)が残っているため還元性を(　)。",
     "meaning": "a-1.4-グリコシド結合/ヘミアセタール構造/c:示す:示さない:示す",
+    "answerType": "用語/用語/選択肢",
     "difficulty": "2;1;1"
   },
   {
@@ -2062,6 +2356,7 @@
     "subcategory": "2",
     "word": "smiles:OC[C@H]1O[C@@H](O[C@H]2[C@H](O)[C@@H](O)[C@@H](O)O[C@@H]2CO)[C@H](O)[C@@H](O)[C@@H]1O:この構造式で表される化合物を(　)という。",
     "meaning": "セロビオース",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -2069,6 +2364,7 @@
     "subcategory": "2",
     "word": "セロビオースは(　)という酵素で加水分解すると２つの(　)を生じる。",
     "meaning": "セロビアーゼ/b-グルコース",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2076,6 +2372,7 @@
     "subcategory": "2",
     "word": "セロビオースはβ-グルコース２分子が¹Cと⁴Cの -OH の間で脱水縮合した構造(　)で、(　)が残っているので還元性を(　)。",
     "meaning": "b-1.4-グリコシド結合/ヘミアセタール構造/c:示す:示さない:示す",
+    "answerType": "用語/用語/選択肢",
     "difficulty": "2;1;1"
   },
   {
@@ -2083,6 +2380,7 @@
     "subcategory": "2",
     "word": "smiles:OC[C@H]1O[C@@H](O[C@H]2[C@H](O)[C@@H](O)C(O)O[C@@H]2CO)[C@H](O)[C@@H](O)[C@H]1O:この構造式で表される化合物を(　)という。",
     "meaning": "ラクトース",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -2090,6 +2388,7 @@
     "subcategory": "2",
     "word": "ラクトースは(　)という酵素で加水分解すると(　)と(　)を生じる。",
     "meaning": "ラクターゼ/r:1:ガラクトース:グルコース/r1",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "1;1;1"
   },
   {
@@ -2097,6 +2396,7 @@
     "subcategory": "2",
     "word": "ラクトースはβ-ガラクトースとグルコースの¹Cと⁴Cの -OH の間で脱水縮合した構造(　)で、(　)が残っているので還元性を(　)。",
     "meaning": "b-1.4-グリコシド結合/ヘミアセタール構造/c:示す:示さない:示す",
+    "answerType": "用語/用語/選択肢",
     "difficulty": "2;1;1"
   },
   {
@@ -2104,6 +2404,7 @@
     "subcategory": "2",
     "word": "smiles:OC[C@@H]1[C@@H](O)[C@H](O)[C@@H](O)[C@H](O1)O[C@@H]2[C@H](O)[C@@H](O)[C@H](O)[C@H](O2)CO:この構造式で表される化合物を(　)という。",
     "meaning": "トレハロース",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2111,6 +2412,7 @@
     "subcategory": "2",
     "word": "トレハロースは(　)という酵素で加水分解すると２つの(　)を生じる。",
     "meaning": "トレハラーゼ/a-グルコース",
+    "answerType": "物質名/物質名",
     "difficulty": "2;2"
   },
   {
@@ -2118,6 +2420,7 @@
     "subcategory": "2",
     "word": "トレハロースはα-グルコース２分子がそれぞれの¹Cの -OH の間で脱水縮合した構造(　)で、(　)がないので還元性を(　)。",
     "meaning": "a-1.1-グリコシド結合/ヘミアセタール構造/c:示す:示さない:示さない",
+    "answerType": "用語/用語/選択肢",
     "difficulty": "2;2;2"
   },
   {
@@ -2125,6 +2428,7 @@
     "subcategory": "3",
     "word": "デンプンは(　)が縮合重合した高分子化合物で、直鎖状の(　)と枝分かれのある(　)からなる。",
     "meaning": "a-グルコース/アミロース/アミロペクチン",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "1;1;1"
   },
   {
@@ -2132,6 +2436,7 @@
     "subcategory": "3",
     "word": "デンプンは80℃以上の水に浸しておくと可溶成分で比較的分子量が小さい(　)と不溶成分で比較的分子量が大きい(　)に分けられる。",
     "meaning": "アミロース/アミロペクチン",
+    "answerType": "物質名/物質名",
     "difficulty": "3;3"
   },
   {
@@ -2139,6 +2444,7 @@
     "subcategory": "3",
     "word": "デンプンを加水分解すると最終的には(　)になるが、その途中のさまざまな糖類の混合物を(　)という。",
     "meaning": "マルトース/デキストリン",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2146,6 +2452,7 @@
     "subcategory": "3",
     "word": "デキストリンはデンプンより水に(　)。",
     "meaning": "c:溶けやすい:溶けにくい:溶けやすい",
+    "answerType": "選択肢",
     "difficulty": "2"
   },
   {
@@ -2153,6 +2460,7 @@
     "subcategory": "3",
     "word": "デンプンに希酸を加えて加熱すると徐々に加水分解されて(　)になる。",
     "meaning": "グルコース",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -2160,6 +2468,7 @@
     "subcategory": "3",
     "word": "デンプンは還元性を(　)、ヨウ素と反応して(　)～青紫色になる(　)を起こす。これはI₂がデンプン分子に入り込むからである。",
     "meaning": "c:示し:示さず:示さず/m:青:青色/ヨウ素デンプン反応",
+    "answerType": "選択肢/色/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -2167,6 +2476,7 @@
     "subcategory": "3",
     "word": "グリコーゲンは(　)が縮合重合した高分子化合物で、アミロペクチンより枝分かれが(　)。",
     "meaning": "a-グルコース/c:多い:少ない:多い",
+    "answerType": "物質名/選択肢",
     "difficulty": "1;1"
   },
   {
@@ -2174,6 +2484,7 @@
     "subcategory": "3",
     "word": "グリコーゲンは還元性を(　)、ヨウ素と反応して(　)色を呈する",
     "meaning": "c:示し:示さず:示さず/褐",
+    "answerType": "選択肢/色",
     "difficulty": "1;1"
   },
   {
@@ -2181,6 +2492,7 @@
     "subcategory": "3",
     "word": "セルロースは(　)が直鎖状に縮合重合した高分子化合物で、ヨウ素と(　)。",
     "meaning": "b-グルコース/c:反応する:反応しない:反応しない",
+    "answerType": "物質名/選択肢",
     "difficulty": "1;1"
   },
   {
@@ -2188,6 +2500,7 @@
     "subcategory": "3",
     "word": "セルロースは(　)という酵素で加水分解すると(　)になる。",
     "meaning": "セルラーゼ/セロビオース",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2195,6 +2508,7 @@
     "subcategory": "3",
     "word": "セルロースは還元性を(　)、ヨウ素と反応しない。",
     "meaning": "c:示し:示さず:示さず",
+    "answerType": "選択肢",
     "difficulty": "1"
   },
   {
@@ -2202,6 +2516,7 @@
     "subcategory": "3",
     "word": "セルロースは多くの溶媒に(　)が、シュワイツァー試薬などのテトラアンミン銅(Ⅱ)イオンを含む溶液には(　)。",
     "meaning": "c:溶ける:溶けない:溶けない/c:溶ける:溶けない:溶ける",
+    "answerType": "選択肢/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -2209,6 +2524,7 @@
     "subcategory": "3",
     "word": "セルロースに希酸を加えて長時間加熱すると徐々に加水分解されて(　)になる。",
     "meaning": "グルコース",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -2216,6 +2532,7 @@
     "subcategory": "3",
     "word": "セルロースの再生繊維は(　)と呼ばれる。",
     "meaning": "レーヨン",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2223,6 +2540,7 @@
     "subcategory": "3",
     "word": "セルロースの -OH を無水酢酸で(　)して -OCOCH₃ にすると溶媒に溶解しにくい(　)になる。",
     "meaning": "アセチル化/トリアセチルセルロース",
+    "answerType": "用語/物質名",
     "difficulty": "2;2"
   },
   {
@@ -2230,6 +2548,7 @@
     "subcategory": "3",
     "word": "トリアセチルセルロースを加水分解してジアセチルセルロースとするとアセトンに溶けるようになり、アセトンに溶解して細孔から温かい空気中に押し出し、熱風で溶媒を蒸発させると(　)ができる。",
     "meaning": "アセテート",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2237,6 +2556,7 @@
     "subcategory": "3",
     "word": "ニトロセルロースは、(　)を濃硝酸と濃硫酸の混合物である(　)で(　)して -ONI₂ にしたもので、火薬として用いられる",
     "meaning": "セルロース/混酸/エステル化",
+    "answerType": "物質名/物質名/用語",
     "difficulty": "2;2;2"
   },
   {
@@ -2244,6 +2564,7 @@
     "subcategory": "3",
     "word": "水酸化銅(Ⅱ)に濃アンモニア水を加えた(　)にセルロースを溶解すると粘性のあるコロイド溶液になる。この溶液を(　)中で細孔から押し出すとセルロースが再生し、(　)になる。",
     "meaning": "シュワイツァー試薬/希硫酸/m:銅アンモニアレーヨン:キュプラ",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "2;2;2;2"
   },
   {
@@ -2251,6 +2572,7 @@
     "subcategory": "3",
     "word": "セルロースを濃NaOHaqで処理し、二硫化炭素CS₂と反応させてから薄いNaOHaqに溶かしたものを(　)といい、これは(　)色のコロイド溶液である。",
     "meaning": "ビスコース/赤褐",
+    "answerType": "物質名/色",
     "difficulty": "2;2"
   },
   {
@@ -2258,6 +2580,7 @@
     "subcategory": "3",
     "word": "ビスコースを(　)中で細孔から押し出すとセルロースが再生し、(　)になる。また、これを膜にしたものが(　)である。",
     "meaning": "希硫酸/ビスコースレーヨン/セロハン",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "2;2;2"
   },
   {
@@ -2265,6 +2588,7 @@
     "subcategory": "3",
     "word": "銅アンモニアレーヨンやビスコースレーヨンをまとめて(　)と呼ぶ。",
     "meaning": "再生繊維",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2272,6 +2596,7 @@
     "subcategory": "0",
     "word": "(　)-NH₂ と(　)-COOH をあわせ持つ化合物を(　)という。",
     "meaning": "アミノ基/カルボキシ基/アミノ酸",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -2279,6 +2604,7 @@
     "subcategory": "0",
     "word": "アミノ酸のなかでも同一の炭素原子にアミノ基とカルボキシ基がどちらもついているものを特に(　)といい、カルボキシ基が結合している炭素原子の隣の炭素原子にアミノ基がついているものを(　)という。",
     "meaning": "a-アミノ酸/b-アミノ酸",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
@@ -2286,6 +2612,7 @@
     "subcategory": "0",
     "word": "smiles:C(C(=O)O)N:この構造式で表され、Rに -H を持つアミノ酸を(　)といい、等電点は(　)である。また、このアミノ酸には(　)がない。",
     "meaning": "グリシン/6.0/m:鏡像異性体:光学異性体:不斉炭素原子",
+    "answerType": "物質名/数/用語",
     "difficulty": "2;3;2"
   },
   {
@@ -2293,6 +2620,7 @@
     "subcategory": "0",
     "word": "smiles:C[C@H](N)C(=O)O:この構造式で表され、Rに -CH₃ を持つアミノ酸を(　)といい、等電点は(　)である。",
     "meaning": "アラニン/6.0",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2300,6 +2628,7 @@
     "subcategory": "0",
     "word": "smiles:c1ccc(cc1)C[C@@H](C(=O)O)N:この構造式で表され、Rに -CH₂-⌬ を持つアミノ酸を(　)といい、等電点は(　)である。",
     "meaning": "フェニルアラニン/5.5",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2307,6 +2636,7 @@
     "subcategory": "0",
     "word": "smiles:N[C@@H](Cc1ccc(O)cc1)C(O)=O:この構造式で表され、Rに -CH₂-⌬-OH を持つアミノ酸を(　)といい、等電点は(　)である。",
     "meaning": "チロシン/5.7",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2314,6 +2644,7 @@
     "subcategory": "0",
     "word": "smiles:C([C@@H](C(=O)O)N)S:この構造式で表され、Rに -CH₂-SH を持つアミノ酸を(　)といい、等電点は(　)である。",
     "meaning": "システイン/5.1",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2321,6 +2652,7 @@
     "subcategory": "0",
     "word": "smiles:CSCC[C@H](N)C(=O)O:この構造式で表され、Rに -(CH₂)₂-S-CH₃ を持つアミノ酸を(　)といい、等電点は(　)である。",
     "meaning": "メチオニン/5.7",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2328,6 +2660,7 @@
     "subcategory": "0",
     "word": "smiles:C([C@@H](C(=O)O)N)O:この構造式で表され、Rに -CH₂-OH を持つアミノ酸を(　)といい、等電点は(　)である。",
     "meaning": "セリン/5.7",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2335,6 +2668,7 @@
     "subcategory": "0",
     "word": "smiles:C([C@@H](C(=O)O)N)C(=O)O:この構造式で表され、Rに -CH-COOH を持つアミノ酸を(　)といい、等電点は(　)である。",
     "meaning": "アスパラギン酸/2.8",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2342,6 +2676,7 @@
     "subcategory": "0",
     "word": "smiles:C(CC(=O)O)[C@@H](C(=O)O)N:この構造式で表され、Rに -(CH₂)₂-COOH を持つアミノ酸を(　)と言い、等電点は(　)である。",
     "meaning": "グルタミン酸/3.2",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2349,6 +2684,7 @@
     "subcategory": "0",
     "word": "smiles:C(CCN)CC(C(=O)O)N:この構造式で表され、Rに -(CH₂)₄-NH₂ を持つアミノ酸を(　)と言い、等電点は(　)である。",
     "meaning": "リシン/9.7",
+    "answerType": "物質名/数",
     "difficulty": "2;3"
   },
   {
@@ -2356,6 +2692,7 @@
     "subcategory": "0",
     "word": "アミノ酸の結晶は(　)結晶であり、他の有機化合物と比べて融点が(　)(融点より前で分解するものが多い)、有機溶媒より水に溶けやすいものもある。",
     "meaning": "イオン/c:高く:低く:高く",
+    "answerType": "用語/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -2363,6 +2700,7 @@
     "subcategory": "0",
     "word": "アミノ酸は分子内に酸性のカルボキシ基と塩基性のアミノ基を持つため、酸と塩基の性質を示し結晶中や水中では-COO⁻と-NH₃⁺が同一分子中に存在する。これを(　)という。",
     "meaning": "双性イオン",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -2370,6 +2708,7 @@
     "subcategory": "0",
     "word": "アミノ酸の水溶液では(　)・(　)・(　)が平衡状態であり、酸や塩基を加えると組成が変わり平衡が移動する。全体の電化が0になる点を(　)といい、この時全ての分子が(　)になっている。",
     "meaning": "r:1:陽イオン:双性イオン:陰イオン/r1/r1/等電点/双性イオン",
+    "answerType": "用語/用語/用語/用語/用語",
     "difficulty": "1;1;1;1;1"
   },
   {
@@ -2377,6 +2716,7 @@
     "subcategory": "0",
     "word": "アミノ酸にニンヒドリンの水溶液を加えて加熱すると、(　)色になる。この反応を(　)という。",
     "meaning": "赤紫/ニンヒドリン反応",
+    "answerType": "色/用語",
     "difficulty": "1;1"
   },
   {
@@ -2384,6 +2724,7 @@
     "subcategory": "0",
     "word": "(　)は、アミノ酸の検出に用いられる。",
     "meaning": "ニンヒドリン",
+    "answerType": "物質名",
     "difficulty": "1"
   },
   {
@@ -2391,6 +2732,7 @@
     "subcategory": "0",
     "word": "アミノ酸の水溶液は等電点よりpHが小さいと陽イオンになるため(　)に、pHが大きいと陰イオンになるため(　)に移動する。よって適当なpHのもとではアミノ酸を分離できる。",
     "meaning": "陰極側/陽極側",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -2398,6 +2740,7 @@
     "subcategory": "0",
     "word": "アミノ酸のうち、-COOHと -NH₂の数が等しいものを(　)、-COOH が多いものを(　)、-NH₂ などが多いものを(　)という。",
     "meaning": "中性アミノ酸/酸性アミノ酸/塩基性アミノ酸",
+    "answerType": "用語/用語/用語",
     "difficulty": "3;3;3"
   },
   {
@@ -2405,6 +2748,7 @@
     "subcategory": "1",
     "word": "a-アミノ酸がカルボキシ基 -COOH とアミノ基 -NH₂ で脱水縮合した結合 -CO-NO- を(　)といい、これは(　)の一種である。。",
     "meaning": "ペプチド結合/アミド結合",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -2412,6 +2756,7 @@
     "subcategory": "1",
     "word": "ペプチド結合を持つ物質を(　)といい、2分子のアミノ酸が脱水縮合したものを(　)、3分子のアミノ酸が脱水縮合したものを(　)、多数のアミノ酸が縮合したものを(　)という。",
     "meaning": "ペプチド/ジペプチド/トリペプチド/ポリペプチド",
+    "answerType": "用語/用語/用語/用語",
     "difficulty": "2;2;2;2"
   },
   {
@@ -2419,6 +2764,7 @@
     "subcategory": "1",
     "word": "タンパク質を構成するアミノ酸の配列順序をタンパク質の(　)という。",
     "meaning": "一次構造",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2426,6 +2772,7 @@
     "subcategory": "1",
     "word": "タンパク質の一次構造を折り畳んで作られる部分的な立体構造をタンパク質の(　)といい、らせん構造の(　)やひだ状の構造の(　)がある。",
     "meaning": "二次構造/a-ヘリックス/b-シート",
+    "answerType": "用語/用語/用語",
     "difficulty": "2;3;3"
   },
   {
@@ -2433,6 +2780,7 @@
     "subcategory": "1",
     "word": "タンパク質の二次構造や構成アミノ酸中の官能基などによる(　)や(　)-S-S- 、電荷を持った基による(　)によりとる複雑な立体構造をタンパク質の(　)という。",
     "meaning": "水素結合/ジスルフィド結合/クーロン力/三次構造",
+    "answerType": "用語/用語/用語/用語",
     "difficulty": "2;2;2;2"
   },
   {
@@ -2440,6 +2788,7 @@
     "subcategory": "1",
     "word": "三次構造をとった複数のポリペプチド鎖が共有結合以外の結合で集まった立体構造をタンパク質の(　)という。",
     "meaning": "四次構造",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2447,6 +2796,7 @@
     "subcategory": "1",
     "word": "タンパク質にはポリペプチドだけで構成される(　)だけでなく、リン酸・核酸・色素・糖類・脂肪などが結合した(　)もある。",
     "meaning": "単純タンパク質/複合タンパク質",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
@@ -2454,6 +2804,7 @@
     "subcategory": "1",
     "word": "タンパク質はその形状から水に溶けやすい(　)と溶けにくい(　)に大別される。",
     "meaning": "球状タンパク質/繊維状タンパク質",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -2461,6 +2812,7 @@
     "subcategory": "1",
     "word": "タンパク質には、熱・酸・塩基・重金属イオン・アルコールなどにより凝固する性質、(　)がある。これによりタンパク質の立体構造が変化し、生理的な機能は(　)。これを(　)という。",
     "meaning": "変性/c:失われる:失われない:失われる/失活",
+    "answerType": "用語/選択肢/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -2468,6 +2820,7 @@
     "subcategory": "1",
     "word": "タンパク質に濃NaOHaqを加えて加熱するとアンモニアが発生する。これにより(　)を検出できる。",
     "meaning": "窒素",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2475,6 +2828,7 @@
     "subcategory": "1",
     "word": "タンパク質に濃NaOHaqを加えて加熱すると硫黄がイオンになり、さらに (CH₃COO)₂Pbaq をくわえると( 化学式 )の黒色沈澱が生じる。これにより(　)を検出できる。",
     "meaning": "PbS/硫黄",
+    "answerType": "化学式/物質名",
     "difficulty": "2;2"
   },
   {
@@ -2482,6 +2836,7 @@
     "subcategory": "1",
     "word": "タンパク質にNaOHaqを加えた後少量のCuSO₄aqを加えると(　)色になる反応を(　)といい、トリペプチド以上で反応がみられる。",
     "meaning": "赤紫/ビウレット反応",
+    "answerType": "色/用語",
     "difficulty": "1;1"
   },
   {
@@ -2489,6 +2844,7 @@
     "subcategory": "1",
     "word": "ビウレット反応は( 化学式 )aqと少量の( 化学式 )aqを加えると起こり、ペプチド結合を(　)個以上持つもので起こる。原因はCu²⁺とペプチド結合の錯体形成である。",
     "meaning": "NaOH/CuSO₄/2",
+    "answerType": "化学式/化学式/数",
     "difficulty": "2;2;1"
   },
   {
@@ -2496,6 +2852,7 @@
     "subcategory": "1",
     "word": "タンパク質に濃HNO₃を加えて加熱すると(　)色になり、冷却後にNH₃aqなどを加えて塩基性にすると(　)色になる反応を(　)という。構成するアミノ酸が(　)を持つ場合にみられる。",
     "meaning": "黄/橙黄/キサントプロテイン反応/ベンゼン環",
+    "answerType": "色/色/用語/用語",
     "difficulty": "2;2;1;1"
   },
   {
@@ -2503,6 +2860,7 @@
     "subcategory": "1",
     "word": "キサントプロテイン反応は、タンパク質に濃( 化学式 )を加えて加熱すると黄色になり、その後に( 化学式 )にすると橙黄色になる反応。原因はベンゼン環のニトロ化である。",
     "meaning": "HNO₃/c:酸性:中性:塩基性:塩基性",
+    "answerType": "化学式/選択肢",
     "difficulty": "2;2"
   },
   {
@@ -2510,6 +2868,7 @@
     "subcategory": "0",
     "word": "繊維は(　)と(　)に分類できる。",
     "meaning": "r:1:天然繊維:化学繊維/r1",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -2517,6 +2876,7 @@
     "subcategory": "0",
     "word": "天然繊維には麻や木綿などの(　)があり、主成分は(　)である。",
     "meaning": "植物繊維/セルロース",
+    "answerType": "用語/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2524,6 +2884,7 @@
     "subcategory": "0",
     "word": "天然繊維には羊毛や絹などの(　)があり、主成分はケラチンなどの(　)である。",
     "meaning": "動物繊維/タンパク質",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -2531,6 +2892,7 @@
     "subcategory": "0",
     "word": "化学繊維にはレーヨンなどの(　)やアセテートなどの(　)、ポリアミドやポリエステルなどの(　)がある。",
     "meaning": "再生繊維/半合成繊維/合成繊維",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -2538,6 +2900,7 @@
     "subcategory": "0",
     "word": "再生繊維にはセルロースをシュワイツァー試薬に溶解して希硫酸中に押し出して再生した(　)や、セルロースを二硫化炭素と反応させてから水酸化ナトリウム水溶液に溶解後再生させた(　)などがある。",
     "meaning": "銅アンモニアレーヨン/ビスコースレーヨン",
+    "answerType": "物質名/物質名",
     "difficulty": "2;2"
   },
   {
@@ -2545,6 +2908,7 @@
     "subcategory": "0",
     "word": "半合成繊維にはセルロースの -OH をアセチル化して -OCOCH₃ に変えたあと部分的に加水分解してから繊維にした(　)などがある。",
     "meaning": "アセテート",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2552,6 +2916,7 @@
     "subcategory": "0",
     "word": "合成繊維にはポリ酢酸ビニルをけん化して(　)にしたあと、-OH のうち30~40%を(　)で処理(　)したビニロンなどがある。",
     "meaning": "ポリビニルアルコール/ホルムアルデヒド/アセタール化",
+    "answerType": "物質名/物質名/用語",
     "difficulty": "2;2;2"
   },
   {
@@ -2559,6 +2924,7 @@
     "subcategory": "1",
     "word": "酵素は生体内の化学反応を速く進める(　)の役割をする物質である。",
     "meaning": "触媒",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -2566,6 +2932,7 @@
     "subcategory": "1",
     "word": "酵素の主体は(　)であり、無機触媒にはない特徴を持つ。",
     "meaning": "タンパク質",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -2573,6 +2940,7 @@
     "subcategory": "1",
     "word": "酵素には特定の物質(　)にしか反応しない(　)がある。酵素の反応を起こす部分の構造を(　)といい、基質と酵素の関係は鍵と鍵穴に例えられる。",
     "meaning": "基質/基質特異性/活性部位",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;2"
   },
   {
@@ -2580,6 +2948,7 @@
     "subcategory": "1",
     "word": "酵素には最もよく働く温度領域である(　)と最もよく働くpH領域である(　)がある。",
     "meaning": "最適温度/最適pH",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -2587,6 +2956,7 @@
     "subcategory": "1",
     "word": "酵素(E)は基質(S)と結合して(　)となり、生成物(P)を生じる",
     "meaning": "m:酵素-基質複合体:E・S",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -2594,6 +2964,7 @@
     "subcategory": "1",
     "word": "アミラーゼは(　)に働き(　)を生じる。",
     "meaning": "デンプン/マルトース",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2601,6 +2972,7 @@
     "subcategory": "1",
     "word": "マルターゼは(　)に働き(　)を生じる。",
     "meaning": "マルトース/グルコース",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2608,6 +2980,7 @@
     "subcategory": "1",
     "word": "インベルターゼとスクラーゼは(　)に働き(　)を生じる。",
     "meaning": "スクロース/転化糖",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2615,6 +2988,7 @@
     "subcategory": "1",
     "word": "ラクターゼは(　)に働き(　)と(　)を生じる。",
     "meaning": "ラクトース/r:1:グルコース:ガラクトース/r1",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "1;1;1"
   },
   {
@@ -2622,6 +2996,7 @@
     "subcategory": "1",
     "word": "チマーゼ(14種類の酵素の混合物)は(　)に働き(　)と(　)を生じる。",
     "meaning": "グルコース/r:1:エタノール:二酸化炭素/r1",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "3;3;3"
   },
   {
@@ -2629,6 +3004,7 @@
     "subcategory": "1",
     "word": "セルラーゼは(　)に働き(　)を生じる。",
     "meaning": "セルロース/セルビオース",
+    "answerType": "物質名/物質名",
     "difficulty": "1;1"
   },
   {
@@ -2636,6 +3012,7 @@
     "subcategory": "1",
     "word": "ペプシンやトリプシンなどのプロテアーゼは(　)に働き(　)と(　)を生じる。",
     "meaning": "タンパク質/r:1:ペプチド:アミノ酸/r1",
+    "answerType": "用語/用語/用語",
     "difficulty": "3;3;3"
   },
   {
@@ -2643,6 +3020,7 @@
     "subcategory": "1",
     "word": "ペプチダーゼは(　)に働き(　)を生じる。",
     "meaning": "ペプチド/アミノ酸",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -2650,6 +3028,7 @@
     "subcategory": "1",
     "word": "リパーゼは(　)に働き(　)と(　)を生じる。",
     "meaning": "油脂/r:1:高級脂肪酸:モノグリセリド/r1",
+    "answerType": "用語/物質名/物質名",
     "difficulty": "3;3;3"
   },
   {
@@ -2657,6 +3036,7 @@
     "subcategory": "1",
     "word": "カタラーゼは(　)に働き(　)と(　)を生じる。",
     "meaning": "過酸化水素/r:1:酸素:水",
+    "answerType": "物質名/物質名/物質名",
     "difficulty": "3;3;3"
   },
   {
@@ -2664,6 +3044,7 @@
     "subcategory": "2",
     "word": "核酸は(　)という単量体が繰り返し結合した構造をしており、日本語名で(　)と(　)がある。",
     "meaning": "ヌクレオチド/r:1:デオキシリボ核酸:リボ核酸/r1",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;2;2"
   },
   {
@@ -2671,6 +3052,7 @@
     "subcategory": "2",
     "word": "ヌクレオチドの中の五炭糖に窒素を含む塩基が結合した部分を(　)。",
     "meaning": "ヌクレオシド",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -2678,6 +3060,7 @@
     "subcategory": "2",
     "word": "ヌクレオチドは(　)、(　)、(　)からなる。",
     "meaning": "r:1:リン酸:糖:塩基/r1/r1",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -2685,6 +3068,7 @@
     "subcategory": "2",
     "word": "ヌクレオシドにリン酸が(　)結合し、ヌクレオチドとなる。そしてヌクレオチドどうしが糖とリン酸の -OH で(　)してできた(　)が核酸である。",
     "meaning": "エステル結合/縮合重合/ポリヌクレオチド",
+    "answerType": "用語/用語/用語",
     "difficulty": "3;3;3"
   },
   {
@@ -2692,6 +3076,7 @@
     "subcategory": "2",
     "word": "デオキシリボ核酸とリボ核酸の糖はいずれも炭素数が(　)である。",
     "meaning": "5",
+    "answerType": "数",
     "difficulty": "2"
   },
   {
@@ -2699,6 +3084,7 @@
     "subcategory": "2",
     "word": "デオキシリボ核酸(　)の塩基はA(　)、T(　)、G(　)、C(　)である。",
     "meaning": "DNA/アデニン/チミン/グアニン/シトシン",
+    "answerType": "用語/物質名/物質名/物質名/物質名",
     "difficulty": "1;2;2;2;2"
   },
   {
@@ -2706,6 +3092,7 @@
     "subcategory": "2",
     "word": "リボ核酸(　)の塩基はA(　)、U(　)、G(　)、C(　)である。",
     "meaning": "RNA/アデニン/ウラシル/グアニン/シトシン",
+    "answerType": "用語/物質名/物質名/物質名/物質名",
     "difficulty": "1;2;2;2;2"
   },
   {
@@ -2713,6 +3100,7 @@
     "subcategory": "2",
     "word": "DNAの塩基は記号で表すと(　)と(　)が２つ、(　)と(　)が3つの(　)結合の(　)を作り対になって二本のヌクレオチド鎖を結びつけている。",
     "meaning": "r:1:T/r1/r:2:G:C/r2/水素/塩基対",
+    "answerType": "化学式/化学式/化学式/化学式/用語/用語",
     "difficulty": "2;2;2;2;2;3"
   },
   {
@@ -2720,6 +3108,7 @@
     "subcategory": "0",
     "word": "高分子は小さい構造単位(　)からできており、それが次々に結合する反応(　)によって生じる高分子化合物を(　)という。",
     "meaning": "m:単量体:モノマー/重合/m:重合体:ポリマー",
+    "answerType": "用語/用語/用語",
     "difficulty": "1;1;1"
   },
   {
@@ -2727,6 +3116,7 @@
     "subcategory": "0",
     "word": "ビニル基は(　)重合によって重合体となる。単量体の名前の前にポリをつけると重合体の名前になる。",
     "meaning": "付加",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -2734,6 +3124,7 @@
     "subcategory": "0",
     "word": "ポリエチレンやポリプロピレンを(　)という。",
     "meaning": "オレフィン系繊維",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2741,6 +3132,7 @@
     "subcategory": "0",
     "word": "ポリアクリロニトリルを主成分とする合成繊維を(　)という。",
     "meaning": "アクリル繊維",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2748,6 +3140,7 @@
     "subcategory": "0",
     "word": "アクリロニトリルに酢酸ビニルやアクリル酸メチルなどを混ぜて付加重合したものを(　)という。",
     "meaning": "アクリル系繊維",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2755,6 +3148,7 @@
     "subcategory": "0",
     "word": "ポリ酢酸ビニルをNaOHaqでけん化すると水溶性の(　)ができ、水に溶けないようにホルムアルデヒドで(　)すると(　)ができる。",
     "meaning": "m:ポリビニルアルコール:PVA/アセタール化/ビニロン",
+    "answerType": "物質名/用語/物質名",
     "difficulty": "2;1;1"
   },
   {
@@ -2762,6 +3156,7 @@
     "subcategory": "0",
     "word": "(　)をNaOHaqでけん化すると(　)のポリビニルアルコールができ、これを(　)で処理するとビニロンができる。",
     "meaning": "ポリ酢酸ビニル/c:水溶性:不溶性:水溶性/ホルムアルデヒド",
+    "answerType": "物質名/選択肢/物質名",
     "difficulty": "2;2;1"
   },
   {
@@ -2769,6 +3164,7 @@
     "subcategory": "1",
     "word": "ゴムの木に傷をつけると粘度の高い樹液(　)が得られる。これを酸性にして凝固させたのが(　)である。",
     "meaning": "ラテックス/m:生ゴム:天然ゴム",
+    "answerType": "物質名/物質名",
     "difficulty": "2;2"
   },
   {
@@ -2776,6 +3172,7 @@
     "subcategory": "1",
     "word": "生ゴムの主成分は(　)が付加重合した(　)である。",
     "meaning": "イソプレン/ポリイソプレン",
+    "answerType": "物質名/物質名",
     "difficulty": "2;2"
   },
   {
@@ -2783,6 +3180,7 @@
     "subcategory": "1",
     "word": "生ゴムに硫黄を加え加熱するとイソプレンの鎖に硫黄の橋が架かった架橋構造ができ、弾性が増す。この操作を(　)という。",
     "meaning": "加硫",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -2790,6 +3188,7 @@
     "subcategory": "1",
     "word": "加硫の割合が5～8%だと輪ゴムなど、30～40%だと(　)になる。",
     "meaning": "エボナイト",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2797,6 +3196,7 @@
     "subcategory": "1",
     "word": "合成ゴムは(　)の付加重合でつくる。",
     "meaning": "ブタジエン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2804,6 +3204,7 @@
     "subcategory": "1",
     "word": "1.3-ブタジエンの付加重合でつくられるゴムを(　)といい、耐磨耗性・耐寒性をもつ。",
     "meaning": "m:ブタジエンゴム:BR",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2811,6 +3212,7 @@
     "subcategory": "1",
     "word": "クロロプレンの付加重合でつくられるゴムを(　)といい、耐燃性・耐熱性をもつ。",
     "meaning": "m:クロロプレンゴム:CR",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2818,6 +3220,7 @@
     "subcategory": "1",
     "word": "イソプレンの付加重合でつくられるゴムを(　)といい、高強度である。",
     "meaning": "m:イソプレンゴム:IR",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -2825,6 +3228,7 @@
     "subcategory": "1",
     "word": "スチレン-ブタジエンゴムのように２種類の単量体を(　)させた合成ゴムもある。",
     "meaning": "共重合",
+    "answerType": "用語",
     "difficulty": "2"
   },
   {
@@ -2832,6 +3236,7 @@
     "subcategory": "1",
     "word": "スチレンと1.3-ブタジエンの共重合でつくられるゴムを(　)といい、耐老化性・耐熱性・耐油性・耐磨耗性をもつ。",
     "meaning": "m:スチレン-ブタジエンゴム:SBR",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2839,6 +3244,7 @@
     "subcategory": "1",
     "word": "アクリロニトリルと1.3-ブタジエンの共重合でつくられるゴムを(　)といい、耐油性・耐薬品性・耐熱性・耐老化性・耐磨耗性をもつ。",
     "meaning": "m:アクリロニトリル-ブタジエンゴム:NBR",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -2846,6 +3252,7 @@
     "subcategory": "1",
     "word": "フッ素を含むゴムを(　)といい、耐老化性・耐油性・耐薬品性・耐熱性をもつ。",
     "meaning": "m:フッ素ゴム:FKM",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -2853,6 +3260,7 @@
     "subcategory": "1",
     "word": "ブタジエン骨格をもたず、ケイ素からつくられるゴムを(　)といい、耐熱性・耐寒性・耐薬品性・電気絶縁性・耐オゾン性・耐候性・非粘着性を持つ。",
     "meaning": "m:シリコーンゴム:Q",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -2860,6 +3268,7 @@
     "subcategory": "2",
     "word": "アミノ基とカルボキシ基の脱水縮合による重合で多数のアミド結合を持っている高分子化合物を(　)という。",
     "meaning": "ポリアミド",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -2867,6 +3276,7 @@
     "subcategory": "2",
     "word": "ポリアミドは(　)と(　)から作られる。",
     "meaning": "r:1:ジアミン:ジカルボン酸/r1",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -2874,6 +3284,7 @@
     "subcategory": "2",
     "word": "ナイロン66は(　)と(　)の(　)重合によりつくられる。",
     "meaning": "r:1:ヘキサメチレンジアミン:アジピン酸/r1/縮合",
+    "answerType": "物質名/物質名/用語",
     "difficulty": "2;2;2"
   },
   {
@@ -2881,6 +3292,7 @@
     "subcategory": "2",
     "word": "ヘキサメチレンジアミンとアジピン酸の縮合重合によりつくられる合成高分子化合物を(　)という。",
     "meaning": "m:ナイロン66:6.6-ナイロン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2888,6 +3300,7 @@
     "subcategory": "2",
     "word": "ナイロン6は環状の(　)の(　)重合によりつくられる。",
     "meaning": "e-カプロラクタム/開環",
+    "answerType": "物質名/用語",
     "difficulty": "2;2"
   },
   {
@@ -2895,6 +3308,7 @@
     "subcategory": "2",
     "word": "ε-カプロラクタムの開環重合によりつくられる合成繊維を(　)という。",
     "meaning": "m:ナイロン6:6-ナイロン",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2902,6 +3316,7 @@
     "subcategory": "2",
     "word": "カルボキシ基とヒドロキシ基の縮合重合による重合で多数のエステル結合を持っている高分子化合物を(　)という。",
     "meaning": "ポリエステル",
+    "answerType": "用語",
     "difficulty": "1"
   },
   {
@@ -2909,6 +3324,7 @@
     "subcategory": "2",
     "word": "ポリエステルは(　)と(　)から作られる。",
     "meaning": "r:1:2価アルコール:ジカルボン酸/r1",
+    "answerType": "用語/用語",
     "difficulty": "2;2"
   },
   {
@@ -2916,6 +3332,7 @@
     "subcategory": "2",
     "word": "ポリエチレンテレフタラートは(　)と(　)の(　)重合によりつくられる。",
     "meaning": "r:1:エチレングリコール:テレフタル酸/r1/縮合",
+    "answerType": "物質名/物質名/用語",
     "difficulty": "2;2;1"
   },
   {
@@ -2923,6 +3340,7 @@
     "subcategory": "2",
     "word": "エチレングリコールとテレフタル酸の縮合重合によりつくられる合成高分子化合物を(　)という。",
     "meaning": "m:ポリエチレンテレフタラート:PET",
+    "answerType": "物質名",
     "difficulty": "2"
   },
   {
@@ -2930,6 +3348,7 @@
     "subcategory": "3",
     "word": "合成樹脂には、熱を加えると柔らかくなる(　)と熱を加えると硬化する(　)がある。",
     "meaning": "熱可塑性樹脂/熱硬化性樹脂",
+    "answerType": "用語/用語",
     "difficulty": "1;1"
   },
   {
@@ -2937,6 +3356,7 @@
     "subcategory": "3",
     "word": "付加重合または縮合重合によってつくられる合成高分子の多くは(　)であり、付加反応と縮合反応が繰り返されて重合する付加重合でつくられる合成高分子化合物の多くは(　)である。",
     "meaning": "c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "選択肢/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -2944,6 +3364,7 @@
     "subcategory": "3",
     "word": "ポリエチレンは、製法により密度が違い、(　)(LDPE)と(　)(HDPR)に分けられる。",
     "meaning": "低密度ポリエチレン/高密度ポリエチレン",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -2951,6 +3372,7 @@
     "subcategory": "3",
     "word": "ポリスチレンは、樹脂の特徴から(　)(GPPS)、ゴムを配合した(　)(HIPS)、(　)(EPS)に分けられる。",
     "meaning": "汎用ポリスチレン/耐衝撃性ポリスチレン/発泡ポリスチレン",
+    "answerType": "用語/用語/用語",
     "difficulty": "3;3;3"
   },
   {
@@ -2958,6 +3380,7 @@
     "subcategory": "3",
     "word": "ポリ塩化ビニルは、耐水性・耐薬品性があり、難燃性で電気絶縁性に優れる。可塑剤で軟質に変えることもできる。ソーダ工業で副生される(　)で作れるため安価である。",
     "meaning": "塩素",
+    "answerType": "物質名",
     "difficulty": "3"
   },
   {
@@ -2965,6 +3388,7 @@
     "subcategory": "4",
     "word": "smiles:*CC*:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "m:ポリエチレン:PE/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -2972,6 +3396,7 @@
     "subcategory": "4",
     "word": "smiles:*CC(C)*:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "m:ポリプロピレン:PP/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -2979,6 +3404,7 @@
     "subcategory": "4",
     "word": "smiles:*CC(c1ccccc1)*:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "m:ポリスチレン:PS/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -2986,6 +3412,7 @@
     "subcategory": "4",
     "word": "smiles:*CC(Cl)*:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "m:ポリ塩化ビニル:PVC/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -2993,6 +3420,7 @@
     "subcategory": "4",
     "word": "smiles:*CC(OC(=O)C)*:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "m:ポリ酢酸ビニル:PVAc/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -3000,6 +3428,7 @@
     "subcategory": "4",
     "word": "smiles:*CC(C)(C(=O)OC)*:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "m:メタクリル樹脂:PMMA/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -3007,6 +3436,7 @@
     "subcategory": "4",
     "word": "smiles:*OCCOC(=O)c1ccc(C(=O)*)cc1:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "m:ポリエチレンテレフタラート:PET/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -3014,6 +3444,7 @@
     "subcategory": "4",
     "word": "smiles:c1cc(O*)ccc1C(C)(C)c2ccc(OC(=O)*)cc2:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "ポリカーボネート樹脂/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -3021,6 +3452,7 @@
     "subcategory": "4",
     "word": "smiles:*C(F)(F)C(F)(F)*:このような構造の重合体を(　)という。これは(　)である。",
     "meaning": "フッ素樹脂/c:熱可塑性樹脂:熱硬化性樹脂:熱可塑性樹脂",
+    "answerType": "用語/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -3028,6 +3460,7 @@
     "subcategory": "5",
     "word": "フェノールとホルムアルデヒドの重合でつくられる樹脂を(　)といい、(　)とも呼ばれる世界最初の合成樹脂である。これは(　)である。",
     "meaning": "m:フェノール樹脂:PF/ベークライト/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "物質名/物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -3035,6 +3468,7 @@
     "subcategory": "5",
     "word": "尿素とホルムアルデヒドの重合でつくられる樹脂を(　)という。これは(　)である。",
     "meaning": "m:尿素樹脂:ユリア樹脂:UF/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -3042,6 +3476,7 @@
     "subcategory": "5",
     "word": "メラニンとホルムアルデヒドの重合でつくられる樹脂を(　)という。これは(　)である。",
     "meaning": "m:メラニン樹脂:MF/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "2;1"
   },
   {
@@ -3049,6 +3484,7 @@
     "subcategory": "5",
     "word": "無水フタル酸などとグリセリンなどの重合でつくられる樹脂を(　)という。これは(　)である。",
     "meaning": "アルキド樹脂/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -3056,6 +3492,7 @@
     "subcategory": "5",
     "word": "フタル酸またはマレイン酸とエチレングリコールとスチレンの重合でつくられる樹脂を(　)という。これは(　)である。",
     "meaning": "m:不飽和ポリエステル樹脂:UP/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -3063,6 +3500,7 @@
     "subcategory": "5",
     "word": "クロロメチルシランの重合でつくられる樹脂を(　)という。これは(　)である。",
     "meaning": "m:シリコーン樹脂:ケイ素樹脂:SI/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -3070,6 +3508,7 @@
     "subcategory": "5",
     "word": "ビスフェノールAとエピクロロヒドリンとジエチレントリアミンの重合でつくられる樹脂を(　)という。これは(　)である。",
     "meaning": "m:エポキシ樹脂:EP/c:熱可塑性樹脂:熱硬化性樹脂:熱硬化性樹脂",
+    "answerType": "物質名/選択肢",
     "difficulty": "3;3"
   },
   {
@@ -3077,6 +3516,7 @@
     "subcategory": "6",
     "word": "溶液中のイオンを別の種類のイオンと取り替える働きをもつ樹脂を(　)といい、主にスチレンと少量のp-ジビニルベンゼンの共重合を母体としてそのベンゼン環の水素原子を酸性基や塩基性基で置換した構造をしている。",
     "meaning": "イオン交換樹脂",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3084,6 +3524,7 @@
     "subcategory": "6",
     "word": "酸性基を多く含む樹脂は電解質の陽イオンと酸性基の水素イオンを交換する。このような樹脂を(　)という。",
     "meaning": "陽イオン交換樹脂",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3091,6 +3532,7 @@
     "subcategory": "6",
     "word": "塩基性基を多く含む樹脂は電解質の陰イオンと塩基性基の水酸化物イオンを交換する。このような樹脂を(　)という。",
     "meaning": "陰イオン交換樹脂",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3098,6 +3540,7 @@
     "subcategory": "6",
     "word": "特定のイオンだけを通過させる働きをもつ高分子膜を(　)という。",
     "meaning": "イオン交換膜",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3105,6 +3548,7 @@
     "subcategory": "6",
     "word": "生体内や自然環境中で、微生物により安全な物質に分解される高分子化合物を(　)という。",
     "meaning": "生分解性高分子",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3112,6 +3556,7 @@
     "subcategory": "6",
     "word": "生分解性高分子の一種であるポリ乳酸は乳酸２分子を(　)させて乳酸の環状二量体であるジラクチド(環状ジエステル)を合成し、これを(　)重合させてつくる。",
     "meaning": "脱水縮合/開環",
+    "answerType": "用語/用語",
     "difficulty": "3;3"
   },
   {
@@ -3119,6 +3564,7 @@
     "subcategory": "6",
     "word": "水と接触すると短時間で吸水して保水し、数百倍に膨らむ高分子化合物を(　)という。",
     "meaning": "吸水性高分子",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3126,6 +3572,7 @@
     "subcategory": "6",
     "word": "一般的な高分子化合物は絶縁体であるが、ポリアセチレンにヨウ素を添加するなどでつくられる(　)は、金属に近い電気導電性を示す。",
     "meaning": "導電性高分子",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3133,6 +3580,7 @@
     "subcategory": "6",
     "word": "光を当てると分子鎖間で重合が進み、硬化して溶剤に溶けなくなる。このような樹脂を(　)という。",
     "meaning": "感光性高分子",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3140,6 +3588,7 @@
     "subcategory": "6",
     "word": "光を高い割合で通す高分子化合物を(　)という。",
     "meaning": "光透過性高分子",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3147,6 +3596,7 @@
     "subcategory": "6",
     "word": "成形後に力を加えて変形させても、ある温度以上に温めるともとの形に戻る高分子化合物を(　)という。",
     "meaning": "形状記憶高分子",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3154,6 +3604,7 @@
     "subcategory": "6",
     "word": "(　)は、水にポリ酢酸ビニルを分散させたコロイド溶液から、水分が蒸発し、粒子が凝集することで接着効果が得られる。",
     "meaning": "木工用接着剤",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3161,6 +3612,7 @@
     "subcategory": "6",
     "word": "(　)は、単量体のシアノアクリル酸エステルが、微量の水分により付加重合を開始し、短時間でポリシアノアクリレートとなることで接着効果が得られる。",
     "meaning": "瞬間接着剤",
+    "answerType": "用語",
     "difficulty": "3"
   },
   {
@@ -3168,6 +3620,7 @@
     "subcategory": "6",
     "word": "接着剤には(　)、(　)、(　)などがある。",
     "meaning": "r:1:木工用接着剤:瞬間接着剤:エポキシ樹脂系接着剤/r1/r1",
+    "answerType": "用語/用語/用語",
     "difficulty": "3;3;3"
   }
 ]
