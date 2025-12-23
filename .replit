@@ -9,7 +9,7 @@ run = ["sh", "-c", "npm run start"]
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
+externalPort = 80
 
 [agent]
 expertMode = true
@@ -27,8 +27,24 @@ author = "agent"
 task = "workflow.run"
 args = "Discord Bot Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Development Server"
+
 [[workflows.workflow]]
 name = "Discord Bot Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "Development Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]

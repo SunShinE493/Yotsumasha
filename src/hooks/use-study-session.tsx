@@ -31,7 +31,6 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
     },
     onError: (error) => {
       console.log("DEBUG: セッションデータの更新に失敗しました。Error:", error);
-      onComplete(null);
     }
   });
 

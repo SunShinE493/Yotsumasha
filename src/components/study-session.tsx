@@ -31,6 +31,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
   const [rotationDeg, setRotationDeg] = useState(0);
   const [rotationTurn, setRotationTurn] = useState(0);
   const [isEarlyFinishDialogOpen, setIsEarlyFinishDialogOpen] = useState(false);
+  const [isBackConfirmOpen, setIsBackConfirmOpen] = useState(false);
   const { toast } = useToast();
   const userId = useUserId();
 
@@ -163,6 +164,20 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
     setIsEarlyFinishDialogOpen(false);
   };
 
+  const handleBackConfirm = () => {
+    // 現在の進捗を保存してから戻る
+    hookHandleEarlyFinish();
+    toast({
+      title: "学習を中断しました",
+      description: "進捗が保存されました。",
+    });
+    setIsBackConfirmOpen(false);
+    // わずかな遅延を設けて、進捗保存完了後に戻る
+    setTimeout(() => {
+      onBack();
+    }, 300);
+  };
+
   if (isLoading || !Array.isArray(studyWords)) {
     return (
       <Card>
@@ -183,7 +198,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
           <div className="space-y-4">
             <i className="fas fa-exclamation-triangle text-4xl text-destructive"></i>
             <p className="text-destructive-foreground">データの取得中にエラーが発生しました。</p>
-            <p className="text-sm text-muted-foreground">{error && 'message' in error ? error.message : 'Unknown error'}</p>
+            <p className="text-sm text-muted-foreground">Unknown error</p>
           </div>
         </CardContent>
       </Card>
@@ -212,7 +227,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
           <Button
             variant="ghost"
             size="sm"
-            onClick={onBack}
+            onClick={() => setIsBackConfirmOpen(true)}
             data-testid="button-back"
           >
             <i className="fas fa-arrow-left mr-2"></i>
@@ -337,6 +352,25 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
               onClick={handleEarlyFinish}
             >
               中断して結果画面へ
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isBackConfirmOpen} onOpenChange={setIsBackConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>学習画面から戻りますか？</DialogTitle>
+            <DialogDescription>
+              現在の進捗は保存されます。後で再開することができます。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsBackConfirmOpen(false)}>キャンセル</Button>
+            <Button
+              variant="default"
+              onClick={handleBackConfirm}
+            >
+              進捗を保存して戻る
             </Button>
           </DialogFooter>
         </DialogContent>
