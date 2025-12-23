@@ -32,7 +32,15 @@ const app = express();
 const port = 5000;
 
 // Serve static files from dist directory (built React app) - BEFORE any routes
+app.use((req, res, next) => {
+  console.log(`[DEBUG] Request: ${req.method} ${req.path}`);
+  next();
+});
+
+// Serve static files from dist directory (built React app) - BEFORE any routes
 const distDir = path.join(process.cwd(), 'dist');
+console.log(`[DEBUG] Serving dist from: ${distDir}`);
+
 app.use(
   express.static(distDir, {
     setHeaders(res, filePath) {
@@ -48,8 +56,14 @@ app.use(
 // SPA fallback: only for non-API, non-asset, non-file-extension paths
 // This prevents returning index.html for /assets/*.css|js and similar
 app.get(/^\/(?!api)(?!assets)(?!.*\.[^\/]+$).*/, (req, res) => {
+  console.log(`[DEBUG] SPA Fallback matched for: ${req.path}`);
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  res.sendFile(path.join(distDir, 'index.html'));
+  res.sendFile(path.join(distDir, 'index.html'), (err) => {
+    if (err) {
+      console.error(`[DEBUG] Failed to send index.html:`, err);
+      res.status(500).send("Error loading application.");
+    }
+  });
 });
 app.post('/api', function (req, res) {
   console.log(`Received POST request.`);
@@ -157,7 +171,24 @@ async function runWebserver() {
       const prevQ = room.words[room.idx];
       room.idx = (room.idx + 1) % room.words.length;
       const nq = room.words[room.idx];
-      broadcast(roomId, { type: 'question', index: room.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, timeLimit: room.timeLimit, progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length } });
+
+      // Reset round state
+      room.roundState = 'active';
+      room.roundRank = 1;
+      room.answeredPlayers.clear();
+
+      broadcast(roomId, {
+        type: 'question',
+        index: room.idx,
+        id: nq?.id ?? null,
+        word: nq?.word ?? null,
+        meaning: nq?.meaning ?? null,
+        choices: nq?.choices ?? null,
+        prevWord: prevQ?.word ?? null,
+        prevMeaning: prevQ?.meaning ?? null,
+        timeLimit: room.timeLimit,
+        progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length }
+      });
       scheduleQuestionTimer(roomId);
     }, r.timeLimit * 1000);
   }
@@ -186,8 +217,24 @@ async function runWebserver() {
     room.asked = 0;
     if (room.timer) clearTimeout(room.timer);
     // first question
+    // first question
     const q = room.words[room.idx];
-    broadcast(roomId, { type: 'question', index: room.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: 1, total: room.maxQuestions || room.words.length } });
+    room.roundState = 'active';
+    room.roundRank = 1;
+    room.answeredPlayers.clear();
+
+    // Broadcast choices if present
+    broadcast(roomId, {
+      type: 'question',
+      index: room.idx,
+      id: q?.id ?? null,
+      word: q?.word ?? null,
+      meaning: q?.meaning ?? null,
+      choices: q?.choices ?? null, // Send choices
+      prevWord: null,
+      prevMeaning: null,
+      progress: { current: 1, total: room.maxQuestions || room.words.length }
+    });
     scheduleQuestionTimer(roomId);
   }
 
@@ -206,7 +253,23 @@ async function runWebserver() {
           ws.send(JSON.stringify({ type: 'error', message: 'room_exists' }));
           return;
         }
-        let normalized = words.map(w => ({ id: String(w.id || ''), word: String(w.word || ''), meaning: String(w.meaning || '') })).filter(w => w.word && w.meaning);
+        // Helper to normalize but preserve quiz data
+        const normalizeWord = (w) => ({
+          id: String(w.id || ''),
+          word: String(w.word || ''),
+          meaning: String(w.meaning || ''),
+          // Preserve quiz fields if present
+          choices: Array.isArray(w.choices) ? w.choices : undefined,
+          correctAnswer: w.correctAnswer ? String(w.correctAnswer) : undefined,
+          originalId: w.originalId ? String(w.originalId) : undefined
+        });
+
+        let normalized = words.map(normalizeWord).filter(w => w.word && w.meaning);
+        // Only shuffle if NOT in quiz mode? Or just shuffle anyway?
+        // Quiz mode chunks might be related.
+        // However, user didn't strictly say "keep order". But if I generated 4 questions for 1 word, 
+        // they share the same ID prefix maybe?
+        // Let's shuffle. Quiz mode is usually random.
         normalized = normalized.sort(() => Math.random() - 0.5);
         const maxQuestions = Math.max(1, Math.min(Number(questionCount) || normalized.length, normalized.length));
         const r = {
@@ -222,6 +285,11 @@ async function runWebserver() {
           timer: null,
           cleanupTimer: null,
           lastCorrectBy: null,
+          quizMode: Boolean(msg.quizMode),
+          // Quiz state tracking
+          roundState: 'active', // 'active' | 'ending'
+          roundRank: 1,
+          answeredPlayers: new Set()
         };
         rooms.set(room, r);
         ws._room = room; ws._name = name; r.players.set(name, ws); r.scores.set(name, 0);
@@ -239,7 +307,7 @@ async function runWebserver() {
           broadcast(room, { type: 'players', players: Array.from(r.players.keys()) });
           const q = r.words[r.idx];
           ws.send(JSON.stringify({ type: 'score', scores: toScores(r) }));
-          ws.send(JSON.stringify({ type: 'question', index: r.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, prevWord: null, prevMeaning: null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } }));
+          ws.send(JSON.stringify({ type: 'question', index: r.idx, id: q?.id ?? null, word: q?.word ?? null, meaning: q?.meaning ?? null, choices: q?.choices ?? null, prevWord: null, prevMeaning: null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } }));
         } else {
           // waiting state: send full lobby to all
           broadcast(room, { type: 'lobby', players: Array.from(r.players.keys()), timeLimit: r.timeLimit, maxQuestions: r.maxQuestions });
@@ -251,29 +319,94 @@ async function runWebserver() {
         const { room, name, text } = msg; const r = rooms.get(room);
         if (!r || r.state !== 'running') return;
         const q = r.words[r.idx]; if (!q) return;
-        const ok = String(text || '').trim().toLowerCase() === q.meaning.trim().toLowerCase();
-        // Notify all about the answer attempt with content (correct or not)
-        broadcast(room, { type: 'answered', by: name, text: String(text || ''), correct: !!ok });
-        if (ok) {
-          r.lastCorrectBy = name;
-          const prev = r.scores.get(name) || 0; r.scores.set(name, prev + 1);
-          r.asked = (r.asked || 0) + 1;
-          if (r.maxQuestions && r.asked >= r.maxQuestions) {
-            r.state = 'ended';
-            if (r.timer) { clearTimeout(r.timer); r.timer = null; }
-            broadcast(room, { type: 'end', scores: toScores(r) });
-            scheduleRoomCleanup(room);
-            return;
-          }
-          const prevQ = r.words[r.idx];
-          r.idx = (r.idx + 1) % r.words.length;
-          const nq = r.words[r.idx];
-          broadcast(room, { type: 'score', scores: toScores(r) });
-          broadcast(room, { type: 'question', index: r.idx, id: nq?.id ?? null, word: nq?.word ?? null, meaning: nq?.meaning ?? null, prevWord: prevQ?.word ?? null, prevMeaning: prevQ?.meaning ?? null, prevAnswerer: r.lastCorrectBy || null, progress: { current: r.asked + 1, total: r.maxQuestions || r.words.length } });
-          r.lastCorrectBy = null;
-          scheduleQuestionTimer(room);
+
+        // Validation Logic
+        let ok = false;
+        if (q.choices && q.correctAnswer) {
+          // Strict match against correctAnswer
+          ok = String(text || '').trim() === String(q.correctAnswer).trim();
         } else {
-          // wrong answer: keep same question; do nothing else
+          // Legacy/Fall-back matching
+          ok = String(text || '').trim().toLowerCase() === q.meaning.trim().toLowerCase();
+        }
+        // Notify all about the answer attempt with content (correct or not)
+
+        // Notify attempt
+        broadcast(room, { type: 'answered', by: name, text: String(text || ''), correct: !!ok });
+
+        if (ok) {
+          // Prevent double points if same user answers again (client should block, but server safeguards)
+          if (r.answeredPlayers && r.answeredPlayers.has(name)) return;
+          if (r.answeredPlayers) r.answeredPlayers.add(name);
+
+          r.lastCorrectBy = name;
+          const currentScore = r.scores.get(name) || 0;
+
+          // Scoring logic
+          let points = 1;
+          if (r.roundRank === 1) points = 5;
+          else if (r.roundRank === 2) points = 3;
+          else if (r.roundRank === 3) points = 2;
+          else points = 1; // 4th onwards
+
+          r.scores.set(name, currentScore + points);
+          r.roundRank = (r.roundRank || 1) + 1;
+
+          broadcast(room, { type: 'score', scores: toScores(r) });
+
+          // If this is the FIRST correct answer, trigger "Ending" phase
+          if (r.roundState !== 'ending') {
+            r.roundState = 'ending';
+            // Shorten timer to 3 seconds
+            if (r.timer) clearTimeout(r.timer);
+            r.timer = setTimeout(() => {
+              // Advance question logic (duplicated from scheduleQuestionTimer expiry, extracted for cleanliness?)
+              // Inline for now to minimize refactor risk
+              const room = rooms.get(roomId); // refresh ref
+              if (!room || room.state !== 'running') return;
+
+              room.asked = (room.asked || 0) + 1;
+              if (room.maxQuestions && room.asked >= room.maxQuestions) {
+                const lastQ = room.words[room.idx];
+                room.state = 'ended';
+                if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+                broadcast(roomId, { type: 'end', scores: toScores(room), endReason: 'finished', lastId: lastQ?.id ?? null, lastWord: lastQ?.word ?? null, lastMeaning: lastQ?.meaning ?? null });
+                scheduleRoomCleanup(roomId);
+                return;
+              }
+
+              const prevQ = room.words[room.idx];
+              room.idx = (room.idx + 1) % room.words.length;
+              const nq = room.words[room.idx];
+
+              // Reset round
+              room.roundState = 'active';
+              room.roundRank = 1;
+              room.answeredPlayers.clear();
+
+              broadcast(roomId, {
+                type: 'question',
+                index: room.idx,
+                id: nq?.id ?? null,
+                word: nq?.word ?? null,
+                meaning: nq?.meaning ?? null,
+                choices: nq?.choices ?? null,
+                prevWord: prevQ?.word ?? null,
+                prevMeaning: prevQ?.meaning ?? null,
+                prevAnswerer: room.lastCorrectBy || null,
+                timeLimit: room.timeLimit,
+                progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length }
+              });
+              room.lastCorrectBy = null;
+              scheduleQuestionTimer(roomId);
+            }, 3000); // 3 seconds delay
+          }
+        } else {
+          // Wrong answer: -2 points
+          // Prevent multiple penalties? Maybe not, spamming wrong answers should result in heavy penalty.
+          const currentScore = r.scores.get(name) || 0;
+          r.scores.set(name, currentScore - 2);
+          broadcast(room, { type: 'score', scores: toScores(r) });
         }
       }
     });
@@ -655,11 +788,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
   }
   if (reaction.emoji.name === '💩') {
-  if (user.id === '1163105759492571156') {
-    // reaction から message を辿って channel を指定する
-    reaction.message.channel.send("<@1163105759492571156>うんこ置くな");
+    if (user.id === '1163105759492571156') {
+      // reaction から message を辿って channel を指定する
+      reaction.message.channel.send("<@1163105759492571156>うんこ置くな");
+    }
   }
-}
 
 
 });
@@ -893,7 +1026,7 @@ async function runai(content, message, aisikibetsu) {
       });
 
       const responseText = completion.choices[0].message.content;
-      
+
       console.log(responseText);
       if (responseText) {
         await message.channel.send(responseText);
@@ -905,7 +1038,7 @@ async function runai(content, message, aisikibetsu) {
       await message.channel.send("エラーが発生しました");
     }
 
-  // --- パターン1: 思考/長文生成 (gemini-2.0-flash-thinking-exp 相当 -> deepseek-reasoner) ---
+    // --- パターン1: 思考/長文生成 (gemini-2.0-flash-thinking-exp 相当 -> deepseek-reasoner) ---
   } else if (aisikibetsu === 1) {
     if (!ai) {
       await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
@@ -931,7 +1064,7 @@ async function runai(content, message, aisikibetsu) {
         // reasonerモデルの場合、reasoning_content（思考過程）も返ってきますが、
         // ここでは content（最終回答）のみを取得するようにしています。
         const chunkText = chunk.choices[0]?.delta?.content || '';
-        
+
         if (!chunkText) continue; // 空の場合はスキップ
 
         fullResponse += chunkText;
@@ -954,7 +1087,7 @@ async function runai(content, message, aisikibetsu) {
       message.reply('DeepSeek APIからの応答中にエラーが発生しました。');
     }
 
-  // --- パターン2: 既存メッセージの編集 (ストリーミング) ---
+    // --- パターン2: 既存メッセージの編集 (ストリーミング) ---
   } else if (aisikibetsu === 2) {
     // 元のコードで未定義だった部分を補完しています
     if (!ai) return;
@@ -983,11 +1116,11 @@ async function runai(content, message, aisikibetsu) {
         // Discord APIのレート制限（Rate Limit）に引っかからないよう、
         // 毎回 edit するのではなく、一定量たまるか時間が経過してから edit するのが定石ですが
         // とりあえず元のロジックに近い形で書きます
-        
+
         // (あまりに高速にeditするとDiscord APIでエラーになるため、本来は間引き処理が必要です)
         updateCount++;
         if (updateCount % 10 === 0) { // 10チャンクごとに更新（簡易的な間引き）
-             await msgToEdit.edit(fullText.substring(0, 2000)); // 2000文字以内で編集
+          await msgToEdit.edit(fullText.substring(0, 2000)); // 2000文字以内で編集
         }
       }
       // 最後に確実に全文で更新

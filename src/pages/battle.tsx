@@ -8,6 +8,9 @@ import { MathText } from '@/components/MathText';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { validateAnswer, formatMeaning } from '@/lib/answerUtils';
+import { generateQuizData } from '@/lib/quizUtils';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export default function BattlePage() {
   const { toast } = useToast();
@@ -19,9 +22,10 @@ export default function BattlePage() {
   const [openRooms, setOpenRooms] = useState<Array<{ id: string; state: string; playerCount: number }> | null>(null);
   const [selectedJson, setSelectedJson] = useState<SelectedJsonInfo | null>(null);
   const [rangeStart, setRangeStart] = useState<number | ''>(1);
-  const [rangeEnd, setRangeEnd] = useState<number |  ''>(50);
+  const [rangeEnd, setRangeEnd] = useState<number | ''>(50);
   const [limitSec, setLimitSec] = useState<number | ''>(30);
   const [questionCount, setQuestionCount] = useState<number | ''>(20);
+  const [quizMode, setQuizMode] = useState(false);
   const [canStart, setCanStart] = useState(false);
 
   // --- WebSocket client state ---
@@ -29,10 +33,12 @@ export default function BattlePage() {
   const [phase, setPhase] = useState<'idle' | 'lobby' | 'running' | 'ended'>('idle');
   const [players, setPlayers] = useState<string[]>([]);
   const [lastAnsweredBy, setLastAnsweredBy] = useState<string | null>(null);
-  const [lastAnswerByName, setLastAnswerByName] = useState<Record<string, string>>({});
+  // lastAnswerByName: map of name -> { text: string, correct: boolean }
+  const [lastAnswerByName, setLastAnswerByName] = useState<Record<string, { text: string; correct: boolean }>>({});
   const [questionWord, setQuestionWord] = useState<string | null>(null);
   const [questionMeaning, setQuestionMeaning] = useState<string | null>(null);
   const [questionId, setQuestionId] = useState<string | null>(null);
+  const [choices, setChoices] = useState<string[] | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [scores, setScores] = useState<Record<string, number>>({});
   const [flash, setFlash] = useState<'none' | 'green' | 'red'>('none');
@@ -106,8 +112,9 @@ export default function BattlePage() {
           setQuestionWord(msg.word ?? null);
           setQuestionMeaning(msg.meaning ?? null);
           setQuestionId(msg.id ?? null);
+          setChoices(msg.choices || null);
           setAnswerText('');
-          const secs = (serverLimitSec ?? limitSec);
+          const secs = Number(serverLimitSec ?? limitSec) || 30;
           startCountdown(secs);
           // update previous refs to this new question
           prevWordRef.current = msg.word ?? null;
@@ -126,7 +133,7 @@ export default function BattlePage() {
           }
           if (typeof msg.by === 'string') {
             setLastAnsweredBy(`${msg.by}: ${String(msg.text || '')}`);
-            setLastAnswerByName(prev => ({ ...prev, [msg.by]: String(msg.text || '') }));
+            setLastAnswerByName(prev => ({ ...prev, [msg.by]: { text: String(msg.text || ''), correct: !!msg.correct } }));
           }
         } else if (msg.type === 'end') {
           setPhase('ended');
@@ -150,6 +157,7 @@ export default function BattlePage() {
           setQuestionWord(null);
           setQuestionMeaning(null);
           setQuestionId(null);
+          setChoices(null);
           setLastAnswer(null);
           setLastAnswerWord(null);
           if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -195,10 +203,30 @@ export default function BattlePage() {
       });
       return;
     }
+
+
+    // Quiz Mode Logic: Expand questions
+    if (quizMode) {
+      try {
+        // Need all words for neighbor calculation
+        const allRes = await apiRequest('GET', `/api/vocabulary` + (Boolean(selectedJson?.isBuiltin && selectedJson?.presets?.length) ? `?source=${encodeURIComponent(selectedJson!.name)}` : ''));
+        const allWords = await allRes.json();
+
+        // Generate expanded quiz data from the *selected range* (words) against *full context* (allWords)
+        // Note: generateQuizData expects {id, word, meaning...}
+        const expanded = generateQuizData(words, allWords);
+        words = expanded;
+
+      } catch (err) {
+        console.error("Quiz gen failed", err);
+        // fallback to normal?
+      }
+    }
+
     const ws = ensureSocket();
     const sendCreate = () => {
       selfNameRef.current = name;
-      ws.send(JSON.stringify({ type: 'create', room, name, limitSec, questionCount, words }));
+      ws.send(JSON.stringify({ type: 'create', room, name, limitSec, questionCount, words, quizMode }));
       setMode('host');
     };
     if (ws.readyState === WebSocket.OPEN) sendCreate();
@@ -240,6 +268,21 @@ export default function BattlePage() {
     }
     wsRef.current.send(JSON.stringify({ type: 'answer', room, name, text }));
     setAnswerText('');
+  };
+
+  const submitChoice = (choice: string) => {
+    if (!wsRef.current) return;
+    // UI feedback
+    const isCorrect = questionMeaning ? (choice === questionMeaning) : false; // Strict match for quiz mode usually? 
+    // Actually server validates against 'correctAnswer' or 'meaning'.
+    // For visual feedback:
+    if (!isCorrect) {
+      setFlash('red'); setTimeout(() => setFlash('none'), 200);
+    } else {
+      setFlash('green'); setTimeout(() => setFlash('none'), 120);
+    }
+
+    wsRef.current.send(JSON.stringify({ type: 'answer', room, name, text: choice }));
   };
 
   return (
@@ -320,6 +363,10 @@ export default function BattlePage() {
                     <label className="text-sm text-muted-foreground">出題数</label>
                     <Input type="number" value={questionCount} onChange={(e) => { if (e.target.value === '') { setQuestionCount(''); return; } const v = Number(e.target.value); setQuestionCount(isNaN(v) ? '' : v); }} />
                   </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="quiz-mode" checked={quizMode} onCheckedChange={setQuizMode} />
+                  <Label htmlFor="quiz-mode">4択クイズモード</Label>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
@@ -423,15 +470,27 @@ export default function BattlePage() {
                     </div>
                   </div>
                   <div className="font-semibold text-foreground" style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.25 }}>
-                    <MathText text={questionWord ?? (phase === 'ended' ? '終了しました' : '...')} smilesVariant="black" />
+                    <div className="font-semibold text-foreground" style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.25 }}>
+                      <MathText text={(phase === 'running' || phase === 'ended' || true) ? (questionWord ?? (phase === 'ended' ? '終了しました' : '...')) : '...'} smilesVariant="black" />
+                    </div>
                   </div>
                 </div>
 
                 {phase === 'running' && (
-                  <form onSubmit={submitAnswer} className="flex gap-2">
-                    <Input placeholder="意味を入力" value={answerText} onChange={(e) => setAnswerText(e.target.value)} autoFocus />
-                    <Button type="submit">回答</Button>
-                  </form>
+                  choices && choices.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-2 mt-4">
+                      {choices.map((c, i) => (
+                        <Button key={i} className="w-full text-lg h-12" variant="outline" onClick={() => submitChoice(c)}>
+                          <MathText text={c} smilesVariant="black" />
+                        </Button>
+                      ))}
+                    </div>
+                  ) : (
+                    <form onSubmit={submitAnswer} className="flex gap-2">
+                      <Input placeholder="意味を入力" value={answerText} onChange={(e) => setAnswerText(e.target.value)} autoFocus />
+                      <Button type="submit">回答</Button>
+                    </form>
+                  )
                 )}
 
                 <div>
@@ -440,7 +499,14 @@ export default function BattlePage() {
                     {Object.entries(scores).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0)).map(([n, sc]) => (
                       <div key={n} className="flex items-center rounded-md border border-border bg-background px-3 py-2">
                         <div className="text-foreground">{n}</div>
-                        <div className="flex-1 mx-2 text-xs text-muted-foreground text-center truncate">{lastAnswerByName[n] ? <MathText text={lastAnswerByName[n]} smilesVariant="black" /> : ''}</div>
+                        <div className="flex-1 mx-2 text-xs text-center truncate">
+                          {lastAnswerByName[n] ? (
+                            <span className={lastAnswerByName[n].correct ? "text-green-600 font-bold" : "text-red-500"}>
+                              {lastAnswerByName[n].correct ? "⭕ " : "❌ "}
+                              <MathText text={lastAnswerByName[n].text} smilesVariant="black" />
+                            </span>
+                          ) : ''}
+                        </div>
                         <div className="text-sm text-muted-foreground tabular-nums">{sc}</div>
                       </div>
                     ))}

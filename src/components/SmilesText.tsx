@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SmilesDrawer from '../lib/smiles-drawer-lib.js';
+// @ts-ignore
+import SmilesDrawer from 'smiles-drawer';
 
 interface SmilesTextProps {
     smiles: string;
