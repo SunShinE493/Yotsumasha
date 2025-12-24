@@ -124,7 +124,7 @@
     "subcategory": "1",
     "word": "官能基-OHの名前と一般名は？",
     "meaning": "ヒドロキシ基/アルコール",
-    "answerType": "用語/用語",
+    "answerType": "基/用語",
     "difficulty": "1;1"
   },
   {
@@ -132,7 +132,7 @@
     "subcategory": "1",
     "word": "官能基-O-の名前と一般式は？",
     "meaning": "エーテル結合/エーテル",
-    "answerType": "用語/用語",
+    "answerType": "結合/用語",
     "difficulty": "1;1"
   },
   {
@@ -140,7 +140,7 @@
     "subcategory": "1",
     "word": "官能基-COHの名前と一般名は？",
     "meaning": "m:ホルミル基:アルデヒド基/アルデヒド'",
-    "answerType": "用語/用語",
+    "answerType": "基/用語",
     "difficulty": "1;1"
   },
   {
@@ -148,7 +148,7 @@
     "subcategory": "1",
     "word": "官能基-CO-の名前と一般式は？",
     "meaning": "カルボニル基/ケトン",
-    "answerType": "用語/用語",
+    "answerType": "基/用語",
     "difficulty": "1;1"
   },
   {
@@ -156,7 +156,7 @@
     "subcategory": "1",
     "word": "官能基-COOHの名前と一般式は？",
     "meaning": "カルボキシ基/カルボン酸",
-    "answerType": "用語/用語",
+    "answerType": "基/用語",
     "difficulty": "1;1"
   },
   {
@@ -164,7 +164,7 @@
     "subcategory": "1",
     "word": "官能基-COOの名前と一般式は？",
     "meaning": "エステル結合/エステル",
-    "answerType": "用語/用語",
+    "answerType": "結合/用語",
     "difficulty": "1;1"
   },
   {
@@ -172,7 +172,7 @@
     "subcategory": "1",
     "word": "官能基-NO₂の名前と一般式は？",
     "meaning": "ニトロ基/ニトロ化合物",
-    "answerType": "用語/用語",
+    "answerType": "基/用語",
     "difficulty": "1;1"
   },
   {
@@ -180,7 +180,7 @@
     "subcategory": "1",
     "word": "官能基-NH₂の名前と一般式は？",
     "meaning": "アミノ基/アミン",
-    "answerType": "用語/用語",
+    "answerType": "基/用語",
     "difficulty": "1;1"
   },
   {
@@ -188,7 +188,7 @@
     "subcategory": "1",
     "word": "官能基-SO₃Hの名前と一般式は？",
     "meaning": "スルホ基/スルホン酸",
-    "answerType": "用語/用語",
+    "answerType": "基/用語",
     "difficulty": "1;1"
   },
   {
