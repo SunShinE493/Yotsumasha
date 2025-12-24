@@ -362,43 +362,43 @@ async function runWebserver() {
             r.timer = setTimeout(() => {
               // Advance question logic (duplicated from scheduleQuestionTimer expiry, extracted for cleanliness?)
               // Inline for now to minimize refactor risk
-              const room = rooms.get(roomId); // refresh ref
-              if (!room || room.state !== 'running') return;
+              const roomObj = rooms.get(room); // refresh ref
+              if (!roomObj || roomObj.state !== 'running') return;
 
-              room.asked = (room.asked || 0) + 1;
-              if (room.maxQuestions && room.asked >= room.maxQuestions) {
-                const lastQ = room.words[room.idx];
-                room.state = 'ended';
-                if (room.timer) { clearTimeout(room.timer); room.timer = null; }
-                broadcast(roomId, { type: 'end', scores: toScores(room), endReason: 'finished', lastId: lastQ?.id ?? null, lastWord: lastQ?.word ?? null, lastMeaning: lastQ?.meaning ?? null });
-                scheduleRoomCleanup(roomId);
+              roomObj.asked = (roomObj.asked || 0) + 1;
+              if (roomObj.maxQuestions && roomObj.asked >= roomObj.maxQuestions) {
+                const lastQ = roomObj.words[roomObj.idx];
+                roomObj.state = 'ended';
+                if (roomObj.timer) { clearTimeout(roomObj.timer); roomObj.timer = null; }
+                broadcast(room, { type: 'end', scores: toScores(roomObj), endReason: 'finished', lastId: lastQ?.id ?? null, lastWord: lastQ?.word ?? null, lastMeaning: lastQ?.meaning ?? null });
+                scheduleRoomCleanup(room);
                 return;
               }
 
-              const prevQ = room.words[room.idx];
-              room.idx = (room.idx + 1) % room.words.length;
-              const nq = room.words[room.idx];
+              const prevQ = roomObj.words[roomObj.idx];
+              roomObj.idx = (roomObj.idx + 1) % roomObj.words.length;
+              const nq = roomObj.words[roomObj.idx];
 
               // Reset round
-              room.roundState = 'active';
-              room.roundRank = 1;
-              room.answeredPlayers.clear();
+              roomObj.roundState = 'active';
+              roomObj.roundRank = 1;
+              roomObj.answeredPlayers.clear();
 
-              broadcast(roomId, {
+              broadcast(room, {
                 type: 'question',
-                index: room.idx,
+                index: roomObj.idx,
                 id: nq?.id ?? null,
                 word: nq?.word ?? null,
                 meaning: nq?.meaning ?? null,
                 choices: nq?.choices ?? null,
                 prevWord: prevQ?.word ?? null,
                 prevMeaning: prevQ?.meaning ?? null,
-                prevAnswerer: room.lastCorrectBy || null,
-                timeLimit: room.timeLimit,
-                progress: { current: room.asked + 1, total: room.maxQuestions || room.words.length }
+                prevAnswerer: roomObj.lastCorrectBy || null,
+                timeLimit: roomObj.timeLimit,
+                progress: { current: roomObj.asked + 1, total: roomObj.maxQuestions || roomObj.words.length }
               });
-              room.lastCorrectBy = null;
-              scheduleQuestionTimer(roomId);
+              roomObj.lastCorrectBy = null;
+              scheduleQuestionTimer(room);
             }, 3000); // 3 seconds delay
           }
         } else {

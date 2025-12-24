@@ -30,131 +30,70 @@ export interface QuizQuestion {
 export function generateQuizData(targetWords: QuizWord[], allWords: QuizWord[]): QuizQuestion[] {
     const questions: QuizQuestion[] = [];
 
-    // Helper to get neighbors
-    // We want to find words that are "close" in the list to the target.
-    // Ideally, allWords is already sorted by ID or logical order.
-    // We'll treat the index in allWords as the "closeness" metric.
-
     targetWords.forEach(target => {
-        const meanings = target.meaning.split(/\/(?!r\d)/g);
+        const targetIndex = allWords.findIndex(w => w.id === target.id);
+        const targetSegments = target.meaning.split(/\/(?!r\d)/g);
         const answerTypes = (target.answerType || "").split("/");
 
-        // Find index of target in allWords to locate neighbors
-        const targetIndex = allWords.findIndex(w => w.id === target.id);
+        // Correct answer is the combined formatted segments
+        const correctAnswer = formatMeaning(target.meaning);
 
-        meanings.forEach((rawMeaning, i) => {
-            const typeLabel = answerTypes[i] || "";
-            const questionText = `${target.word}${typeLabel ? ` (${typeLabel})` : ""}`;
+        // Construct question text with all labels if present
+        const typeLabels = answerTypes.filter(Boolean).join('/');
+        const questionText = `${target.word}${typeLabels ? ` (${typeLabels})` : ""}`;
 
-            let choices: string[] = [];
-            let correctAnswer = "";
+        const choices: string[] = [correctAnswer];
 
-            if (rawMeaning.startsWith("c:")) {
-                // c:Choice1:Choice2:Correct
-                // The last one is correct. All are choices.
-                const parts = rawMeaning.split(":");
-                // c:A:B:C:A -> parts=["c", "A", "B", "C", "A"]
-                // The last element is the correct answer.
-                // The middle elements (index 1 to length-1) are the choices.
-                // BUT logic recall: "c:固体:液体:気体:固体" -> Choices are 固体, 液体, 気体. Correct is 固体 (last one).
-                // Wait, if the last one is the correct one, and it's also in the choice list...
-                // The user said: "c:固体:液体:気体:固体 ... (答えは一番最後にある固体になるようにそうでないやつを誤答にする)"
-                // It implies the options are provided in the string.
+        // Find neighbors for distractors
+        const neighbors = findDistractors(allWords, targetIndex, 6, w => w.id !== target.id);
 
-                // Let's assume standard format c:Option1:Option2...:CorrectAnswer
-                // Actually looking at user example: "c:固体:液体:気体:固体"
-                // choices: [固体, 液体, 気体] (extracted from parts 1, 2, 3)
-                // correct: 固体 (part 4)
+        // Build 3 distractors
+        for (let k = 0; k < 3; k++) {
+            // For each distractor, use the k-th neighbor
+            const neighbor = neighbors[k] || allWords[Math.floor(Math.random() * allWords.length)];
+            const nSegments = neighbor.meaning.split(/\/(?!r\d)/g);
 
-                // If specific choices are < 4, we might need to pad, but user says "all should be choices".
-                // Let's just take all unique items from parts[1...last-1] as choices.
-                // And parts[last] as correct.
-
-                const cParts = rawMeaning.slice(2).split(":");
-                correctAnswer = cParts[cParts.length - 1];
-                const rawChoices = cParts.slice(0, cParts.length - 1);
-
-                // Remove duplicates and ensure correct answer is handled
-                choices = Array.from(new Set(rawChoices));
-
-                // If we strictly need 4 choices and have fewer, we might need to pad?
-                // User instruction: "すべてが選択肢になるようにしてください。かぶってもいいです。"
-                // "Make all of them choices. It's okay if they overlap."
-                // We will just use these.
-
-            } else if (rawMeaning.startsWith("m:")) {
-                // m:Main:Sub -> Display Main(Sub)
-                correctAnswer = formatMeaning(rawMeaning);
-                choices = [correctAnswer];
-
-                // Find 3 distractors
-                const distractors = findDistractors(allWords, targetIndex, 3, (w) => {
-                    // Filter for same type of meaning if possible?
-                    // The prompt says "same answerType meaning".
-                    // If we can't easily parse type from neighbors without complex logic,
-                    // we'll rely on "nearest neighbor" assumption.
-                    // Ideally we check if neighbor has "m:" or similar structure or answerType matches.
-                    // For simplicity & robustness: just pick nearest neighbors that aren't this word.
-                    return w.id !== target.id;
-                });
-
-                choices.push(...distractors.map(d => formatMeaning(d.meaning.split(/\/(?!r\d)/g)[0]))); // Take first meaning of distractor for simplicity?
-                // Or should we try to align indices?
-                // "一番近くにある3つの単語のmeaning" -> "Meaning of 3 nearest words"
-
-            } else if (rawMeaning.startsWith("r:")) {
-                // r:1:A:B/r1 -> A/B
-                correctAnswer = formatMeaning(rawMeaning);
-                choices = [correctAnswer];
-
-                // "2個以上付近から持ってきて/で区切って1個の選択肢につき二つ表示するようにしてください"
-                // Distractors should be composite of neighboring terms.
-                const neighbors = findDistractors(allWords, targetIndex, 6, (w) => w.id !== target.id);
-
-                // Create 3 distractors by combining neighbors in pairs
-                for (let k = 0; k < 3; k++) {
-                    const n1 = neighbors[k * 2];
-                    const n2 = neighbors[k * 2 + 1];
-                    if (n1 && n2) {
-                        const m1 = simpleFormat(n1.meaning);
-                        const m2 = simpleFormat(n2.meaning);
-                        choices.push(`${m1}/${m2}`);
-                    } else if (n1) {
-                        choices.push(simpleFormat(n1.meaning));
+            const distractorParts = targetSegments.map((tSeg, j) => {
+                if (tSeg.startsWith('c:')) {
+                    // c: Rule: Distractor uses an INCORRECT option from the SAME word's c: tag
+                    const parts = tSeg.slice(2).split(':');
+                    const correctPart = parts.pop();
+                    const wrongOptions = parts.filter(p => p !== correctPart);
+                    if (wrongOptions.length > 0) {
+                        // Spread options across distractors
+                        return wrongOptions[k % wrongOptions.length];
                     }
+                    return correctPart;
+                } else {
+                    // m:, r:, or Standard: Use neighbor's segment if it exists at index j
+                    // If neighbor doesn't have segment at index j, it means its structure differs.
+                    // Fallback to neighbor's segment 0 (usually the main substance name or equivalent).
+                    const dRaw = nSegments[j] !== undefined ? nSegments[j] : nSegments[0];
+                    return formatMeaning(dRaw);
                 }
-
-            } else {
-                // Standard meaning
-                correctAnswer = formatMeaning(rawMeaning);
-                choices = [correctAnswer];
-
-                // Neighbors
-                const distractors = findDistractors(allWords, targetIndex, 3, (w) => w.id !== target.id);
-                choices.push(...distractors.map(d => simpleFormat(d.meaning)));
-            }
-
-            // Finalize choices: Ensure 4 items, unique, shuffle
-            // If we used "m:" or standard, we might have pulled raw meanings that need cleaning.
-            // Re-cleaning logic applied above.
-
-            // Fallback if not enough choices
-            while (choices.length < 4) {
-                choices.push("---");
-            }
-            choices = choices.slice(0, 4);
-
-            // Shuffle choices
-            choices = choices.sort(() => Math.random() - 0.5);
-
-            questions.push({
-                id: `${target.id}_${i}`,
-                originalId: target.id,
-                word: questionText,
-                meaning: correctAnswer, // Display text
-                correctAnswer: correctAnswer,
-                choices: choices
             });
+
+            choices.push(distractorParts.join('/'));
+        }
+
+        // Finalize: Unique, 4 items, shuffle
+        let finalChoices = Array.from(new Set(choices.map(c => c.trim()).filter(Boolean)));
+
+        // If still not enough choices (rare), pad
+        while (finalChoices.length < 4) {
+            finalChoices.push(`Option ${finalChoices.length + 1}`);
+        }
+
+        // Shuffle
+        finalChoices = finalChoices.slice(0, 4).sort(() => Math.random() - 0.5);
+
+        questions.push({
+            id: target.id,
+            originalId: target.id,
+            word: questionText,
+            meaning: correctAnswer,
+            correctAnswer: correctAnswer,
+            choices: finalChoices
         });
     });
 

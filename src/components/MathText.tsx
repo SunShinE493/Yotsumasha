@@ -49,33 +49,47 @@ function ensureKatex(): Promise<any> {
 function renderSegments(text: string, katex: any): Array<React.ReactNode> {
   const nodes: Array<React.ReactNode> = [];
   if (!text) return [text];
-  // First split display math $$...$$ and \\[ ... \\]
-  const blockTokens = text.split(/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\])/g);
-  for (const tok of blockTokens) {
-    if (!tok) continue;
-    if ((tok.startsWith('$$') && tok.endsWith('$$') && tok.length >= 4) || (tok.startsWith('\\[') && tok.endsWith('\\]') && tok.length >= 4)) {
-      const expr = tok.slice(2, -2).trim();
-      try {
-        const html = katex.renderToString(expr, { displayMode: true, throwOnError: false, macros: KATEX_MACROS });
-        nodes.push(<div key={nodes.length} dangerouslySetInnerHTML={{ __html: html }} />);
-      } catch {
-        nodes.push(<pre key={nodes.length} className="text-xs whitespace-pre-wrap">{expr}</pre>);
-      }
-    } else {
-      // Split inline math $...$ and \\( ... \\)
-      const inlineTokens = tok.split(/(\$(?:[^$]|\\\$)+?\$|\\\([\s\S]+?\\\))/g);
-      for (const it of inlineTokens) {
-        if (!it) continue;
-        if ((it.startsWith('$') && it.endsWith('$') && it.length >= 2) || (it.startsWith('\\(') && it.endsWith('\\)') && it.length >= 4)) {
-          const expr = it.startsWith('$') ? it.slice(1, -1).trim() : it.slice(2, -2).trim();
-          try {
-            const html = katex.renderToString(expr, { displayMode: false, throwOnError: false, macros: KATEX_MACROS });
-            nodes.push(<span key={nodes.length} dangerouslySetInnerHTML={{ __html: html }} />);
-          } catch {
-            nodes.push(<code key={nodes.length}>{expr}</code>);
+
+  // Handle literal "\n" (two chars) and actual newline characters
+  // Split by (\n|\\n) but keep delimiter to identify it
+  const lines = text.split(/(\\n|\n)/g);
+
+  for (const line of lines) {
+    if (line === '\\n' || line === '\n') {
+      nodes.push(<br key={`br-${nodes.length}`} />);
+      continue;
+    }
+    if (!line) continue;
+
+    // Normal text segment processing (KaTeX)
+    // First split display math $$...$$ and \\[ ... \\]
+    const blockTokens = line.split(/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\])/g);
+    for (const tok of blockTokens) {
+      if (!tok) continue;
+      if ((tok.startsWith('$$') && tok.endsWith('$$') && tok.length >= 4) || (tok.startsWith('\\[') && tok.endsWith('\\]') && tok.length >= 4)) {
+        const expr = tok.slice(2, -2).trim();
+        try {
+          const html = katex.renderToString(expr, { displayMode: true, throwOnError: false, macros: KATEX_MACROS });
+          nodes.push(<div key={nodes.length} dangerouslySetInnerHTML={{ __html: html }} />);
+        } catch {
+          nodes.push(<pre key={nodes.length} className="text-xs whitespace-pre-wrap">{expr}</pre>);
+        }
+      } else {
+        // Split inline math $...$ and \\( ... \\)
+        const inlineTokens = tok.split(/(\$(?:[^$]|\\\$)+?\$|\\\([\s\S]+?\\\))/g);
+        for (const it of inlineTokens) {
+          if (!it) continue;
+          if ((it.startsWith('$') && it.endsWith('$') && it.length >= 2) || (it.startsWith('\\(') && it.endsWith('\\)') && it.length >= 4)) {
+            const expr = it.startsWith('$') ? it.slice(1, -1).trim() : it.slice(2, -2).trim();
+            try {
+              const html = katex.renderToString(expr, { displayMode: false, throwOnError: false, macros: KATEX_MACROS });
+              nodes.push(<span key={nodes.length} dangerouslySetInnerHTML={{ __html: html }} />);
+            } catch {
+              nodes.push(<code key={nodes.length}>{expr}</code>);
+            }
+          } else {
+            nodes.push(<span key={nodes.length}>{it}</span>);
           }
-        } else {
-          nodes.push(<span key={nodes.length}>{it}</span>);
         }
       }
     }
