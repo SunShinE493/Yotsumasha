@@ -78,7 +78,7 @@ export async function askQuiz(client, channelId, number) {
   }
 
   // 2. インデックス計算 (10n-9 番目 -> 0始まりで 10(n-1))
-  let startIndex = (number - 1) * 10;
+  let startIndex = (number - 1) * 9;
 
   // 総単語数より大きい場合、収まるまで引く（ループさせる）
   while (startIndex >= words.length && words.length > 0) {
