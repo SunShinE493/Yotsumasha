@@ -614,7 +614,7 @@ import { GoogleGenAI } from "@google/genai"; // ※元のコードに残って�
 import OpenAI from "openai";
 
 // --- 設定: GitHub Gist連携用 ---
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''; // ここにGitHubトークンを設定
+const GIST_TOKEN = process.env.GIST_TOKEN || ''; // ここにGitHubトークンを設定
 const GIST_ID = process.env.GIST_ID || '';           // ここに保存先のGist IDを設定
 const GIST_FILENAME = 'wordlistmemory.json';
 
@@ -1041,7 +1041,7 @@ async function extractWordListJson(text) {
 
 // 2. Gistに単語リストを追記する関数
 async function addToGist(newEntries) {
-  if (!GITHUB_TOKEN || !GIST_ID) {
+  if (!GIST_TOKEN || !GIST_ID) {
     console.error('GitHub Token or Gist ID is missing.');
     return false;
   }
@@ -1049,7 +1049,7 @@ async function addToGist(newEntries) {
   try {
     // 1. 現在のGistデータを取得
     const getResponse = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
-      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+      headers: { Authorization: `token ${GIST_TOKEN}` }
     });
 
     const file = getResponse.data.files[GIST_FILENAME];
@@ -1074,7 +1074,7 @@ async function addToGist(newEntries) {
         }
       }
     }, {
-      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+      headers: { Authorization: `token ${GIST_TOKEN}` }
     });
 
     return true;
