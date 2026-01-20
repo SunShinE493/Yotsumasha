@@ -113,7 +113,7 @@ export async function askQuiz(client, channelId, number) {
 
   targetWords.forEach((item, index) => {
     const emoji = NUMBER_EMOJIS[index];
-    messageContent += `${emoji} ${item.word} ー ${item.meaning}\n`;
+    messageContent += `${emoji} ${item.word} ー ||${item.meaning}||\n`;
   });
 
   // 5. メッセージ送信
