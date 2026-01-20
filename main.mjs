@@ -610,7 +610,6 @@ async function checkFeed(channelFeedUrl) {
 
 import { dailyTrigger } from './commands/samples/daymath.mjs';
 import { askQuiz } from './commands/samples/wordQuiz.mjs';
-import { sendJsonAsText } from './commands/samples/wordQuiz.mjs';
 import { GoogleGenAI } from "@google/genai"; // ※元のコードに残っていましたが、下部でOpenAI互換を使用しているため未使用なら削除可
 import OpenAI from "openai";
 
@@ -631,9 +630,6 @@ async function SchTrigger() {
   let filePath = 'commands/samples/wordlist.json';
 
   // エラーハンドリング追加（clientが定義されている前提）
-  try {
-    sendJsonAsText(client, channelId, filePath)
-  } catch(e) { console.error(e); }
 
   if (hour === 6 || hour === 23) {
     console.log('課題確認トリガー' + now + hour)
