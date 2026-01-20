@@ -604,39 +604,50 @@ async function checkFeed(channelFeedUrl) {
     },
   );
 }
-import { dailyTrigger } from './commands/samples/daymath.mjs'
-import { askQuiz } from './commands/samples/wordQuiz.mjs'
-import { sendJsonAsText } from './commands/samples/wordQuiz.mjs'
+
+
+
+
+import { dailyTrigger } from './commands/samples/daymath.mjs';
+import { askQuiz } from './commands/samples/wordQuiz.mjs';
+import { sendJsonAsText } from './commands/samples/wordQuiz.mjs';
+import { GoogleGenAI } from "@google/genai"; // ※元のコードに残っていましたが、下部でOpenAI互換を使用しているため未使用なら削除可
+import OpenAI from "openai";
+
+// --- 設定: GitHub Gist連携用 ---
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''; // ここにGitHubトークンを設定
+const GIST_ID = process.env.GIST_ID || '';           // ここに保存先のGist IDを設定
+const GIST_FILENAME = 'wordlistmemory.json';
+
 let wcount = 1;
+
+// --- スケジュールトリガー ---
 async function SchTrigger() {
-
   const now = moment().tz("Asia/Tokyo");
-
   const hour = now.hour();
   console.log('課題確認トリガー' + now + hour)
 
   let channelId = '1188202806851682314';
   let filePath = 'commands/samples/wordlist.json';
-  sendJsonAsText(client, channelId, filePath)
-  if (hour === 6 || hour === 23) {
 
-    // channel を取得（例：特定のチャンネルIDを指定）
+  // エラーハンドリング追加（clientが定義されている前提）
+  try {
+    sendJsonAsText(client, channelId, filePath)
+  } catch(e) { console.error(e); }
+
+  if (hour === 6 || hour === 23) {
     console.log('課題確認トリガー' + now + hour)
     const channel = await client.channels.fetch('1162776615445594122'); // てるまない雑談
-
-
     const period = hour === 6 ? 'AM' : 'PM';
-
-    sendReminders(channel, period);
+    sendReminders(channel, period); // ※sendReminders関数は外部定義またはこのファイルに必要
 
   } else if (hour === 4) {
-    const channel2 = await client.channels.fetch('838468033789558848'); //一般'838468033789558848
+    const channel2 = await client.channels.fetch('838468033789558848'); 
     dailyTrigger(channel2)
     console.log('積分');
   } else if (hour > 4 && hour < 23) {
     const channelId = '838468033789558848';
-    const today = new Date(); // 日付を番号に変換する例 (例: 8月19日なら19
-    const dayNumber = today.getDate();
+    const today = new Date(); 
     wcount++;
     askQuiz(client, channelId, wcount)
   }
@@ -652,157 +663,162 @@ async function backupToGist() {
   } catch { }
 }
 
-
-//追加
+// --- メインのメッセージイベントハンドラ ---
 client.on('messageCreate', async (message) => {
 
   // ボット自身のメッセージは無視
-
   if (message.author.bot) return;
 
-  // リプライされたメッセージか確認
-  if (message.mentions.has('1187343608026771496')) {
+  // リプライされたメッセージか確認（Botへのメンション）
+  // IDはBot自身のものに書き換えてください
+  const MY_BOT_ID = '1187343608026771496'; 
 
+  if (message.mentions.has(MY_BOT_ID)) {
+
+    // 1. 画像リプライの処理
     if (message.reference && message.reference.messageId) {
-
       const repliedChannel = message.channel;
       const repliedMessageId = message.reference.messageId;
 
-      // 返信元のメッセージを取得
-
-      const repliedMessage = await repliedChannel.messages.fetch(repliedMessageId);
-
-      const attachment = repliedMessage.attachments.first();
-      if (!attachment || !attachment.contentType.startsWith('image')) {
-        //画像なし
-
-        try {
-          // リプライ元のチャンネルを取
-
-          let content = message.content + '以降は、以前のメッセージを添付しています。→→' + repliedMessage.content;
-          const keyword = '<@1187343608026771496>'
-          content = content.replace(new RegExp(keyword, "g"), "");
-          console.log(content);
-          runai(content, message, 1);
-        } catch (error) {
-          console.error('リプライコンテントがない', error)
-        }
-        return;
-      }
-
       try {
-        //urlからデータ
-        const response = await axios.get(attachment.url, {
-          responseType: 'arraybuffer',
-        });
-        const imageData = response.data;
-        const mimeType = attachment.contentType;
+        const repliedMessage = await repliedChannel.messages.fetch(repliedMessageId);
+        const attachment = repliedMessage.attachments.first();
 
-        // 画像データをBase64にエンコード
-        const base64Image = Buffer.from(imageData).toString('base64');
+        // 画像がない場合（テキストのみのリプライなど）
+        if (!attachment || !attachment.contentType.startsWith('image')) {
+          try {
+            let content = message.content + '以降は、以前のメッセージを添付しています。→→' + repliedMessage.content;
+            const keyword = `<@${MY_BOT_ID}>`;
+            content = content.replace(new RegExp(keyword, "g"), "");
+            console.log(content);
+            runai(content, message, 1);
+          } catch (error) {
+            console.error('リプライコンテントがない', error)
+          }
+          return;
+        }
 
+        // 画像がある場合
+        try {
+          const response = await axios.get(attachment.url, { responseType: 'arraybuffer' });
+          const imageData = response.data;
+          const mimeType = attachment.contentType;
+          const base64Image = Buffer.from(imageData).toString('base64');
 
-        // Gemini APIに送信するコンテンツを準備
-        let promptText = message.content.replace(`<@${client.user.id}>`, '').trim();
+          let promptText = message.content.replace(`<@${client.user.id}>`, '').trim(); // client.user.idを使用
 
-        console.log(promptText)
-        const parts = [
-          { text: promptText },
-          {
-            inlineData: {
-              data: base64Image,
-              mimeType: mimeType,
-            },
-          },
-        ];
-
-        // まずは「考え中...」のメッセージを送信
-
-        runai(parts, message, 1);
+          console.log(promptText)
+          // ※Gemini用のpayload構造ですが、runai側でOpenAI系を使っているため、
+          // 画像処理を行う場合はrunai側も画像対応（GPT-4oなど）に修正する必要があります。
+          // ここでは既存コードの構造を維持します。
+          const parts = [
+            { text: promptText },
+            { inlineData: { data: base64Image, mimeType: mimeType } },
+          ];
+          runai(parts, message, 1); // ここで画像処理用の分岐が必要かもしれません
+        } catch (error) {
+          console.error('画像リプライ処理エラー', error)
+        }
       } catch (error) {
-        console.error('画像リプライコンテントがない', error)
+        console.error('リプライ取得エラー', error);
       }
-    } else {
-      runai(0, message, 0)
+    } 
+    // 2. 通常のメンション（画像リプライではない場合）
+    else {
+      let content = message.content.replace(new RegExp(`<@!?${MY_BOT_ID}>`, 'g'), '').trim();
+
+      // ▼▼▼ 追加機能: 単語リスト登録機能 ▼▼▼
+      // 簡易判定: 「ー」または「-」を含み、かつAI抽出が成功しそうな場合
+      const wordListPattern = /[a-zA-Z]+.*[ー\-].+/;
+
+      if (wordListPattern.test(content)) {
+        // AIでJSON抽出を試みる
+        const extractedData = await extractWordListJson(content);
+
+        // JSON配列が正しく取得できたら確認フローへ
+        if (extractedData && Array.isArray(extractedData) && extractedData.length > 0) {
+
+          const jsonString = JSON.stringify(extractedData, null, 2);
+          const confirmMsg = await message.channel.send(
+            `以下の内容をリストに追加しますか？\n\`\`\`json\n${jsonString}\n\`\`\``
+          );
+
+          await confirmMsg.react('✅');
+          await confirmMsg.react('❌');
+
+          // リアクション検知 (10分間 = 600,000ms)
+          const filter = (reaction, user) => {
+            return ['✅', '❌'].includes(reaction.emoji.name) && !user.bot;
+          };
+
+          const collector = confirmMsg.createReactionCollector({ filter, time: 600000 });
+
+          collector.on('collect', async (reaction, user) => {
+            if (reaction.emoji.name === '✅') {
+              await message.channel.send('Gistに追加しています...');
+              const success = await addToGist(extractedData);
+              if (success) {
+                await message.channel.send(`✅ Gist (${GIST_FILENAME}) に ${extractedData.length}件追加しました！`);
+              } else {
+                await message.channel.send('❌ Gistへの追加に失敗しました。設定を確認してください。');
+              }
+              collector.stop('accepted');
+            } else if (reaction.emoji.name === '❌') {
+              await message.channel.send('キャンセルしました。');
+              collector.stop('cancelled');
+            }
+          });
+
+          return; // 単語登録フローに入ったので、通常の会話AIは実行しない
+        }
+      }
+      // ▲▲▲ 追加機能終了 ▲▲▲
+
+      // 通常のAI会話
+      runai(content, message, 0);
     }
   }
+
+  // ボット自身のメッセージへのリプライ検知（リアクション用）
   if (message.reference) {
-
     try {
-
-      // リプライ対象のメッセージを取得
-
       const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
-
-      // ボットが送信したメッセージにリプライされた場合のみ反応
-
       if (repliedMessage.author.id === client.user.id) {
-
-        // リプライにリアクションを追加
-
         await message.react('😅');
-
         console.log(`リアクションを追加しました: ${message.content}`);
-
-
       }
-
     } catch (error) {
-
       console.error('リプライ処理中にエラーが発生しました:', error);
-
     }
-
   }
-
 });
+
+// --- リアクションイベント ---
 client.on('messageReactionAdd', async (reaction, user) => {
-
   if (reaction.partial) {
-
     try {
-
       await reaction.fetch();
       console.log('リアクションあり')
     } catch (error) {
-
       console.error('リアクションの取得に失敗しました:', error);
-
       return;
-
     }
-
   }
-
   const message = reaction.message;
 
   // Botが送信したメッセージかどうか
-
   if (message.content.includes('あたま')) {
-
-    //message.author?.bot && 
-
     const channel = message.channel;
-
     channel.send(`${user.toString()}あたま`);
-
   }
   if (reaction.emoji.name === '💩') {
     if (user.id === '1163105759492571156') {
-      // reaction から message を辿って channel を指定する
       reaction.message.channel.send("<@1163105759492571156>うんこ置くな");
     }
   }
-
-
 });
 
-
-
-
-
-
-
+// --- その他の自動応答用 messageCreate ---
 client.on('messageCreate', async message => {
   // ボットのメッセージは無視
   if (message.author.bot) {
@@ -813,13 +829,13 @@ client.on('messageCreate', async message => {
     } else if (/<@838466692299882518>あたま/.test(message.content)) {
       await message.channel.send('<@1163105759492571156>あたま');
     }
-
     else return;
   }
-  // メッセージに「漏らして」または「💩」が含まれる場合
+
+  // 自動応答ルール
   if (/漏らして|💩/.test(message.content)) {
-    await message.channel.send('ぶりっ💩'); // メッセージ送信
-    await message.react('💩'); // 💩リアクションを追加
+    await message.channel.send('ぶりっ💩'); 
+    await message.react('💩'); 
   }
   if (/？？？|ふちる|？る/.test(message.content)) {
     await message.channel.send('そんなコマンドないで');
@@ -849,154 +865,21 @@ client.on('messageCreate', async message => {
     await message.react('<:uwa:1337797911156887635>');
   }
   if (/ちょんす/.test(message.content)) {
-    await message.react('🇨');
-    await message.react('🇭');
-    await message.react('🇴');
-    await message.react('🇳');
-    await message.react('🇸');
+    await message.react('🇨'); await message.react('🇭'); await message.react('🇴'); await message.react('🇳'); await message.react('🇸');
   }
   if (/<@838466692299882518>あたま|<@838466692299882518> あたま|<@1236945333511258165>あたま/.test(message.content)) {
     await message.channel.send('<@1163105759492571156>あたま');
   }
-
-
 });
 
-import { GoogleGenAI } from "@google/genai";
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-let aisikibetsu, max;
-
-
-
-/**
-
-const API_KEY = process.env.GOOGLE_API_KEY;
-if (API_KEY === undefined) {
-  console.log("APIki-なし")
-}
-let ai;
-if (API_KEY) {
-  ai = new GoogleGenAI(API_KEY, {});
-} else {
-  console.log("API Key missing, AI features disabled.");
-}
-async function runai(content, message, aisikibetsu) {
-  const talk = message.content;
-  if (aisikibetsu === 0) {
-    if (!ai) {
-      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
-      return;
-    }
-    max = 1000;
-
-    const chat = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
-      contents: talk + "（##回答の内容は短く簡潔に。）",
-      config: {
-        maxOutputTokens: 1800,
-      },
-    })
-    console.log(chat.text);
-    if (chat.text !== undefined) {
-      await message.channel.send(chat.text);
-    } else {
-      await message.channel.send("字数エラー");
-      console.log("字数エラー");
-    }
-  } else if (aisikibetsu === 1) {
-    if (!ai) {
-      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
-      return;
-    }
-    message.channel.send('考え中です。これには数分かかる場合もあります。');
-
-    try {
-
-      let result = await ai.models.generateContentStream({
-        model: "gemini-2.0-flash-thinking-exp",
-        contents: content,
-        config: { // 前回確認した通り、configで問題ないならこれでOK
-          temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
-          topP: 0.9, // サンプリング時の確率閾値を調整
-          topK: 40, // サンプリング時の上位K個のトークンに限定
-        },
-      });
-
-      let fullResponse = '';
-      let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
-      const MAX_DISCORD_MESSAGE_LENGTH = 2000; // Discordのメッセージ最大文字数
-
-      // ストリーム応答を逐次処理
-      for await (const chunk of result) {
-        const chunkText = chunk.text;
-        fullResponse += chunkText;
-
-        // 2000文字を超えたら、その部分を送信し、fullResponseをクリア
-        // ただし、最後のチャンクでない限り、既存メッセージの編集は行わない
-        if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH) {
-          const partToSend = fullResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
-
-          // 2000文字に達したら常に新しいメッセージとして送信
-          // lastSentMessage = null の場合でも新規送信になる
-          lastSentMessage = await message.channel.send(partToSend);
-
-          fullResponse = fullResponse.substring(MAX_DISCORD_MESSAGE_LENGTH); // 送信した部分をfullResponseから削除
-        }
-      }
-
-      // ストリームが完全に終了した後、fullResponseに残っているテキストを処理
-      if (fullResponse.length > 0) {
-        // 残りがある場合、まだ送信されたメッセージがなければ新規で、
-        // 既にメッセージが送信されていれば、それが最後の部分なのでそのメッセージを編集
-        if (lastSentMessage) {
-          // 最後のメッセージが存在する場合、そのメッセージに追記する形で編集
-          // ただし、Discord APIの文字数制限があるので、実際には新しいメッセージとして送る方が安全
-          // ここは新規メッセージとして送るロジックに統一します
-          await message.channel.send(fullResponse);
-        } else {
-          // まだメッセージが一つも送信されていない（応答が2000文字未満だった）場合
-          await message.channel.send(fullResponse);
-        }
-      }
-    } catch (error) {
-      console.error('Gemini APIからの応答中にエラーが発生しました:', error);
-      message.reply('Gemini APIからの応答中にエラーが発生しました。');
-    }
-  } else if (aisikibetsu === 2) {
-
-
-
-    // Gemini APIにストリーミングリクエストを送信
-    const result = await model.generateContentStream({ contents: [{ role: 'user', parts }] });
-
-    let fullText = '';
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      fullText += chunkText;
-
-      // 最初のメッセージを編集して、回答を追記
-      await message.edit(fullText);
-    }
-
-
-  }
-}
-
-*/
-
-
-import OpenAI from "openai";
-// キーの取得（名前は適宜合わせてください。DeepSeekのキーが入っている前提です）
+// --- AI設定 (OpenAI / DeepSeek) ---
 const D_API_KEY = process.env.Deepseek_API;
-
 if (D_API_KEY === undefined) {
   console.log("APIキーなし");
 }
 
 let ai;
 if (D_API_KEY) {
-  // DeepSeek用に初期化 (BaseURLを設定)
   ai = new OpenAI({
     baseURL: 'https://api.groq.com/openai/v1',
     apiKey: D_API_KEY
@@ -1005,10 +888,11 @@ if (D_API_KEY) {
   console.log("API Key missing, AI features disabled.");
 }
 
+// --- AI実行関数 ---
 async function runai(content, message, aisikibetsu) {
-  const talk = message.content;
+  const talk = (typeof content === 'string') ? content : "（画像が送信されましたが、現在のモデルではテキストのみ処理します）"; // 画像ペイロード対策
 
-  // --- パターン0: 通常の会話 (gemini-2.0-flash-exp 相当 -> deepseek-chat) ---
+  // --- パターン0: 通常の会話 ---
   if (aisikibetsu === 0) {
     if (!ai) {
       await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
@@ -1017,11 +901,11 @@ async function runai(content, message, aisikibetsu) {
 
     try {
       const completion = await ai.chat.completions.create({
-        model: "llama-3.3-70b-versatile", // 高速な通常モデル
+        model: "llama-3.3-70b-versatile",
         messages: [
           { role: "user", content: talk + "（##回答の内容は短く簡潔に。）" }
         ],
-        max_tokens: 1800, // maxOutputTokens の代わり
+        max_tokens: 1800,
         stream: false,
       });
 
@@ -1038,38 +922,38 @@ async function runai(content, message, aisikibetsu) {
       await message.channel.send("エラーが発生しました");
     }
 
-    // --- パターン1: 思考/長文生成 (gemini-2.0-flash-thinking-exp 相当 -> deepseek-reasoner) ---
+    // --- パターン1: 思考/長文生成 (DeepSeek R1相当) ---
   } else if (aisikibetsu === 1) {
     if (!ai) {
       await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
       return;
     }
-    message.channel.send('考え中です。llama-3.3-70b-versatileが推論しています...');
+    message.channel.send('考え中です...');
 
     try {
+      // partsオブジェクトが来ている場合の処理が必要ならここで変換
+      let textContent = talk;
+      if (Array.isArray(content) && content[0].text) {
+          textContent = content[0].text;
+      }
+
       const stream = await ai.chat.completions.create({
-        model: "llama-3.3-70b-versatile", // 推論強化モデル (DeepSeek R1)
+        model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "user", content: content }
+          { role: "user", content: textContent }
         ],
         stream: true,
-        // ※ DeepSeek Reasoner は temperature 等のパラメータ指定をサポートしていないため削除しました
       });
 
       let fullResponse = '';
       const MAX_DISCORD_MESSAGE_LENGTH = 2000;
 
       for await (const chunk of stream) {
-        // DeepSeekのストリームからテキストを取得
-        // reasonerモデルの場合、reasoning_content（思考過程）も返ってきますが、
-        // ここでは content（最終回答）のみを取得するようにしています。
         const chunkText = chunk.choices[0]?.delta?.content || '';
-
-        if (!chunkText) continue; // 空の場合はスキップ
+        if (!chunkText) continue;
 
         fullResponse += chunkText;
 
-        // Discordの2000文字制限処理
         if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH) {
           const partToSend = fullResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
           await message.channel.send(partToSend);
@@ -1077,57 +961,129 @@ async function runai(content, message, aisikibetsu) {
         }
       }
 
-      // 残りのテキストを送信
       if (fullResponse.length > 0) {
         await message.channel.send(fullResponse);
       }
 
     } catch (error) {
-      console.error('DeepSeek APIからの応答中にエラーが発生しました:', error);
-      message.reply('DeepSeek APIからの応答中にエラーが発生しました。');
+      console.error('APIからの応答中にエラーが発生しました:', error);
+      message.reply('APIからの応答中にエラーが発生しました。');
     }
 
-    // --- パターン2: 既存メッセージの編集 (ストリーミング) ---
+    // --- パターン2: 既存メッセージの編集 ---
   } else if (aisikibetsu === 2) {
-    // 元のコードで未定義だった部分を補完しています
     if (!ai) return;
 
     try {
       const stream = await ai.chat.completions.create({
-        model: "deepseek-chat",
-        messages: [{ role: 'user', content: content }], // parts ではなく content を使用
+        model: "deepseek-chat", // または適切なモデル
+        messages: [{ role: 'user', content: talk }],
         stream: true
       });
 
       let fullText = '';
-      let msgToEdit = null; // 編集対象のメッセージ
-
-      // 最初に「考え中...」などのメッセージを送っておき、それを編集する場合
-      // もし既に編集したいメッセージがある場合はそれを引数で渡すなどの変更が必要です
-      // ここでは便宜上、新規にメッセージを送ってそれを編集していくスタイルにします
-      msgToEdit = await message.channel.send("生成中...");
-
-      let updateCount = 0; // API制限回避のため更新頻度を調整用
+      let msgToEdit = await message.channel.send("生成中...");
+      let updateCount = 0;
 
       for await (const chunk of stream) {
         const chunkText = chunk.choices[0]?.delta?.content || '';
         fullText += chunkText;
 
-        // Discord APIのレート制限（Rate Limit）に引っかからないよう、
-        // 毎回 edit するのではなく、一定量たまるか時間が経過してから edit するのが定石ですが
-        // とりあえず元のロジックに近い形で書きます
-
-        // (あまりに高速にeditするとDiscord APIでエラーになるため、本来は間引き処理が必要です)
         updateCount++;
-        if (updateCount % 10 === 0) { // 10チャンクごとに更新（簡易的な間引き）
-          await msgToEdit.edit(fullText.substring(0, 2000)); // 2000文字以内で編集
+        if (updateCount % 10 === 0) {
+          await msgToEdit.edit(fullText.substring(0, 2000)).catch(()=>{});
         }
       }
-      // 最後に確実に全文で更新
-      await msgToEdit.edit(fullText.substring(0, 2000));
+      await msgToEdit.edit(fullText.substring(0, 2000)).catch(()=>{});
 
     } catch (e) {
       console.error(e);
     }
+  }
+}
+
+// --- 追加機能用関数 ---
+
+// 1. AIを使ってテキストから単語リストJSONを抽出する関数
+async function extractWordListJson(text) {
+  if (!ai) return null;
+
+  try {
+    const prompt = `
+    以下のテキストから「英単語」と「意味」のペアを抽出し、JSON配列形式で出力してください。
+    他の解説は一切不要です。JSONのみを出力してください。
+
+    フォーマット:
+    [
+      {"word": "英単語", "meaning": "意味"},
+      {"word": "英単語", "meaning": "意味"}
+    ]
+
+    テキスト:
+    ${text}
+    `;
+
+    const completion = await ai.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1, // 確実性を高める
+      stream: false,
+    });
+
+    let content = completion.choices[0].message.content;
+
+    // コードブロック(```json ... ```)の除去
+    content = content.replace(/```json|```/g, '').trim();
+
+    // JSONとしてパースできるか確認
+    return JSON.parse(content);
+  } catch (e) {
+    console.error('JSON Extraction Error:', e);
+    return null;
+  }
+}
+
+// 2. Gistに単語リストを追記する関数
+async function addToGist(newEntries) {
+  if (!GITHUB_TOKEN || !GIST_ID) {
+    console.error('GitHub Token or Gist ID is missing.');
+    return false;
+  }
+
+  try {
+    // 1. 現在のGistデータを取得
+    const getResponse = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+    });
+
+    const file = getResponse.data.files[GIST_FILENAME];
+    let currentData = [];
+
+    if (file && file.content) {
+      try {
+        currentData = JSON.parse(file.content);
+      } catch (e) {
+        console.error('Existing Gist content is not valid JSON, starting fresh.');
+      }
+    }
+
+    // 2. データを結合
+    const updatedData = [...currentData, ...newEntries];
+
+    // 3. Gistを更新 (PATCH)
+    await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {
+      files: {
+        [GIST_FILENAME]: {
+          content: JSON.stringify(updatedData, null, 2)
+        }
+      }
+    }, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Failed to update Gist:', error.response?.data || error.message);
+    return false;
   }
 }

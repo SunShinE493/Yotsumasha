@@ -6,48 +6,66 @@ import {
   EmbedBuilder,
   MessageFlags,
 } from "discord.js";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+import axios from "axios"; // Gist操作用
 
+// --- 設定: Gist連携用 ---
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''; // GitHub Personal Access Token
+const GIST_ID = process.env.GIST_ID || '';           // 保存先のGist ID
+const GIST_FILENAME = 'wordlistmemory.json';
 
-const __filename = fileURLToPath(
-  import.meta.url
-);
-const __dirname = path.dirname(__filename);
-const wordListPath = path.join(__dirname, "wordlist.json");
+// 数字絵文字の定義
+const NUMBER_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
 
-// wordlist.jsonの読み込み関数
+// ---------------------------------------------------
+// Gist 操作関数
+// ---------------------------------------------------
+
+// Gistからデータを読み込む
 async function readWordList() {
+  if (!GITHUB_TOKEN || !GIST_ID) {
+    console.error("GitHub Token または Gist ID が設定されていません。");
+    return [];
+  }
   try {
-    const data = await fs.readFile(
-      wordListPath,
-      "utf8"
-    );
-    return JSON.parse(data);
+    const response = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+    });
+    const file = response.data.files[GIST_FILENAME];
+    if (file && file.content) {
+      return JSON.parse(file.content);
+    }
+    return [];
   } catch (error) {
-    console.error("Failed to read wordlist.json:", error);
+    console.error("Gistの読み込みに失敗しました:", error.message);
     return [];
   }
 }
 
-// wordlist.jsonへの保存関数
+// Gistへデータを保存する
 async function saveWordList(list) {
+  if (!GITHUB_TOKEN || !GIST_ID) return;
   try {
-    await fs.writeFile(
-      wordListPath,
-      JSON.stringify(list, null, 2)
-    );
+    await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {
+      files: {
+        [GIST_FILENAME]: {
+          content: JSON.stringify(list, null, 2)
+        }
+      }
+    }, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+    });
+    console.log("Gistへの保存完了");
   } catch (error) {
-    console.error("Failed to save wordlist.json:", error);
+    console.error("Gistへの保存に失敗しました:", error.message);
   }
 }
 
 // ---------------------------------------------------
-// 修正版 askQuiz 関数
+// 修正版 askQuiz 関数 (リスト表示 & 自動削除)
 // ---------------------------------------------------
 export async function askQuiz(client, channelId, number) {
-  const words = await readWordList();
+  // 1. Gistから単語リストを取得
+  let words = await readWordList();
 
   const channel = client.channels.cache.get(channelId);
   if (!channel) {
@@ -55,101 +73,120 @@ export async function askQuiz(client, channelId, number) {
     return;
   }
 
-    if (number <= 0 || number > words.length) {
-    console.error("無効な番号が指定されました。", number);
-      channel.send("無効な番号が指定されました。", number )
+  if (!words || words.length === 0) {
+    channel.send("単語リストが空です。");
     return;
   }
 
-  const selectedWord = words[number - 1];
-  const embed = new EmbedBuilder()
-    .setColor("Blue")
-    .setTitle(`今日の英単語 #${number}`)
-    .setDescription(`この英単語の意味を答えてください:\n\n**${selectedWord.word}**`);
+  // 2. インデックス計算 (10n-9 番目 -> 0始まりで 10(n-1))
+  // 指定された番号nが有効でない場合は、有効になるまで総単語数を引く
+  let startIndex = (number - 1) * 10;
 
-  // 答えを見るボタンと覚えたボタンを追加
-  const showAnswerButton = new ButtonBuilder()
-    .setCustomId(`show_meaning_${number}`)
-    .setLabel("答えを見る")
-    .setStyle(ButtonStyle.Primary);
+  // 総単語数より大きい場合、収まるまで引く（ループさせる）
+  while (startIndex >= words.length && words.length > 0) {
+    startIndex -= words.length;
+  }
+  // 念のため負の値対策
+  if (startIndex < 0) startIndex = 0;
 
-  const learnedButton = new ButtonBuilder()
-    .setCustomId(`learned_word_${number}`)
-    .setLabel("覚えた")
-    .setStyle(ButtonStyle.Success);
+  // 3. 表示する9個の単語を抽出
+  // 配列の最後までいったら途切れる（ループさせずにそこで止める場合）
+  // もし「表示もループさせたい」場合はロジックを追加する必要がありますが、
+  // ここでは「リストの末尾まで」を取得します。
+  const targetWords = [];
+  for (let i = 0; i < 9; i++) {
+    const index = startIndex + i;
+    if (index < words.length) {
+      targetWords.push(words[index]);
+    } else {
+      break; // リストの末尾に到達したら終了
+    }
+  }
 
-  const row = new ActionRowBuilder().addComponents(
-    showAnswerButton,
-    learnedButton
-  );
+  if (targetWords.length === 0) {
+    channel.send("表示可能な単語がありません。");
+    return;
+  }
 
-  // interaction.reply()の代わりに channel.send() を使う
-  const message = await channel.send({
-    embeds: [embed],
-    components: [row],
+  // 4. メッセージの作成
+  let messageContent = `**単語リスト (No.${number} / Start Index: ${startIndex})**\nCheck ✅ to delete after 59 mins.\n\n`;
+
+  targetWords.forEach((item, index) => {
+    const emoji = NUMBER_EMOJIS[index];
+    messageContent += `${emoji} ${item.word} ー ${item.meaning}\n`;
   });
 
-  // メッセージにコレクターを付ける
-  const collector = message.createMessageComponentCollector({
-    time: 3600000, // 1時間有効
+  // 5. メッセージ送信
+  const message = await channel.send(messageContent);
+
+  // 6. リアクションの付与 (1〜9)
+  // 順番通りにリアクションするために reduce または for...of を使用
+  try {
+    for (let i = 0; i < targetWords.length; i++) {
+      await message.react(NUMBER_EMOJIS[i]);
+    }
+  } catch (error) {
+    console.error("リアクション付与中にエラー:", error);
+  }
+
+  // 7. コレクターの設置 (59分間待機)
+  const waitTime = 59 * 60 * 1000; // 59分
+
+  const collector = message.createReactionCollector({
+    time: waitTime,
+    dispose: true // リアクションが外された場合も考慮する場合はtrue（今回は終了時判定なので必須ではないが念のため）
   });
 
-  collector.on("collect", async (i) => {
-    // 答えボタンを押したユーザーのみに回答を見せる
-    if (i.customId === `show_meaning_${number}`) {
-      const answerEmbed = new EmbedBuilder()
-        .setColor("Green")
-        .setTitle(`回答 #${number}`)
-        .setDescription(`**${selectedWord.word}** の意味は\n\n**${selectedWord.meaning}** です。`);
+  console.log(`コレクター開始: ${waitTime / 60000}分間監視します。`);
 
-      await i.reply({
-        embeds: [answerEmbed],
-         flags: MessageFlags.Ephemeral,
-      });
-      // collector.stop(); は削除。覚えたボタンも押せるようにするため。
+  collector.on("end", async (collected) => {
+    console.log("コレクター終了。削除判定を開始します。");
+
+    try {
+      // 削除を実行する前に、最新のリストを再取得する（競合回避のため）
+      let currentWords = await readWordList();
+      let wordsToDelete = [];
+
+      // 各絵文字についてチェック
+      for (let i = 0; i < targetWords.length; i++) {
+        const emojiChar = NUMBER_EMOJIS[i];
+        const reaction = collected.get(emojiChar);
+
+        if (reaction) {
+          // Bot以外のユーザーがリアクションしているか確認
+          // countにはBot自身のリアクションも含まれるため count > 1 なら誰かが押したとみなす
+          // より厳密には users.fetch() をすべきですが、簡易的に count で判定
+          if (reaction.count > 1) {
+            wordsToDelete.push(targetWords[i].word); // 削除対象の単語を記録
+          }
+        }
+      }
+
+      if (wordsToDelete.length > 0) {
+        // 削除対象を除外した新しいリストを作成
+        const initialLength = currentWords.length;
+        const newWordList = currentWords.filter(w => !wordsToDelete.includes(w.word));
+
+        if (initialLength !== newWordList.length) {
+          await saveWordList(newWordList);
+
+          const deletedCount = initialLength - newWordList.length;
+          const reportMsg = `以下の単語をリストから削除しました (${deletedCount}件):\n` + wordsToDelete.join(', ');
+
+          await channel.send(reportMsg);
+          console.log(`削除実行: ${wordsToDelete.join(', ')}`);
+        }
+      } else {
+        // 削除対象なし
+        // console.log("削除対象の単語はありませんでした。");
+      }
+
+      // 終わったらメッセージのリアクションを消すなどの処理はお好みで
+      // await message.reactions.removeAll(); 
+
+    } catch (error) {
+      console.error("削除処理中にエラーが発生しました:", error);
     }
-    // 覚えたボタンが押されたときの処理
-    else if (i.customId === `learned_word_${number}`) {
-      const currentWords = await readWordList();
-      const wordToDelete = currentWords[number - 1];
-
-      // フィルターを使って削除
-      const updatedWords = currentWords.filter(
-        (word) => word.word !== wordToDelete.word
-      );
-
-      await saveWordList(updatedWords);
-      await i.reply({
-        content: `英単語「${wordToDelete.word}」をリストから削除しました。これで完璧に覚えましたね！`,
-        ephemeral: false,
-      });
-
-      // コレクターを停止し、メッセージのボタンを無効化
-      collector.stop();
-      message.edit({
-        components: [
-          new ActionRowBuilder().addComponents(
-            showAnswerButton.setDisabled(true),
-            learnedButton.setDisabled(true)
-          ),
-        ],
-      });
-    }
-  });
-
-  collector.on("end", (collected) => {
-    // コレクターが時間切れで終了した場合、ボタンを無効化する
-    if (collected.size === 0) {
-      message.edit({
-        components: [
-          new ActionRowBuilder().addComponents(
-            showAnswerButton.setDisabled(true),
-            learnedButton.setDisabled(true)
-          ),
-        ],
-      });
-    }
-    console.log(`コレクターが終了しました。回答数: ${collected.size}`);
   });
 }
 
@@ -158,22 +195,22 @@ export async function askQuiz(client, channelId, number) {
 // ---------------------------------------------------
 export const data = new SlashCommandBuilder()
   .setName("word")
-  .setDescription("英単語の問題と回答を管理します。")
+  .setDescription("Gistの単語リストを管理します。")
   .addSubcommand((subcommand) =>
     subcommand
-      .setName("quiz")
-      .setDescription("番号に対応する英単語の問題を出題します。")
+      .setName("list")
+      .setDescription("指定番号に基づいて単語リストを表示します（暗記モード）。")
       .addIntegerOption((option) =>
         option
           .setName("number")
-          .setDescription("表示する英単語の番号")
+          .setDescription("リスト番号 (n)")
           .setRequired(true)
       )
   )
   .addSubcommand((subcommand) =>
     subcommand
       .setName("add")
-      .setDescription("新しい英単語と意味を追加します。")
+      .setDescription("新しい英単語と意味をGistに追加します。")
       .addStringOption((option) =>
         option
           .setName("word")
@@ -186,98 +223,65 @@ export const data = new SlashCommandBuilder()
           .setDescription("英単語の意味")
           .setRequired(true)
       )
-  )
-  .addSubcommand((subcommand) =>
-    subcommand
-      .setName("training")
-      .setDescription("今日の英単語の練習ができます")
-      .addIntegerOption((option) =>
-        option
-          .setName("questions")
-          .setDescription("問題数")
-          .setRequired(true)
-      )
   );
 
 export async function execute(interaction) {
   const subcommand = interaction.options.getSubcommand();
+  const client = interaction.client;
+  const channelId = interaction.channelId;
 
-  if (subcommand === "quiz") {
+  if (subcommand === "list") { // 旧 quiz
     const number = interaction.options.getInteger("number");
-    
-    
-    interaction.reply({
-      content: `英単語 #${number}　の問題を出題します。 `,
+
+    await interaction.reply({
+      content: `リスト #${number} を読み込んでいます...`,
       ephemeral: true
-    })
-    const channelId = interaction.channelId;
-    const client = interaction.client;
-    // 新しい関数を呼び出す
-  let filePath = 'commands/samples/wordlist.json';
-  sendJsonAsText(client, channelId, filePath) 
-  
+    });
+
+    // リスト表示関数呼び出し
     await askQuiz(client, channelId, number);
+
   } else if (subcommand === "add") {
     const word = interaction.options.getString("word");
     const meaning = interaction.options.getString("meaning");
+
+    await interaction.deferReply({ ephemeral: true });
+
     const words = await readWordList();
     words.push({
-      word: word.toLowerCase(),
+      word: word, // 原文ママ保存（必要なら.toLowerCase()）
       meaning: meaning,
     });
+
     await saveWordList(words);
 
-    await interaction.reply({
-      content: `新しい英単語「${word}」と意味「${meaning}」を追加しました。`,
-      ephemeral: true,
+    await interaction.editReply({
+      content: `Gistに新しい単語「${word}」と意味「${meaning}」を追加しました。`,
     });
-    const channelId = interaction.channelId;
-    const client = interaction.client;
-    // 新しい関数を呼び出す
-  let filePath = 'commands/samples/wordlist.json';
-  await sendJsonAsText(client, channelId, filePath) 
-  }else if (subcommand === "training") {
 
-    const questions = interaction.options.getInteger("questions");
-    let words = await readWordList();
-    
-    const channelId = interaction.channelId;
-    const client = interaction.client;
-    // 新しい関数を呼び出す
-    for(let i=0;i<questions;i++){
-    let number = Math.floor(Math.random()*words.length+1)
-    await askQuiz(client, channelId, number);
-  }
+    // Gistの内容を確認用に送信（必要なら）
+    // sendJsonAsText(client, channelId); 
   }
 }
 
-
-
-
-
-/**
- * JSONファイルの内容を読み込み、テキストメッセージとして送信します。
- * @param {object} client - Discord.jsのクライアントオブジェクト
- * @param {string} channelId - 送信するチャンネルのID
- * @param {string} filePath - 送信するJSONファイルのパス（プロジェクトルートからの相対パス）
- */
-export async function sendJsonAsText(client, channelId, filePath) {
+// ---------------------------------------------------
+// ユーティリティ: JSONテキスト送信（デバッグ用など）
+// ---------------------------------------------------
+export async function sendJsonAsText(client, channelId) {
   try {
-    // 1. ファイルへの絶対パスを構築
-    const fullPath = path.join(__dirname, 'wordlist.json');
-    
-    // 2. JSONファイルを文字列として読み込む
-    const jsonString = await fs.readFile(fullPath, 'utf8');
-let channelId ='1188202806851682314'
-    // 3. チャンネルを取得
+    const words = await readWordList();
     const channel = await client.channels.fetch(channelId);
-    if (!channel) return console.error('チャンネルが見つかりません。');
+    if (!channel) return;
 
-    // 4. コードブロック記法を使って、JSONの内容をテキストとして送信
-    // `json`を付けることでシンタックスハイライトが適用されます。
-    console.log( jsonString);
+    const jsonString = JSON.stringify(words, null, 2);
+    // 長すぎる場合は分割が必要ですが、ここでは簡易的にconsole出力のみ、または先頭のみにする等の配慮が必要
+    console.log("Current Gist Content Length:");
 
-    console.log('JSONファイルの内容がテキストとして正常に送信されました。');
+    if (jsonString.length < 1900) {
+     // channel.send("```json\n" + jsonString + "\n```");
+    } else {
+      channel.send("データが大きすぎるため、コンソールに出力しました。");
+    }
   } catch (error) {
     console.error('JSONデータの送信中にエラーが発生しました:', error);
   }

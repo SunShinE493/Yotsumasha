@@ -1,4 +1,3 @@
-
 import { formatMeaning } from "./answerUtils";
 
 export interface QuizWord {
@@ -12,62 +11,57 @@ export interface QuizWord {
 
 export interface QuizQuestion {
     id: string;
-    word: string; // The question text (e.g. "Phenol (Substance Name)")
-    meaning: string; // The correct answer string for display/validation
-    choices?: string[]; // 4 choices
-    correctAnswer: string; // The exact string to match for correctness
+    word: string; 
+    meaning: string; 
+    choices?: string[]; 
+    correctAnswer: string; 
     originalId: string;
 }
 
-/**
- * Split a list of raw word data into flattened quiz questions.
- * Handles:
- * - c:Choice1:Choice2... (Fixed choices)
- * - m:Meaning (Nearest neighbor distractors)
- * - r:Component (Nearest neighbor compound distractors)
- * - Standard text (Nearest neighbor distractors)
- */
 export function generateQuizData(targetWords: QuizWord[], allWords: QuizWord[]): QuizQuestion[] {
     const questions: QuizQuestion[] = [];
 
     targetWords.forEach(target => {
-        const targetIndex = allWords.findIndex(w => w.id === target.id);
         const targetSegments = target.meaning.split(/\/(?!r\d)/g);
-        const answerTypes = (target.answerType || "").split("/");
+        const answerTypes = (target.answerType || "").split("/").filter(Boolean);
 
-        // Correct answer is the combined formatted segments
         const correctAnswer = formatMeaning(target.meaning);
-
-        // Construct question text with all labels if present
-        const typeLabels = answerTypes.filter(Boolean).join('/');
+        const typeLabels = answerTypes.join('/');
         const questionText = `${target.word}${typeLabels ? ` (${typeLabels})` : ""}`;
 
         const choices: string[] = [correctAnswer];
 
-        // Find neighbors for distractors
-        const neighbors = findDistractors(allWords, targetIndex, 6, w => w.id !== target.id);
+        // --- 修正ポイント：同じ型だけのプールを作り、その中での距離を見る ---
 
-        // Build 3 distractors
+        // 1. まず同じ型を持つ単語だけを抽出（順序は維持）
+        const filteredPool = allWords.filter(w => {
+            if (answerTypes.length === 0) return !w.answerType;
+            const wTypes = (w.answerType || "").split("/").filter(Boolean);
+            return wTypes.some(t => answerTypes.includes(t));
+        });
+
+        // 2. そのプール内でのターゲットの位置を探す
+        const indexInPool = filteredPool.findIndex(w => w.id === target.id);
+
+        // 3. プール内での前後（距離が近い順）から誤答候補を取得
+        // indexInPool が -1（万が一見つからない）の場合は allWords から探すようにフォールバック
+        const sourceList = indexInPool !== -1 ? filteredPool : allWords;
+        const centerIndex = indexInPool !== -1 ? indexInPool : allWords.findIndex(w => w.id === target.id);
+
+        const neighbors = findDistractors(sourceList, centerIndex, 6, w => w.id !== target.id);
+
+        // --- 誤答の組み立て ---
         for (let k = 0; k < 3; k++) {
-            // For each distractor, use the k-th neighbor
             const neighbor = neighbors[k] || allWords[Math.floor(Math.random() * allWords.length)];
             const nSegments = neighbor.meaning.split(/\/(?!r\d)/g);
 
             const distractorParts = targetSegments.map((tSeg, j) => {
                 if (tSeg.startsWith('c:')) {
-                    // c: Rule: Distractor uses an INCORRECT option from the SAME word's c: tag
                     const parts = tSeg.slice(2).split(':');
                     const correctPart = parts.pop();
                     const wrongOptions = parts.filter(p => p !== correctPart);
-                    if (wrongOptions.length > 0) {
-                        // Spread options across distractors
-                        return wrongOptions[k % wrongOptions.length];
-                    }
-                    return correctPart;
+                    return wrongOptions.length > 0 ? wrongOptions[k % wrongOptions.length] : correctPart;
                 } else {
-                    // m:, r:, or Standard: Use neighbor's segment if it exists at index j
-                    // If neighbor doesn't have segment at index j, it means its structure differs.
-                    // Fallback to neighbor's segment 0 (usually the main substance name or equivalent).
                     const dRaw = nSegments[j] !== undefined ? nSegments[j] : nSegments[0];
                     return formatMeaning(dRaw);
                 }
@@ -76,17 +70,21 @@ export function generateQuizData(targetWords: QuizWord[], allWords: QuizWord[]):
             choices.push(distractorParts.join('/'));
         }
 
-        // Finalize: Unique, 4 items, shuffle
         let finalChoices = Array.from(new Set(choices.map(c => c.trim()).filter(Boolean)));
-
-        // If still not enough choices (rare), pad
         while (finalChoices.length < 4) {
             finalChoices.push(`Option ${finalChoices.length + 1}`);
         }
 
-        // Shuffle
         finalChoices = finalChoices.slice(0, 4).sort(() => Math.random() - 0.5);
 
+
+        console.log(`問題: ${target.word}, 型: ${target.answerType}`);
+console.log(`同じ型の単語数: ${filteredPool.length}件見つかりました`);
+if (filteredPool.length === 0) {
+    console.warn("警告: 同じ型の単語がゼロなので、ランダム抽出に切り替わっています！");
+}
+
+        
         questions.push({
             id: target.id,
             originalId: target.id,
@@ -95,13 +93,17 @@ export function generateQuizData(targetWords: QuizWord[], allWords: QuizWord[]):
             correctAnswer: correctAnswer,
             choices: finalChoices
         });
+        
     });
 
     return questions;
 }
 
+/**
+ * 指定されたリスト内での近隣探索
+ */
 function findDistractors(
-    allWords: QuizWord[],
+    list: QuizWord[],
     centerIndex: number,
     count: number,
     filterFn: (w: QuizWord) => boolean
@@ -109,36 +111,25 @@ function findDistractors(
     const candidates: QuizWord[] = [];
     let range = 1;
 
-    // Spiral out from center
-    while (candidates.length < count && range < allWords.length) {
-        // Try left
+    while (candidates.length < count && range < list.length) {
         const left = centerIndex - range;
-        if (left >= 0 && filterFn(allWords[left])) {
-            candidates.push(allWords[left]);
+        if (left >= 0 && filterFn(list[left])) {
+            candidates.push(list[left]);
         }
         if (candidates.length >= count) break;
 
-        // Try right
         const right = centerIndex + range;
-        if (right < allWords.length && filterFn(allWords[right])) {
-            candidates.push(allWords[right]);
+        if (right < list.length && filterFn(list[right])) {
+            candidates.push(list[right]);
         }
         range++;
     }
 
-    // If still not enough (small dataset), just random pick from remainder
     if (candidates.length < count) {
-        const remaining = allWords.filter(w => !candidates.includes(w) && filterFn(w));
-        const needed = count - candidates.length;
-        candidates.push(...remaining.sort(() => Math.random() - 0.5).slice(0, needed));
+        const remaining = list.filter(w => !candidates.includes(w) && filterFn(w));
+        candidates.push(...remaining.sort(() => Math.random() - 0.5).slice(0, count - candidates.length));
     }
 
-    // Randomize the selected neighbors so it's not always the exact same ones in same order
+    // 近接順を維持しつつ少しだけシャッフル（毎回同じ並びにならないように）
     return candidates.sort(() => Math.random() - 0.5).slice(0, count);
-}
-
-function simpleFormat(m: string): string {
-    // Take first segment if multiple
-    const first = m.split(/\/(?!r\d)/g)[0];
-    return formatMeaning(first);
 }
