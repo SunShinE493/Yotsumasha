@@ -9,7 +9,7 @@ import {
 import axios from "axios";
 
 // --- 設定: Gist連携用 ---
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''; // GitHub Token
+const GIST_TOKEN = process.env.GIST_TOKEN || ''; // GitHub Token
 const GIST_ID = process.env.GIST_ID || '';           // Gist ID
 const GIST_FILENAME = 'wordlistmemory.json';
 
@@ -21,13 +21,13 @@ const NUMBER_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6
 // ---------------------------------------------------
 
 async function readWordList() {
-  if (!GITHUB_TOKEN || !GIST_ID) {
+  if (!GIST_TOKEN || !GIST_ID) {
     console.error("GitHub Token または Gist ID が設定されていません。");
     return [];
   }
   try {
     const response = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
-      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+      headers: { Authorization: `token ${GIST_TOKEN}` }
     });
     const file = response.data.files[GIST_FILENAME];
     if (file && file.content) {
@@ -41,7 +41,7 @@ async function readWordList() {
 }
 
 async function saveWordList(list) {
-  if (!GITHUB_TOKEN || !GIST_ID) return;
+  if (!GIST_TOKEN || !GIST_ID) return;
   try {
     await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {
       files: {
@@ -50,7 +50,7 @@ async function saveWordList(list) {
         }
       }
     }, {
-      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+      headers: { Authorization: `token ${GIST_TOKEN}` }
     });
     console.log("Gistへの保存完了");
   } catch (error) {
