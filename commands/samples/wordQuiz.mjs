@@ -243,9 +243,24 @@ export async function execute(interaction) {
     }
   } catch (error) {
     console.error("コマンド実行エラー:", error);
-    // エラー時も editReply を使う
-    await interaction.editReply({
-      content: `エラーが発生しました: ${error.message}`,
-    });
+    try {
+      // 既に応答済み(replied) または 保留中(deferred) の場合
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ 
+          content: 'コマンド実行中にエラーが発生しました。', 
+          ephemeral: true 
+        });
+      } else {
+        // まだ何も返していない場合
+        await interaction.reply({ 
+          content: 'コマンド実行中にエラーが発生しました。', 
+          ephemeral: true 
+        });
+      }
+    } catch (reportError) {
+      // エラー報告すら失敗した場合（有効期限切れや二重応答など）
+      // ここでエラーを握りつぶすことで、Bot自体のクラッシュを防ぐ
+      console.error("ユーザーへのエラー通知に失敗しました（このエラーは無視されます）:", reportError.message);
+    }
   }
 }
