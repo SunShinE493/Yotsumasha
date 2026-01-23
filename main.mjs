@@ -919,7 +919,12 @@ async function runai(content, message, aisikibetsu) {
     }
 
     // --- パターン1: 思考/長文生成 (DeepSeek R1相当) ---
-  } else if (aisikibetsu === 1) {
+  } 
+  /**
+  
+  
+  
+  else if (aisikibetsu === 1) {
     if (!ai) {
       await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
       return;
@@ -967,7 +972,72 @@ async function runai(content, message, aisikibetsu) {
     }
 
     // --- パターン2: 既存メッセージの編集 ---
-  } else if (aisikibetsu === 2) {
+  }
+  
+  **/
+
+
+     else if (aisikibetsu === 1) {
+    if (!ai) {
+      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      return;
+    }
+    message.channel.send('考え中です。これには数分かかる場合もあります。');
+
+    try {
+
+      let result = await ai.models.generateContentStream({
+        model: "gemma-3-27b-it",
+        contents: content,
+        config: { // 前回確認した通り、configで問題ないならこれでOK
+          temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
+          topP: 0.9, // サンプリング時の確率閾値を調整
+          topK: 40, // サンプリング時の上位K個のトークンに限定
+        },
+      });
+
+      let fullResponse = '';
+      let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
+      const MAX_DISCORD_MESSAGE_LENGTH = 2000; // Discordのメッセージ最大文字数
+
+      // ストリーム応答を逐次処理
+      for await (const chunk of result) {
+        const chunkText = chunk.text;
+        fullResponse += chunkText;
+
+        // 2000文字を超えたら、その部分を送信し、fullResponseをクリア
+        // ただし、最後のチャンクでない限り、既存メッセージの編集は行わない
+        if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH) {
+          const partToSend = fullResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
+
+          // 2000文字に達したら常に新しいメッセージとして送信
+          // lastSentMessage = null の場合でも新規送信になる
+          lastSentMessage = await message.channel.send(partToSend);
+
+          fullResponse = fullResponse.substring(MAX_DISCORD_MESSAGE_LENGTH); // 送信した部分をfullResponseから削除
+        }
+      }
+
+      // ストリームが完全に終了した後、fullResponseに残っているテキストを処理
+      if (fullResponse.length > 0) {
+        // 残りがある場合、まだ送信されたメッセージがなければ新規で、
+        // 既にメッセージが送信されていれば、それが最後の部分なのでそのメッセージを編集
+        if (lastSentMessage) {
+          // 最後のメッセージが存在する場合、そのメッセージに追記する形で編集
+          // ただし、Discord APIの文字数制限があるので、実際には新しいメッセージとして送る方が安全
+          // ここは新規メッセージとして送るロジックに統一します
+          await message.channel.send(fullResponse);
+        } else {
+          // まだメッセージが一つも送信されていない（応答が2000文字未満だった）場合
+          await message.channel.send(fullResponse);
+        }
+      }
+    } catch (error) {
+      console.error('Gemini APIからの応答中にエラーが発生しました:', error);
+      message.reply('Gemini APIからの応答中にエラーが発生しました。');
+    }
+     }
+  else if (aisikibetsu === 2) {
     if (!ai) return;
 
     try {
@@ -1083,3 +1153,128 @@ async function addToGist(newEntries) {
     return false;
   }
 }
+
+
+
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+let aisikibetsu, max;
+
+
+
+
+const API_KEY = process.env.GOOGLE_API_KEY;
+if (API_KEY === undefined) {
+  console.log("APIki-なし")
+}
+if (API_KEY) {
+  ai = new GoogleGenAI(API_KEY, {});
+} else {
+  console.log("API Key missing, AI features disabled.");
+}
+/**
+async function runai(content, message, aisikibetsu) {
+  const talk = message.content;
+  if (aisikibetsu === 0) {
+    if (!ai) {
+      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      return;
+    }
+    max = 1000;
+
+    const chat = await ai.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      contents: talk + "（##回答の内容は短く簡潔に。）",
+      config: {
+        maxOutputTokens: 1800,
+      },
+    })
+    console.log(chat.text);
+    if (chat.text !== undefined) {
+      await message.channel.send(chat.text);
+    } else {
+      await message.channel.send("字数エラー");
+      console.log("字数エラー");
+    }
+  } else if (aisikibetsu === 1) {
+    if (!ai) {
+      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      return;
+    }
+    message.channel.send('考え中です。これには数分かかる場合もあります。');
+
+    try {
+
+      let result = await ai.models.generateContentStream({
+        model: "gemini-2.0-flash-thinking-exp",
+        contents: content,
+        config: { // 前回確認した通り、configで問題ないならこれでOK
+          temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
+          topP: 0.9, // サンプリング時の確率閾値を調整
+          topK: 40, // サンプリング時の上位K個のトークンに限定
+        },
+      });
+
+      let fullResponse = '';
+      let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
+      const MAX_DISCORD_MESSAGE_LENGTH = 2000; // Discordのメッセージ最大文字数
+
+      // ストリーム応答を逐次処理
+      for await (const chunk of result) {
+        const chunkText = chunk.text;
+        fullResponse += chunkText;
+
+        // 2000文字を超えたら、その部分を送信し、fullResponseをクリア
+        // ただし、最後のチャンクでない限り、既存メッセージの編集は行わない
+        if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH) {
+          const partToSend = fullResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
+
+          // 2000文字に達したら常に新しいメッセージとして送信
+          // lastSentMessage = null の場合でも新規送信になる
+          lastSentMessage = await message.channel.send(partToSend);
+
+          fullResponse = fullResponse.substring(MAX_DISCORD_MESSAGE_LENGTH); // 送信した部分をfullResponseから削除
+        }
+      }
+
+      // ストリームが完全に終了した後、fullResponseに残っているテキストを処理
+      if (fullResponse.length > 0) {
+        // 残りがある場合、まだ送信されたメッセージがなければ新規で、
+        // 既にメッセージが送信されていれば、それが最後の部分なのでそのメッセージを編集
+        if (lastSentMessage) {
+          // 最後のメッセージが存在する場合、そのメッセージに追記する形で編集
+          // ただし、Discord APIの文字数制限があるので、実際には新しいメッセージとして送る方が安全
+          // ここは新規メッセージとして送るロジックに統一します
+          await message.channel.send(fullResponse);
+        } else {
+          // まだメッセージが一つも送信されていない（応答が2000文字未満だった）場合
+          await message.channel.send(fullResponse);
+        }
+      }
+    } catch (error) {
+      console.error('Gemini APIからの応答中にエラーが発生しました:', error);
+      message.reply('Gemini APIからの応答中にエラーが発生しました。');
+    }
+  } else if (aisikibetsu === 2) {
+
+
+
+    // Gemini APIにストリーミングリクエストを送信
+    const result = await model.generateContentStream({ contents: [{ role: 'user', parts }] });
+
+    let fullText = '';
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      fullText += chunkText;
+
+      // 最初のメッセージを編集して、回答を追記
+      await message.edit(fullText);
+    }
+
+
+  }
+}
+
+*/
+
+
