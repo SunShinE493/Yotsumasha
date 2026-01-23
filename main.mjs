@@ -875,8 +875,9 @@ if (D_API_KEY === undefined) {
 }
 
 let ai;
+let lai
 if (D_API_KEY) {
-  ai = new OpenAI({
+  lai = new OpenAI({
     baseURL: 'https://api.groq.com/openai/v1',
     apiKey: D_API_KEY
   });
@@ -890,13 +891,13 @@ async function runai(content, message, aisikibetsu) {
 
   // --- パターン0: 通常の会話 ---
   if (aisikibetsu === 0) {
-    if (!ai) {
+    if (!lai) {
       await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
       return;
     }
 
     try {
-      const completion = await ai.chat.completions.create({
+      const completion = await lai.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "user", content: talk + "（##回答の内容は短く簡潔に。）" }
@@ -925,7 +926,7 @@ async function runai(content, message, aisikibetsu) {
   
   
   else if (aisikibetsu === 1) {
-    if (!ai) {
+    if (!lai) {
       await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
       return;
     }
@@ -938,7 +939,7 @@ async function runai(content, message, aisikibetsu) {
           textContent = content[0].text;
       }
 
-      const stream = await ai.chat.completions.create({
+      const stream = await lai.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "user", content: textContent }
@@ -979,7 +980,7 @@ async function runai(content, message, aisikibetsu) {
 
      else if (aisikibetsu === 1) {
     if (!ai) {
-      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      await message.channel.send("gAPIキーが設定されていないため、AI機能は利用できません。");
       return;
     }
     message.channel.send('考え中です。これには数分かかる場合もあります。');
@@ -1072,7 +1073,7 @@ async function runai(content, message, aisikibetsu) {
 
 // 1. AIを使ってテキストから単語リストJSONを抽出する関数
 async function extractWordListJson(text) {
-  if (!ai) return null;
+  if (!lai) return null;
 
   try {
     const prompt = `
@@ -1089,7 +1090,7 @@ async function extractWordListJson(text) {
     ${text}
     `;
 
-    const completion = await ai.chat.completions.create({
+    const completion = await lai.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.1, // 確実性を高める
