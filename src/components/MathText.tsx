@@ -97,7 +97,7 @@ function renderSegments(text: string, katex: any): Array<React.ReactNode> {
   return nodes.length ? nodes : [text];
 }
 
-export function MathText({ text, smilesVariant }: { text: string; smilesVariant?: 'default' | 'black' }) {
+export function MathText({ text, smilesVariant, fontSizePx }: { text: string; smilesVariant?: 'default' | 'black'; fontSizePx?: number }) {
   const [ready, setReady] = useState<boolean>(!!window.katex);
   useEffect(() => {
     if (!ready) {
@@ -107,6 +107,40 @@ export function MathText({ text, smilesVariant }: { text: string; smilesVariant?
 
   const content = useMemo(() => {
     if (!text) return text;
+
+    // Check for "img:" prefix
+    // Format: img:<PATH>:<LABEL>
+    if (text.startsWith('img:')) {
+      const rest = text.substring(4); // Remove "img:"
+      const colonIndex = rest.indexOf(':');
+      let imagePath = rest.trim();
+      let label = "";
+
+      if (colonIndex !== -1) {
+        imagePath = rest.substring(0, colonIndex).trim();
+        label = rest.substring(colonIndex + 1).trim();
+      }
+
+      return (
+        <div className="flex flex-col items-center">
+          <img
+            src={imagePath}
+            alt={label || "card image"}
+            className="object-contain rounded-md shadow-sm"
+            style={{
+              maxHeight: fontSizePx ? `${fontSizePx * 6}px` : '160px',
+              maxWidth: '100%'
+            }}
+            loading="lazy"
+          />
+          {label && (
+            <div className="mt-2 text-center text-sm font-medium">
+              {renderSegments(label, window.katex)}
+            </div>
+          )}
+        </div>
+      );
+    }
 
     // Check for "smiles:" prefix
     // Format: smiles:<SMILES_STRING>:<remaining text>
@@ -122,7 +156,7 @@ export function MathText({ text, smilesVariant }: { text: string; smilesVariant?
         return (
           <div className="flex flex-col items-center">
             <SmilesText smiles={smilesString} variant={smilesVariant} />
-            <div className="mt-2 text-center">
+            <div className="mt-2 text-center text-sm">
               {renderSegments(displayString, window.katex)}
             </div>
           </div>

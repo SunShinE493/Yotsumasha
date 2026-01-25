@@ -24,6 +24,7 @@ export const BUILTIN_JSON_FILES = [
   "organic.json",
   "chemistoryByIshii.json",
   "chemistoryByIshii2.json",
+  "su3kaiho.json",
 ];
 
 async function ensureUploadsDir() {

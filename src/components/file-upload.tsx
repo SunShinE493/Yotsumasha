@@ -37,7 +37,7 @@ import rinri2 from "./data/rinri2.json";
 
 import chemistoryByIshii from "./data/chemistoryByIshii.json";
 import chemistoryByIshii2 from "./data/chemistoryByIshii2.json";
-
+import su3kaiho from "./data/su3kaiho.json";
 
 // 選択可能な内蔵JSONファイル
 const availableJsonFiles = {
@@ -52,8 +52,8 @@ const availableJsonFiles = {
   "Chemistry.json": Chemistry,
   "chemistoryByIshii.json": chemistoryByIshii,
   "chemistoryByIshii2.json": chemistoryByIshii2,
+  "su3kaiho.json": su3kaiho,
 };
-import { useEffect, useState } from "react";
 
 // 親に渡すデータの型を定義
 export interface SelectedJsonInfo {

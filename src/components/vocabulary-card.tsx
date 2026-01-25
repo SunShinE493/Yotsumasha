@@ -49,7 +49,7 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fon
               style={fontSizePx ? { fontSize: `${fontSizePx}px`, lineHeight: 1.25 } : undefined}
               data-testid="text-word"
             >
-              <MathText text={frontText} />
+              <MathText text={frontText} fontSizePx={fontSizePx} />
             </div>
             {/* If Front is Word (en-jp) or Meaning (jp-en) */}
             {!isJpEn && word.category && (
@@ -72,7 +72,7 @@ export function VocabularyCard({ word, rotationCount, onFlip, fontSizeClass, fon
               style={fontSizePx ? { fontSize: `${Math.max(12, fontSizePx - 2)}px`, lineHeight: 1.4 } : undefined}
               data-testid="text-meaning"
             >
-              <MathText text={backText} />
+              <MathText text={backText} fontSizePx={fontSizePx ? Math.max(12, fontSizePx - 2) : undefined} />
             </div>
             {/* Difficulty display below answer */}
             {word.difficulty && (

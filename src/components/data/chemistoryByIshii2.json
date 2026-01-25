@@ -1,5 +1,13 @@
 [
   {
+    "category": "テスト",
+    "subcategory": "0",
+    "word": "img:/Campfire_lit.png:焚き火の画像",
+    "meaning": "焚き火",
+    "answerType": "テスト",
+    "difficulty": "1"
+  },
+  {
     "category": "有機物",
     "subcategory": "0",
     "word": "炭素を骨格とする化合物を何というか？",
