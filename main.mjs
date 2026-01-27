@@ -439,11 +439,11 @@ async function runWebserver() {
   });
 }
 
-cron.schedule('0 30 * * * *', () => {
+cron.schedule('0 0 * * * *', () => {
 
   const now = moment().tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
 
-  console.log(`[${now}] ⏰ 毎時リマインダー: SchTrigger を実行します`);
+  console.log(`[${now}] ⏰ 毎時リマインドチェックを実行します`);
 
   SchTrigger();
 
@@ -617,6 +617,9 @@ import OpenAI from "openai";
 const GIST_TOKEN = process.env.GIST_TOKEN || ''; // ここにGitHubトークンを設定
 const GIST_ID = process.env.GIST_ID || '';           // ここに保存先のGist IDを設定
 const GIST_FILENAME = 'wordlistmemory.json';
+const SCHEDULE_FILENAME = 'schedule.json';
+
+import { getGistFile, updateGistFile, appendToGistFile } from './shared/gistUtils.mjs';
 
 let wcount = 1;
 
@@ -624,28 +627,45 @@ let wcount = 1;
 async function SchTrigger() {
   const now = moment().tz("Asia/Tokyo");
   const hour = now.hour();
-  console.log('課題確認トリガー' + now + hour)
+  console.log('スケジュール確認トリガー: ' + now.format('YYYY-MM-DD HH:mm'));
 
-  let channelId = '1188202806851682314';
-  let filePath = 'commands/samples/wordlist.json';
+  // 1. Gistから予定を読み込んでリマインドチェック
+  try {
+    const schedule = await getGistFile(SCHEDULE_FILENAME) || [];
+    const todayStr = now.format('YYYY-MM-DD');
+    const currentHourStr = now.format('HH');
 
-  // エラーハンドリング追加（clientが定義されている前提）
+    // その日の、現在の時間に該当する予定を探す
+    const matchedTasks = schedule.filter(task => {
+      if (task.due !== todayStr) return false;
+      const taskHour = task.time ? task.time.split(':')[0] : null;
+      return taskHour === currentHourStr;
+    });
 
-  if (hour === 6 || hour === 23) {
-    console.log('課題確認トリガー' + now + hour)
-    const channel = await client.channels.fetch('1162776615445594122'); // てるまない雑談
-    const period = hour === 6 ? 'AM' : 'PM';
-    sendReminders(channel, period); // ※sendReminders関数は外部定義またはこのファイルに必要
+    for (const task of matchedTasks) {
+      const targetChannelId = task.channel || '1162776615445594122'; // デフォルト: てるまない雑談
+      try {
+        const channel = await client.channels.fetch(targetChannelId);
+        if (channel) {
+          channel.send(`⏰ **リマインド**: 「${task.name}」の時間です (${task.time})。<@&1370184233938583624>`);
+        }
+      } catch (err) {
+        console.error(`Failed to send reminder to channel ${targetChannelId}:`, err);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to process hourly reminders:', err);
+  }
 
-  } else if (hour === 4) {
-    const channel2 = await client.channels.fetch('838468033789558848'); 
-    dailyTrigger(channel2)
+  // 2. 既存の定時処理
+  if (hour === 4) {
+    const channel2 = await client.channels.fetch('838468033789558848');
+    dailyTrigger(channel2);
     console.log('積分');
   } else if (hour > 4 && hour < 23) {
     const channelId = '838468033789558848';
-    const today = new Date(); 
     wcount++;
-    askQuiz(client, channelId, wcount)
+    askQuiz(client, channelId, wcount);
   }
 
   // Trigger gist backup after schedule work
@@ -667,7 +687,7 @@ client.on('messageCreate', async (message) => {
 
   // リプライされたメッセージか確認（Botへのメンション）
   // IDはBot自身のものに書き換えてください
-  const MY_BOT_ID = '1187343608026771496'; 
+  const MY_BOT_ID = '1187343608026771496';
 
   if (message.mentions.has(MY_BOT_ID)) {
 
@@ -718,22 +738,51 @@ client.on('messageCreate', async (message) => {
       } catch (error) {
         console.error('リプライ取得エラー', error);
       }
-    } 
+    }
     // 2. 通常のメンション（画像リプライではない場合）
     else {
       let content = message.content.replace(new RegExp(`<@!?${MY_BOT_ID}>`, 'g'), '').trim();
 
-      // ▼▼▼ 追加機能: 単語リスト登録機能 ▼▼▼
-      // 簡易判定: 「ー」または「-」を含み、かつAI抽出が成功しそうな場合
+      // ▼▼▼ 追加機能: 単語リスト登録機能 / 予定登録機能 ▼▼▼
+      if (content.includes("予定に追加")) {
+        const extractedData = await extractScheduleJson(content, message);
+
+        if (extractedData && extractedData.name && extractedData.due) {
+          const jsonString = JSON.stringify(extractedData, null, 2);
+          const confirmMsg = await message.channel.send(
+            `以下の予定を追加しますか？\n\`\`\`json\n${jsonString}\n\`\`\``
+          );
+
+          await confirmMsg.react('✅');
+          await confirmMsg.react('❌');
+
+          const filter = (reaction, user) => ['✅', '❌'].includes(reaction.emoji.name) && !user.bot;
+          const collector = confirmMsg.createReactionCollector({ filter, time: 600000 });
+
+          collector.on('collect', async (reaction, user) => {
+            if (reaction.emoji.name === '✅') {
+              await message.channel.send('Gistに予定を保存しています...');
+              const success = await appendToGistFile(SCHEDULE_FILENAME, [extractedData]);
+              if (success) {
+                await message.channel.send(`✅ Gist (${SCHEDULE_FILENAME}) に予定を追加しました！`);
+              } else {
+                await message.channel.send('❌ Gistへの保存に失敗しました。');
+              }
+              collector.stop('accepted');
+            } else if (reaction.emoji.name === '❌') {
+              await message.channel.send('キャンセルしました。');
+              collector.stop('cancelled');
+            }
+          });
+          return;
+        }
+      }
+
+      // 単語リスト登録 (既存)
       const wordListPattern = /[a-zA-Z]+.*[ー\-].+/;
-
       if (wordListPattern.test(content)) {
-        // AIでJSON抽出を試みる
         const extractedData = await extractWordListJson(content);
-
-        // JSON配列が正しく取得できたら確認フローへ
         if (extractedData && Array.isArray(extractedData) && extractedData.length > 0) {
-
           const jsonString = JSON.stringify(extractedData, null, 2);
           const confirmMsg = await message.channel.send(
             `以下の内容をリストに追加しますか？\n\`\`\`json\n${jsonString}\n\`\`\``
@@ -742,21 +791,17 @@ client.on('messageCreate', async (message) => {
           await confirmMsg.react('✅');
           await confirmMsg.react('❌');
 
-          // リアクション検知 (10分間 = 600,000ms)
-          const filter = (reaction, user) => {
-            return ['✅', '❌'].includes(reaction.emoji.name) && !user.bot;
-          };
-
+          const filter = (reaction, user) => ['✅', '❌'].includes(reaction.emoji.name) && !user.bot;
           const collector = confirmMsg.createReactionCollector({ filter, time: 600000 });
 
           collector.on('collect', async (reaction, user) => {
             if (reaction.emoji.name === '✅') {
               await message.channel.send('Gistに追加しています...');
-              const success = await addToGist(extractedData);
+              const success = await appendToGistFile(GIST_FILENAME, extractedData);
               if (success) {
                 await message.channel.send(`✅ Gist (${GIST_FILENAME}) に ${extractedData.length}件追加しました！`);
               } else {
-                await message.channel.send('❌ Gistへの追加に失敗しました。設定を確認してください。');
+                await message.channel.send('❌ Gistへの追加に失敗しました。');
               }
               collector.stop('accepted');
             } else if (reaction.emoji.name === '❌') {
@@ -764,8 +809,7 @@ client.on('messageCreate', async (message) => {
               collector.stop('cancelled');
             }
           });
-
-          return; // 単語登録フローに入ったので、通常の会話AIは実行しない
+          return;
         }
       }
       // ▲▲▲ 追加機能終了 ▲▲▲
@@ -830,8 +874,8 @@ client.on('messageCreate', async message => {
 
   // 自動応答ルール
   if (/漏らして|💩/.test(message.content)) {
-    await message.channel.send('ぶりっ💩'); 
-    await message.react('💩'); 
+    await message.channel.send('ぶりっ💩');
+    await message.react('💩');
   }
   if (/？？？|ふちる|？る/.test(message.content)) {
     await message.channel.send('そんなコマンドないで');
@@ -920,7 +964,7 @@ async function runai(content, message, aisikibetsu) {
     }
 
     // --- パターン1: 思考/長文生成 (DeepSeek R1相当) ---
-  } 
+  }
   /**
   
   
@@ -978,7 +1022,7 @@ async function runai(content, message, aisikibetsu) {
   **/
 
 
-     else if (aisikibetsu === 1) {
+  else if (aisikibetsu === 1) {
     if (!ai) {
       await message.channel.send("gAPIキーが設定されていないため、AI機能は利用できません。");
       return;
@@ -1037,7 +1081,7 @@ async function runai(content, message, aisikibetsu) {
       console.error('Gemini APIからの応答中にエラーが発生しました:', error);
       message.reply('Gemini APIからの応答中にエラーが発生しました。');
     }
-     }
+  }
   else if (aisikibetsu === 2) {
     if (!ai) return;
 
@@ -1058,10 +1102,10 @@ async function runai(content, message, aisikibetsu) {
 
         updateCount++;
         if (updateCount % 10 === 0) {
-          await msgToEdit.edit(fullText.substring(0, 2000)).catch(()=>{});
+          await msgToEdit.edit(fullText.substring(0, 2000)).catch(() => { });
         }
       }
-      await msgToEdit.edit(fullText.substring(0, 2000)).catch(()=>{});
+      await msgToEdit.edit(fullText.substring(0, 2000)).catch(() => { });
 
     } catch (e) {
       console.error(e);
@@ -1152,6 +1196,53 @@ async function addToGist(newEntries) {
   } catch (error) {
     console.error('Failed to update Gist:', error.response?.data || error.message);
     return false;
+  }
+}
+
+// 3. AIを使って予定をJSONに変換する関数
+async function extractScheduleJson(text, message) {
+  if (!lai) return null;
+
+  try {
+    const now = moment().tz("Asia/Tokyo");
+    const todayStr = now.format('YYYY-MM-DD (dddd) HH:mm');
+
+    const prompt = `
+    以下のテキストから「予定の内容」「日付」「時間（24時間表記）」「チャンネルID」を抽出し、JSON形式で出力してください。
+    基準日時: ${todayStr}
+
+    ルール:
+    - 「明日」「14時」などの相対的な表現は基準日時から計算してください。
+    - 時間が指定されていない場合は「00:00」としてください。
+    - チャンネルIDは「${message.channel.id}」をそのまま使用してください。
+
+    フォーマット:
+    {
+      "name": "予定の内容",
+      "due": "YYYY-MM-DD",
+      "time": "HH:mm",
+      "channel": "チャンネルID"
+    }
+
+    ※解説は不要です。JSONのみを出力してください。
+
+    テキスト:
+    ${text}
+    `;
+
+    const completion = await lai.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1,
+      stream: false,
+    });
+
+    let content = completion.choices[0].message.content;
+    content = content.replace(/```json|```/g, '').trim();
+    return JSON.parse(content);
+  } catch (e) {
+    console.error('Schedule Extraction Error:', e);
+    return null;
   }
 }
 

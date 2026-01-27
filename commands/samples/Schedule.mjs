@@ -13,31 +13,19 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
-const scheduleFilePath = path.join(__dirname, 'schedule.json');
+const SCHEDULE_FILENAME = 'schedule.json';
 
-function loadSchedule() {
+import { getGistFile, updateGistFile } from '../../shared/gistUtils.mjs';
 
-  try {
-
-    const data = fs.readFileSync(scheduleFilePath, 'utf8');
-
-    return JSON.parse(data);
-
-  } catch {
-
-    return [];
-
-  }
-
+async function loadSchedule() {
+  return await getGistFile(SCHEDULE_FILENAME) || [];
 }
 
-function saveSchedule(schedule) {
-
-  fs.writeFileSync(scheduleFilePath, JSON.stringify(schedule, null, 2), 'utf8');
-
+async function saveSchedule(schedule) {
+  await updateGistFile(SCHEDULE_FILENAME, schedule);
 }
 
-let schedule = loadSchedule();
+// Global schedule cache is removed to ensure fresh data from Gist
 
 let reminderStarted = false;
 
@@ -57,7 +45,7 @@ export const data = new SlashCommandBuilder()
 
     .addStringOption(opt => opt.setName('due').setDescription('締切日 (YYYY-MM-DD)').setRequired(true))
 
-    .addStringOption(opt => opt.setName('period').setDescription('AM または PM').setRequired(true)))
+    .addStringOption(opt => opt.setName('time').setDescription('時間 (HH:mm)').setRequired(true)))
 
   .addSubcommand(sub => sub
 
@@ -88,6 +76,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
 
   const sub = interaction.options.getSubcommand();
+  const schedule = await loadSchedule();
 
   if (sub === 'add') {
 
@@ -95,21 +84,21 @@ export async function execute(interaction) {
 
     const due = interaction.options.getString('due');
 
-    const period = interaction.options.getString('period').toUpperCase();
+    const time = interaction.options.getString('time');
 
-    if (!isValidDate(due) || !['AM', 'PM'].includes(period)) {
+    if (!isValidDate(due) || !isValidTime(time)) {
 
-      await interaction.reply('日付は YYYY-MM-DD、時間帯は AM または PM を指定してください。');
+      await interaction.reply('日付は YYYY-MM-DD、時間は HH:mm を指定してください。');
 
       return;
 
     }
 
-    schedule.push({ name, due, period });
+    schedule.push({ name, due, time, channel: interaction.channel.id });
 
-    saveSchedule(schedule);
+    await saveSchedule(schedule);
 
-    await interaction.reply(`課題「${name}」が ${due}（${period}）に追加されました。`);
+    await interaction.reply(`課題「${name}」が ${due} ${time} に追加されました。`);
 
   }
 
@@ -117,7 +106,7 @@ export async function execute(interaction) {
 
     if (schedule.length === 0) return await interaction.reply('課題は登録されていません。');
 
-    const msg = schedule.map((t, i) => `${i + 1}. ${t.name} - ${t.due} (${t.period})`).join('\n');
+    const msg = schedule.map((t, i) => `${i + 1}. ${t.name} - ${t.due} ${t.time || ''}`).join('\n');
 
     await interaction.reply(`登録済みの課題:\n${msg}`);
 
@@ -153,7 +142,7 @@ export async function execute(interaction) {
 
     const removed = schedule.splice(index - 1, 1)[0];
 
-    saveSchedule(schedule);
+    await saveSchedule(schedule);
 
     await interaction.reply(`課題「${removed.name}」を削除しました。`);
 
@@ -181,7 +170,7 @@ export async function execute(interaction) {
 
     }
 
-    const list = upcoming.map(task => `- ${task.name} (${task.due} ${task.period})`).join('\n');
+    const list = upcoming.map(task => `- ${task.name} (${task.due} ${task.time || ''})`).join('\n');
 
     await interaction.reply(`今後2週間の課題:\n${list}`);
 
@@ -194,6 +183,14 @@ function isValidDate(dateString) {
   const regex = /^\d{4}-\d{2}-\d{2}$/;
 
   return regex.test(dateString) && !isNaN(new Date(dateString));
+
+}
+
+function isValidTime(timeString) {
+
+  const regex = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  return regex.test(timeString);
 
 }
 
@@ -229,23 +226,24 @@ function startReminders(channel) {
 
 }
 
-export function sendReminders(channel, period) {
+export async function sendReminders(channel, period) {
 
+  const schedule = await loadSchedule();
   const today = moment().tz('Asia/Tokyo').format('YYYY-MM-DD');
 
   const matchedTasks = schedule.filter(task => task.due === today && task.period === period);
 
   matchedTasks.forEach(task => {
-if(period === 'AM'){
-    channel.send(`リマインド: 課題「${task.name}」の締め切りが今日です。 ${task.period}  (${task.due})。<@&1370184233938583624>`);
-   }
+    if (period === 'AM') {
+      channel.send(`リマインド: 課題「${task.name}」の締め切りが今日です。 ${task.period}  (${task.due})。<@&1370184233938583624>`);
+    }
     else {
       channel.send(`リマインド: 課題「${task.name}」の締め切りが明日です。 ${task.period}  (${task.due})。<@&1370184233938583624>`);
-   }
-  
-  console.log("リマインド: 課題「"+task.name+"」の締め切りが今日の ${task.period} です (${task.due})。");
+    }
 
-    
+    console.log("リマインド: 課題「" + task.name + "」の締め切りが今日の ${task.period} です (${task.due})。");
+
+
   });
 
 }

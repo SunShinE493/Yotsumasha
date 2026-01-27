@@ -173,7 +173,7 @@ export function MathText({ text, smilesVariant, fontSizePx }: { text: string; sm
     const normalized = text.replace(/\t(?:ext)/g, '\\text');
     if (!window.katex) return normalized;
     return renderSegments(normalized, window.katex);
-  }, [text, ready, smilesVariant]);
+  }, [text, ready, smilesVariant, fontSizePx]);
 
   return <>{content}</>;
 }
