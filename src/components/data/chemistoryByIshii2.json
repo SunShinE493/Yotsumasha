@@ -1514,7 +1514,7 @@
   {
     "category": "エステル",
     "subcategory": "0",
-    "word": "エステルに酸を加えて加熱すると(　)と(　)になる。CH₃COOC₂H₅ + H₂O → ( 化学式 ) + ( 化学式 )",
+    "word": "エステルに水を加えて加熱すると(　)と(　)になる。CH₃COOC₂H₅ + H₂O → ( 化学式 ) + ( 化学式 )",
     "meaning": "r:1:カルボン酸:アルコール/r1/r:2:CH3COOH:C2H5OH/r2",
     "answerType": "物質名/物質名/化学式/化学式",
     "difficulty": "1;1;2;2"
