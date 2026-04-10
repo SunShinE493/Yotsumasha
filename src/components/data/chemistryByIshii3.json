@@ -1,0 +1,2578 @@
+[
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属は(　)族元素の内Hを除くLi.Na.K.Rb.Cs.Frを言い、価電子の数が(　)であるから(　)価の陽イオンになりやすい。",
+    "meaning": "1",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属の単体は密度が(　　)",
+    "meaning": "c:大きい:小さい:小さい",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属の単体は融点が(　　)。",
+    "meaning": "c:高い:低い:低い",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属の単体は(　　)。",
+    "meaning": "c:柔らかい:硬い:柔らかい",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属は常温で水と反応して(　　)を発生させ(　　)になる。",
+    "meaning": "水素/水酸化物",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属は(　　)に保管する。",
+    "meaning": "灯油中",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属はイオン化傾向が極めて大きいので(　　)で得る。",
+    "meaning": "m:溶融塩電解:融解塩電解",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "アルカリ金属はそれぞれの元素に特有の(　　)を持つ。",
+    "meaning": "炎色反応",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "リチウム(Li)の炎色反応は何色か？",
+    "meaning": "m:赤色:赤",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "ナトリウム(Na)の炎色反応は何色か？",
+    "meaning": "m:黄色:黄",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "0",
+    "word": "カリウム(K)の炎色反応は何色か？",
+    "meaning": "m:紫色:紫",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "1",
+    "word": "水酸化ナトリウムの化学式は？",
+    "meaning": "NaOH",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "1",
+    "word": "水酸化ナトリウムの水溶液は(　)(　)を示す。",
+    "meaning": "c:かなり強い:強い:弱い:強い/c:酸性:塩基性:塩基性",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "1",
+    "word": "湿った空気中で水分を吸収して溶ける現象を何というか？",
+    "meaning": "潮解",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "1",
+    "word": "水酸化ナトリウムが二酸化炭素を吸収して炭酸塩になる化学反応式、( 化学式 ) + CO₂ → Na₂CO₃ + H₂O の穴を埋めよ。",
+    "meaning": "2NaOH",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "1",
+    "word": "水酸化ナトリウムは工業的に(　　)水溶液の電気分解でつくる。",
+    "meaning": "塩化ナトリウム",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "2",
+    "word": "炭酸ナトリウムの化学式は？",
+    "meaning": "Na2CO3",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "2",
+    "word": "炭酸ナトリウム水溶液は(　)(　)を示す。",
+    "meaning": "c:かなり強い:強い:弱い:かなり強い/c:酸性:塩基性:塩基性",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "2",
+    "word": "炭酸ナトリウムの十水和物の結晶が、空気中に放置すると水和物の大部分を失う現象を何というか？",
+    "meaning": "風解",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "3",
+    "word": "炭酸水素ナトリウムの化学式は？",
+    "meaning": "NaHCO3",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "3",
+    "word": "炭酸水素ナトリウム水溶液は(　)(　)を示す。",
+    "meaning": "c:かなり強い:強い:弱い:弱い/c:酸性:塩基性:塩基性",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "3",
+    "word": "炭酸水素ナトリウムを加熱すると分解して( 化学式 )を発生する。",
+    "meaning": "CO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "3",
+    "word": "炭酸水素ナトリウムの熱分解の化学反応式、2NaHCO₃ → Na₂CO₃ + H₂O + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "CO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "4",
+    "word": "アンモニアソーダ法において、塩化ナトリウムの飽和水溶液にアンモニアを吸収させた後、二酸化炭素を吹き込むと沈殿する炭酸水素ナトリウムと、同時に生成する物質の化学反応式、NaCl + H₂O + NH₃ + CO₂ → (Na 化学式 ) + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "NaHCO3/NH4Cl",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "4",
+    "word": "アンモニアソーダ法において、沈殿した炭酸水素ナトリウムを熱分解して炭酸ナトリウムをつくる化学反応式、( 化学式 )→ Na₂CO₃ + H₂O + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "2NaHCO3/CO2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "4",
+    "word": "アンモニアソーダ法において、不足分の二酸化炭素は石灰石の熱分解でつくる。その化学反応式、CaCO₃ → ( 化学式 ) + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "CaO/CO2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "4",
+    "word": "アンモニアソーダ法において、生成したCaOに水を加えて( 化学式 )にする化学反応式、( 化学式 ) + H₂O → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "Ca(OH)2/CaO/Ca(OH)2",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "アルカリ金属",
+    "subcategory": "4",
+    "word": "アンモニアソーダ法において、生成したNH₄ClとCa(OH)₂から( 化学式 )をつくり利用する化学反応式、( 化学式 ) + ( 化学式 ) → CaCl₂ + 2H₂O + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "NH3/2NH4Cl/Ca(OH)2/NH3",
+    "difficulty": "2;2;2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "0",
+    "word": "周期表の2族元素は、原子の価電子の数が(　)個であるから、(　)価の(　)になりやすい。",
+    "meaning": "2/2/c:陽イオン:陰イオン:陽イオン",
+    "difficulty": "1;1;1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "0",
+    "word": "周期表の2族元素のうち(　)( 化学式 )と(　)( 化学式 )を除く、カルシウムCa、ストロンチウムSr、バリウムBa、ラジウムRaを、アルカリ土類金属という。周期表の早い順で答えよ。",
+    "meaning": "ベリリウム/Be/マグネシウム/Mg",
+    "difficulty": "1;1;1;1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "0",
+    "word": "アルカリ土類金属の単体は、常温で水と反応して(　)を発生し、(　)になる。",
+    "meaning": "水素/水酸化物",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "0",
+    "word": "カルシウムと水との反応の化学反応式、Ca + 2H₂O → ( 化学式 ) + ( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "Ca(OH)2/H2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "0",
+    "word": "カルシウム(Ca)の炎色反応は何色か？",
+    "meaning": "橙赤色",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "0",
+    "word": "ストロンチウム(Sr)の炎色反応は何色か？",
+    "meaning": "深赤色",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "0",
+    "word": "バリウム(Ba)の炎色反応は何色か？",
+    "meaning": "黄緑色",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムの化学式は？",
+    "meaning": "CaO",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムは(　)という。",
+    "meaning": "生石灰",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "石灰石（主成分は炭酸カルシウム）を熱分解で酸化カルシウムと二酸化炭素ができる化学反応式、CaCO₃ → ( 化学式 ) + ( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "CaO/CO2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムにコークス(炭素)を混ぜて電気炉で強く加熱すると何ができるか？( 日本語名 )( 英語名 )",
+    "meaning": "炭化カルシウム/カーバイト",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムにコークス(炭素)を混ぜて電気炉で強く加熱する化学反応式、CaO + 3C → ( 化学式 ) + CO の穴を埋めよ。",
+    "meaning": "CaC2",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムが塩基性の乾燥剤として水と反応する化学反応式、CaO + H₂O → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "Ca(OH)2",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムは二酸化炭素とも反応し、炭酸カルシウムになる化学反応式、CaO + CO₂ → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "CaCO3",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムが塩酸と反応する化学反応式、CaO + 2HCl → CaCl₂ + H₂O の反応の性質は何というか？",
+    "meaning": "中和",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "1",
+    "word": "酸化カルシウムは(　)性酸化物である。",
+    "meaning": "c:塩基:酸:塩基",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "2",
+    "word": "水酸化カルシウムの化学式は？",
+    "meaning": "Ca(OH)2",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "2",
+    "word": "水酸化カルシウムは(　)ともいう。",
+    "meaning": "消石灰",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "2",
+    "word": "水酸化カルシウムは水に少し溶け、水溶液は(　)(　)を示す。",
+    "meaning": "c:かなり強い:強い:弱い:強い/c:酸性:塩基性:塩基性",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "2",
+    "word": "水酸化カルシウムの水溶液を(　)といい、二酸化炭素を吹き込むと白濁する。",
+    "meaning": "石灰水",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "2",
+    "word": "水酸化カルシウムの水溶液に二酸化炭素を吹き込んだ際の化学反応式、Ca(OH)₂ + CO₂ → ( 化学式 )↓ + H₂O の穴を埋めよ。",
+    "meaning": "CaCO3",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "2",
+    "word": "白濁した石灰水にさらに二酸化炭素を吹き込むと、炭酸水素カルシウムとなって水に溶ける化学反応式、CaCO₃ + H₂O + CO₂ → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "Ca(HCO3)2",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "3",
+    "word": "炭酸カルシウムの化学式は？",
+    "meaning": "CaCO3",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "3",
+    "word": "炭酸カルシウムが塩酸と反応して、( 化学式 )を発生する。",
+    "meaning": "CO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "3",
+    "word": "炭酸カルシウムが塩酸と反応する化学反応式、( 化学式 ) + 2HCl → ( 化学式 ) + H₂O + ( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "CaCO3/CaCl2/CO2",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "4",
+    "word": "硫酸カルシウムの化学式は？",
+    "meaning": "CaSO4",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "4",
+    "word": "硫酸カルシウムの二水和物CaSO₄•2H₂Oは(　)とよばれる。",
+    "meaning": "m:セッコウ:石膏",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "4",
+    "word": "セッコウを約130℃で焼くと( 化学式 )・½( 化学式 ) となる。これを(　)という。",
+    "meaning": "CaSO4/H2O/焼き石膏",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "5",
+    "word": "塩化カルシウムの化学式は？",
+    "meaning": "CaCl2",
+    "difficulty": "1"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "5",
+    "word": "塩化カルシウムの無水物は潮解性があり、(　)の乾燥剤として用いられる。",
+    "meaning": "c:酸性:中性:塩基性",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "6",
+    "word": "アルカリ土類金属の単体は常温で( 化学式 )と反応して( 化学式 )を発生するが、マグネシウムは反応しない。マグネシウムは(　)となら反応する。",
+    "meaning": "H2O/H2/熱水",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "6",
+    "word": "アルカリ土類金属は特有の(　)反応を示すが、マグネシウムは示さない。",
+    "meaning": "炎色",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "6",
+    "word": "アルカリ土類金属の酸化物は水に溶けて強い塩基性を示すが、マグネシウムの酸化物は水に(　)。",
+    "meaning": "c:溶けやすい:溶けにくい:溶けない:溶けにくい",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "6",
+    "word": "アルカリ土類金属は(　)が水に溶けにくいが、マグネシウムの(　)は水に溶けやすい。",
+    "meaning": "硫酸塩",
+    "difficulty": "2"
+  },
+  {
+    "category": "アルカリ土類金属",
+    "subcategory": "6",
+    "word": "Ba、Ca、Pbの(　)は水に溶けやすいが、アルカリ土類金属は例外である。",
+    "meaning": "硫酸塩",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "0",
+    "word": "酸の水溶液とも強塩基の水溶液とも反応する性質を何というか？",
+    "meaning": "両性",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "0",
+    "word": "両性元素としては、( 化学式 )( 化学式 )( 化学式 )( 化学式 )がよく知られている。",
+    "meaning": "r:1:Al:Zn:Sn:Pb/r1/r1/r1",
+    "difficulty": "1;1;1;1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムの化学式は？",
+    "meaning": "Al",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムは周期表の(　)族の元素。",
+    "meaning": "13",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムイオンの化学式は？",
+    "meaning": "Al3+",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムが空気中に放置された際に表面にできるち密な被膜は何という化学物質か？",
+    "meaning": "酸化アルミニウム",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "Fe.Ni.Alは表面に不動態をつくり(　)に溶けない。",
+    "meaning": "濃硝酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムの単体は、ボーキサイトから(　)(酸化アルミニウム)をつくり、(　)で製造する。",
+    "meaning": "アルミナ/溶融塩電解",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムの溶融塩電解において、陽極で電極の炭素と酸化物イオンが反応してできる化学反応式、C + ( 化学式 ) → ( 化学式 ) + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "O2-/CO/2e-",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムの溶融塩電解において、陽極で電極の炭素と酸化物イオンが反応してできる化学反応式、C + 2( 化学式 ) → ( 化学式 ) + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "O2-/CO2/4e-",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムの溶融塩電解において、陰極で金属のアルミニウムができる化学反応式、( 化学式 ) + 3e- → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "Al3+/Al",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "酸化アルミニウムの融点を下げるために溶かす物質は何か？その化学式は？",
+    "meaning": "氷晶石/Na3AlF6",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムは、酸と強塩基の両方の水溶液に溶け、( 化学式 )を発生する。",
+    "meaning": "H2",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムが塩酸と反応する化学反応式、2Al + 6HCl → ( 化学式 ) + 3( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "2AlCl3/H2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムが水酸化ナトリウム水溶液と反応する化学反応式、2Al + 2NaOH + 6H₂O → ( 化学式 ) + 3( 化学式 ) の穴を埋めよ。",
+    "meaning": "2Na[Al(OH)4]/H2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "1",
+    "word": "アルミニウムは濃硝酸には何をつくって溶けないか？",
+    "meaning": "不動態",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "2",
+    "word": "酸化アルミニウム(アルミナ)の化学式は？",
+    "meaning": "Al2O3",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "2",
+    "word": "酸化アルミニウムが塩酸と反応する化学反応式、Al₂O₃ + 6HCl → ( 化学式 ) + 3H₂O の穴を埋めよ。",
+    "meaning": "2AlCl3",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "2",
+    "word": "酸化アルミニウムが水酸化ナトリウム水溶液と反応する化学反応式、Al₂O₃ + 2NaOH + 3H₂O → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "2Na[Al(OH)4]",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "3",
+    "word": "水酸化アルミニウムの化学式は？",
+    "meaning": "Al(OH)3",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "3",
+    "word": "( 化学式 )を含む水溶液に、NH₃ aqや少量のNaOH aqを加えると白色ゼリー状(ゲル状)沈殿として生じる。",
+    "meaning": "Al3+",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "3",
+    "word": "水酸化アルミニウムが塩酸と反応する化学反応式、Al(OH)₃ + 3HCl → ( 化学式 ) + 3H₂O の穴を埋めよ。",
+    "meaning": "AlCl3",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "3",
+    "word": "水酸化アルミニウムが水酸化ナトリウム水溶液と反応する化学反応式、Al(OH)₃ + NaOH → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "Na[Al(OH)4]",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "4",
+    "word": "亜鉛の化学式は？",
+    "meaning": "Zn",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "4",
+    "word": "亜鉛は電池の(　)極や黄銅(真鍮)などの合金の材料に使われる。",
+    "meaning": "c:正:負:負",
+    "difficulty": "3"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "4",
+    "word": "亜鉛イオンの化学式は？",
+    "meaning": "Zn2+",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "4",
+    "word": "亜鉛は酸と強塩基の両方の水溶液に溶けて、( 化学式 )を発生する。",
+    "meaning": "H2",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "4",
+    "word": "亜鉛が塩酸と反応する化学反応式、Zn + 2HCl → ( 化学式 ) + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "ZnCl2/H2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "4",
+    "word": "亜鉛が水酸化ナトリウム水溶液と反応する化学反応式、Zn + 2NaOH + 2H₂O → ( 化学式 ) +H₂↑ の穴を埋めよ。",
+    "meaning": "Na2[Zn(OH)4]",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "5",
+    "word": "酸化亜鉛の化学式は？",
+    "meaning": "ZnO",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "5",
+    "word": "酸化亜鉛が塩酸と反応する化学反応式、ZnO + 2HCl → ( 化学式 ) + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "ZnCl2/H2O",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "5",
+    "word": "酸化亜鉛が水酸化ナトリウム水溶液と反応する化学反応式、( 化学式 ) + 2NaOH + H₂O → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "ZnO/Na2[ZnO2]",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "6",
+    "word": "水酸化亜鉛の化学式は？",
+    "meaning": "Zn(OH)2",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "6",
+    "word": "( 化学式 )を含む水溶液に、少量のNH₃水やNaOH水溶液を加えると白色沈殿が生じる。",
+    "meaning": "Zn2+",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "6",
+    "word": "水酸化亜鉛が塩酸と反応する化学反応式、( 化学式 ) + 2HCl → ( 化学式 ) + 2H₂O の穴を埋めよ。",
+    "meaning": "Zn(OH)2/ZnCl2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "6",
+    "word": "水酸化亜鉛が水酸化ナトリウム水溶液と反応する化学反応式、( 化学式 ) + 2NaOH → ( 化学式 ) + H₂ の穴を埋めよ。",
+    "meaning": "Zn(OH)2/Na₂[Zn(OH)4]",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "6",
+    "word": "水酸化亜鉛が過剰のアンモニア水に溶ける化学反応式、( 化学式 ) + 4NH₃ → ( 化学式 ) + 2OH- の穴を埋めよ。",
+    "meaning": "Zn(OH)2/[Zn(NH3)4]2-",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "7",
+    "word": "スズの化学式は？",
+    "meaning": "Sn",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "7",
+    "word": "スズは周期表の(　)族元素。",
+    "meaning": "14",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "8",
+    "word": "塩化スズ(Ⅱ)の化学式は？",
+    "meaning": "SnCl2",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "8",
+    "word": "亜鉛(Ⅱ)イオン( 化学式 )は(　)として働く。",
+    "meaning": "Sn2-/c:酸化剤:還元剤:還元剤",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "8",
+    "word": "スズが還元剤として働く化学反応式。Sn²- → ( 化学式 ) + 2e- の穴を埋めよ。",
+    "meaning": "Sn4-",
+    "difficulty": "2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "9",
+    "word": "鉛の化学式は？",
+    "meaning": "Pb",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "9",
+    "word": "鉛は周期表の(　)族元素。",
+    "meaning": "14",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "9",
+    "word": "鉛蓄電池の(　)極に使う。",
+    "meaning": "c:正:負:負",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "9",
+    "word": "鉛が塩酸や希硫酸にほとんど溶けないのは、水に溶けにくい(塩　)( 化学式 )や(硫　)( 化学式 )ができて鉛の表面をおおうからである。",
+    "meaning": "塩化鉛(Ⅱ)/PbCl2/硫酸鉛(Ⅱ)/PbSO4",
+    "difficulty": "2;2;2;2"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "10",
+    "word": "酸化鉛(Ⅳ)の化学式は？",
+    "meaning": "PbO2",
+    "difficulty": "1"
+  },
+  {
+    "category": "両性元素",
+    "subcategory": "10",
+    "word": "酸化鉛(Ⅳ)は鉛蓄電池の(　)極に使う。(　)として働く。",
+    "meaning": "c:正:負:正/c:酸化剤:還元剤:酸化剤",
+    "difficulty": "1;2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "0",
+    "word": "周期表の3~12の元素は、すべて(　)元素である。",
+    "meaning": "金属",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "0",
+    "word": "典型元素の金属に比べ、遷移元素の単体は密度が(　)きく、融点が(　)い。",
+    "meaning": "c:大:小:大/c:高:低:高",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "0",
+    "word": "複数の酸化数をとる遷移元素の化合物は(　)色のものが多い。",
+    "meaning": "c:有:無:有",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "1",
+    "word": "鉄の化学式は？",
+    "meaning": "Fe",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "1",
+    "word": "鉄鉱石を溶鉱炉で還元して鉄をつくる際、コークス由来の(  )で還元する。",
+    "meaning": "一酸化炭素",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "1",
+    "word": "溶鉱炉から得られた鉄は、炭素などの不純物を含む(　)とよばれる。",
+    "meaning": "銑鉄",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "1",
+    "word": "銑鉄に酸素を吹き込み不純物を減らした強靭な鉄を(　)という。",
+    "meaning": "鋼",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "1",
+    "word": "鉄のイオンには( 化学式 )と( 化学式 )がある。酸化数の少ない順に答えよ。",
+    "meaning": "r:1:Fe2+:Fe3+/r1",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "1",
+    "word": "鉄は濃硝酸には何をつくって溶けないか？",
+    "meaning": "不動態",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe²+水溶液の色は何色か？",
+    "meaning": "淡緑色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe²+にK₄[Fe(CN)6]を加えると何色(沈殿/溶液)か？",
+    "meaning": "青白色沈殿",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe²+にK₃[Fe(CN)6]を加えると何色(沈殿/溶液)か？",
+    "meaning": "濃青色沈殿",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe²+にNaOHを加えると何色(沈殿/溶液)か？",
+    "meaning": "緑白色沈殿",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe³+水溶液の色は何色か？",
+    "meaning": "黄褐色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe³+にK₄[Fe(CN)6]を加えると何色(沈殿/溶液)か？",
+    "meaning": "濃青色沈殿",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe³+にK₃[Fe(CN)6]を加えると何色(沈殿/溶液)か？",
+    "meaning": "赤褐色沈殿",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe³+にKSCNを加えると何色(沈殿/溶液)か？",
+    "meaning": "血赤色溶液",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "2",
+    "word": "Fe³+にNaOHを加えると何色(沈殿/溶液)か？",
+    "meaning": "赤褐色沈殿",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "銅の化学式は？",
+    "meaning": "Cu",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "銅鉱石を還元してできる不純な銅は何とよばれるか？",
+    "meaning": "粗銅",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "粗銅を陽極、純銅を陰極にして電気精錬する際の陽極での反応式、( 化学式 ) → ( 化学式 ) + 2e- の穴を埋めよ。",
+    "meaning": "Cu/Cu2+",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "粗銅を陽極、純銅を陰極にして電気精錬する際の陰極での反応式、( 化学式 ) + 2e- → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "Cu2+/Cu",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "銅は希塩酸や希硫酸には溶けないが、硝酸や熱濃硫酸には(　)となって溶ける。",
+    "meaning": "酸化物",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "銅が希硝酸に溶けるときに発生する気体の化学式は？",
+    "meaning": "NO",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "銅が濃硝酸に溶けるときに発生する気体の化学式は？",
+    "meaning": "NO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "3",
+    "word": "銅が熱濃硫酸に溶けるときに発生する気体の化学式は？",
+    "meaning": "SO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "銅(Ⅱ)イオンのイオン式は？",
+    "meaning": "Cu2+",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "硫酸銅(Ⅱ)五水和物(CuSO₄・5H₂O)の結晶は何色か？",
+    "meaning": "青色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "硫酸銅(Ⅱ)五水和物を加熱して水和水を失った後の色は何色か？",
+    "meaning": "白色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "硫酸銅(Ⅱ)五水和物を加熱するときの化学反応式、CuSO₄・5H₂O → ( 化学式 ) + 5H₂O の穴を埋めよ。",
+    "meaning": "CuSO4",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "Cu²+を含む水溶液に少量の水酸化ナトリウム水溶液や少量の(　)を加えると(　)色の水酸化銅(Ⅱ)の沈殿を生じる。",
+    "meaning": "アンモニア水/青白",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "水酸化銅(Ⅱ)の沈殿は、過剰のアンモニア水に溶け、(　)色の溶液になる。",
+    "meaning": "深青色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "水酸化銅(Ⅱ)が過剰のアンモニア水に溶ける化学反応式、Cu(OH)₂ + 4NH₃ → ( 化学式 ) + 2OH- の穴を埋めよ。",
+    "meaning": "[Cu(NH3)4]2-",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "水酸化銅(Ⅱ)を加熱すると何色になるか？",
+    "meaning": "黒色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "水酸化銅(Ⅱ)を加熱する化学反応式、Cu(OH)₂ → ( 化学式 ) + H₂O の穴を埋めよ。",
+    "meaning": "CuO",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "4",
+    "word": "酸化銅(Ⅱ)の色は何色か？",
+    "meaning": "黒色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "5",
+    "word": "銀の化学式は？",
+    "meaning": "Ag",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "5",
+    "word": "銀が硝酸や熱濃硝酸に溶けるときにできるイオンは何の化学式か？",
+    "meaning": "Ag+",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "銀イオンのイオン式は？",
+    "meaning": "Ag+",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "銀イオン水溶液の色は何色か？",
+    "meaning": "無色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "銀イオン水溶液に水酸化ナトリウム水溶液や少量のアンモニア水を加えると生じる沈殿の色は？",
+    "meaning": "褐色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "銀イオン水溶液に水酸化ナトリウム水溶液や少量のアンモニア水を加えると生じる沈殿の化学式は？",
+    "meaning": "Ag2O",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "酸化銀が過剰のアンモニア水に溶ける化学反応式、Ag₂O + 4NH₃ + H₂O → ( 化学式 ) + 2OH- の穴を埋めよ。",
+    "meaning": "2[Ag(NH3)2]+",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "銀イオンと塩化物イオンが反応してできる沈殿の化学式と色は？",
+    "meaning": "AgCl/白色",
+    "difficulty": "2;1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "銀イオンと臭化物イオンが反応してできる沈殿の化学式と色は？",
+    "meaning": "AgBr/淡黄色",
+    "difficulty": "2;1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "銀イオンとヨウ化物イオンが反応してできる沈殿の化学式と色は？",
+    "meaning": "AgI/黄色",
+    "difficulty": "2;1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "6",
+    "word": "ハロゲン化銀の沈殿は光で分解し、何に変化するか？",
+    "meaning": "m:Ag:銀",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "7",
+    "word": "クロム酸イオンのイオン式は？",
+    "meaning": "CrO42-",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "7",
+    "word": "クロム酸イオンの色は何色か？",
+    "meaning": "黄色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "7",
+    "word": "鉛(Ⅱ)イオンPb²+とクロム酸イオンCrO₄²-が沈殿をつくる化学反応式、Pb²+ + ( 化学式 ) → ( 化学式 )↓ の穴を埋めよ。また、この沈殿の色は？",
+    "meaning": "CrO42-/PbCrO4/黄色",
+    "difficulty": "2;2;1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "7",
+    "word": "銀イオンAg+とクロム酸イオンCrO₄²-が沈殿をつくる化学反応式、2Ag+ + ( 化学式 ) → ( 化学式 )↓ の穴を埋めよ。また、この沈殿の色は？",
+    "meaning": "CrO42-/Ag2CrO4/暗赤色",
+    "difficulty": "2;2;1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "8",
+    "word": "ニクロム酸イオンのイオン式は？",
+    "meaning": "Cr2O72-",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "8",
+    "word": "ニクロム酸イオンの色は何色か？",
+    "meaning": "橙赤色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "8",
+    "word": "クロム酸イオンを酸性にするとニクロム酸イオンが生じる化学反応式、2CrO₄²- + 2H+ ( 化学式 ) + H₂O の穴を埋めよ。",
+    "meaning": "Cr2O72-",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "8",
+    "word": "酸性溶液で、二クロム酸イオンは強力な(　)として働く。",
+    "meaning": "c:酸化剤:還元剤:酸化剤",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "9",
+    "word": "過マンガン酸イオンのイオン式は？",
+    "meaning": "MnO4-",
+    "difficulty": "2"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "9",
+    "word": "過マンガン酸イオンの色は何色か？",
+    "meaning": "赤紫色",
+    "difficulty": "1"
+  },
+  {
+    "category": "遷移元素",
+    "subcategory": "9",
+    "word": "過マンガン酸イオンは強力な(　)として働く。",
+    "meaning": "c:酸化剤:還元剤:酸化剤",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "0",
+    "word": "炭素Cとケイ素Siは周期表の(　)族の元素で、価電子は(　)個。",
+    "meaning": "14/4",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "1",
+    "word": "炭素の単体は、性質のことなる(　)がある。",
+    "meaning": "同素体",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "1",
+    "word": "ダイヤモンドは、非常に(　)、(　)色の結晶で、電気を(　)。",
+    "meaning": "c:硬く:柔らかく:硬く/無/c:通す:通さない:通さない",
+    "difficulty": "1;1;1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "1",
+    "word": "黒鉛は、(　)、(　)色の結晶で、電気を(　)。",
+    "meaning": "c:硬く:柔らかく:柔らかく/灰黒/c:通す:通さない:通す",
+    "difficulty": "1;1;1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "1",
+    "word": "ダイヤモンドも黒鉛も、融点は非常に(　)。",
+    "meaning": "c:高い:低い:高い",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "1",
+    "word": "C60.C70などの分子式で表される球状分子の(　)や、結晶構造をもたない無定形炭素などがある。",
+    "meaning": "フラーレン",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "2",
+    "word": "一酸化炭素の分子式は？",
+    "meaning": "CO",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "2",
+    "word": "一酸化炭素が空気中で点火すると、青白い炎をあげて燃え、二酸化炭素になる化学反応式、2CO + O₂ → 2( 化学式 ) の穴を埋めよ。",
+    "meaning": "CO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "2",
+    "word": "一酸化炭素は高温で(　)を示す。",
+    "meaning": "c:酸化性:還元性:還元性",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "2",
+    "word": "一酸化炭素は炭素や炭素化合物が(　)燃焼で生じる。",
+    "meaning": "c:完全:不完全:不完全",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "2",
+    "word": "実験室では、ギ酸HCOOHを(　)と(　)し、脱水で一酸化炭素をつくる。",
+    "meaning": "濃硫酸/加熱",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "2",
+    "word": "ギ酸から一酸化炭素を生成する化学反応式、HCOOH → ( 化学式 ) + ( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "H2O/CO",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "2",
+    "word": "一酸化炭素は水に溶けにくいので、(　)で集める。",
+    "meaning": "c:水上置換:上方置換:下方置換:水上置換",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "二酸化炭素の分子式は？",
+    "meaning": "CO2",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "二酸化炭素水溶液は(　)(　)を示す。",
+    "meaning": "c:かなり強い:強い:弱い:弱い/c:酸性:塩基性:酸性",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "二酸化炭素は(　)水溶液(石灰水)に吹き込むと(　)を生じる。",
+    "meaning": "水酸化カルシウム/炭酸カルシウム",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "水酸化カルシウム水溶液に二酸化炭素を吹き込むと炭酸カルシウムができる化学反応式、Ca(OH)₂ + CO₂ → ( 化学式 )↓ +H₂O の穴を埋めよ。",
+    "meaning": "CaCO3",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "炭酸カルシウムにさらに二酸化炭素を吹き込むと、水に溶けやすい(　)を生じる。",
+    "meaning": "炭酸水素カルシウム",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "炭酸カルシウムが炭酸水素カルシウムになる化学反応式、CaCO₃ + H₂O + CO₂ → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "Ca(HCO3)2",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "二酸化炭素は炭素や炭素化合物の(　)で生じる。",
+    "meaning": "燃焼",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "実験室では、(　)に(　)を加えて熱分解で二酸化炭素が生じる。",
+    "meaning": "炭酸カルシウム/希塩酸",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "3",
+    "word": "炭酸カルシウムに希塩酸を加えて二酸化炭素を生成する化学反応式、CaCO₃ + 2HCl → ( 化学式 ) + H₂O + ( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "CaCl2/CO2",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "4",
+    "word": "ケイ素の化学式は？",
+    "meaning": "Si",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "4",
+    "word": "ケイ素は岩石や鉱物の成分元素として、地殻中に(　)についで多く存在する。",
+    "meaning": "酸素",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "4",
+    "word": "ケイ素は硬く、融点が(　)。",
+    "meaning": "c:高い:低い:高い",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "4",
+    "word": "ケイ素は金属と絶縁体の中間の電気伝導性を示す(　)",
+    "meaning": "半導体",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "4",
+    "word": "ケイ素の単体は自然界には存在せず、(　)をコークスで(　)してつくる。",
+    "meaning": "SiO2/還元",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "二酸化ケイ素の化学式は？",
+    "meaning": "SiO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "二酸化ケイ素は(　)、水晶、ケイ砂として天然に産出する。",
+    "meaning": "石英",
+    "difficulty": "1"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "二酸化ケイ素は硬く、融点が(　)。",
+    "meaning": "c:高い:低い:高い",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "二酸化ケイ素がフッ化水素酸に溶ける化学反応式、SiO₂ + 6HF → ( 化学式 ) + 2H₂O の穴を埋めよ。",
+    "meaning": "H2SiF6",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "二酸化ケイ素に水酸化ナトリウムを加えて加熱するとケイ酸ナトリウムになる化学反応式、SiO₂ + 2NaOH → ( 化学式 ) + H₂O の穴を埋めよ。",
+    "meaning": "Na2SiO3",
+    "difficulty": "2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "二酸化ケイ素と炭酸ナトリウムを加熱するとケイ酸ナトリウムと二酸化炭素になる化学反応式、SiO₂ + ( 化学式 ) → ( 化学式 ) + ( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "Na2CO3/Na2SiO3/CO2",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "ケイ酸ナトリウムに水を加えて加熱すると、(　)とよばれる粘性の大きな液体になる。",
+    "meaning": "水ガラス",
+    "difficulty": "3"
+  },
+  {
+    "category": "炭素ケイ素",
+    "subcategory": "5",
+    "word": "水ガラスに塩酸を加えて加熱脱水した乾燥剤、吸着剤として使われる物質は何か？",
+    "meaning": "シリカゲル",
+    "difficulty": "3"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "0",
+    "word": "窒素NとリンPは周期表の(　)族の元素で、価電子の数は(　)個であり、(　)≦⁠酸化数≦⁠(　)である。",
+    "meaning": "15/5/-3/+5",
+    "difficulty": "1;1;1;1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "1",
+    "word": "窒素の分子式は？",
+    "meaning": "N₂",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニアの分子式は？",
+    "meaning": "NH₃",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニアは無色、(　)臭の気体。",
+    "meaning": "刺激",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニア水溶液は(　)(　)を示す。",
+    "meaning": "c:かなり強い:強い:弱い:弱い/c:酸性:塩基性:塩基性",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニアが塩化水素と反応すると、(　)煙のような(　)の微粉末を生じる。",
+    "meaning": "白/塩化アンモニウム",
+    "difficulty": "1;2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニアと塩化水素の反応の化学反応式、NH₃ + HCl → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "NH₄Cl",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニアの工業的製法であるハーバー・ボッシュ法では、(　)を触媒として、窒素と水素を高温、高圧で直接反応させてつくる。",
+    "meaning": "鉄",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "空気中の窒素と酸素を直接反応させるアンモニアの工業的製法を何というか？",
+    "meaning": "ハーバー・ボッシュ法",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "ハーバー・ボッシュ法の化学反応式、N₂ + 3H₂ ⇌ ( 化学式 ) の穴を埋めよ。",
+    "meaning": "2NH₃",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "実験室でアンモニアを生成する際、塩化アンモニウムに(　)を加えて加熱すると(　)が発生する。",
+    "meaning": "Ca(OH)2/NH3",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "塩化アンモニウムと水酸化カルシウムからアンモニアを生成する化学反応式、2NH₄Cl + ( 化学式 ) → ( 化学式 ) + 2H₂O + 2( 化学式 )↑ の穴を埋めよ。",
+    "meaning": "Ca(OH)2/CaCl2/NH3",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニアは水に溶けやすく、空気よりも軽いので、(　)で集める。",
+    "meaning": "c:水上置換:上方置換:下方置換:上方置換",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "2",
+    "word": "アンモニアの乾燥には、(　)など(　)の乾燥剤を用いる。",
+    "meaning": "ソーダ石灰/c:酸性:中性:塩基性:塩基性",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "3",
+    "word": "一酸化窒素の分子式は？",
+    "meaning": "NO",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "3",
+    "word": "一酸化窒素は空気中では、酸素と反応して、赤褐色の(　)になる。",
+    "meaning": "二酸化窒素",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "3",
+    "word": "一酸化窒素が酸素と反応して二酸化窒素になる化学反応式、2NO + O₂ → 2( 化学式 ) の穴を埋めよ。",
+    "meaning": "NO₂",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "3",
+    "word": "実験室で一酸化窒素は、銅に(　)を反応させてつくる。",
+    "meaning": "希硝酸",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "3",
+    "word": "銅と希硝酸が反応して一酸化窒素を生成する化学反応式、3Cu + ( 化学式 ) → ( 化学式 ) + 4H₂O + ( 化学式 ) の穴を埋めよ。",
+    "meaning": "8HNO3/3Cu(NO3)2/2NO",
+    "difficulty": "2;2;2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "3",
+    "word": "一酸化窒素は水に溶けにくいので、(　)で集める。",
+    "meaning": "c:水上置換:上方置換:下方置換:水上置換",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "4",
+    "word": "二酸化窒素の化学式は？",
+    "meaning": "NO₂",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "4",
+    "word": "二酸化窒素は(　)色、(　)臭の気体。",
+    "meaning": "赤褐/特異",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "4",
+    "word": "二酸化窒素水溶液は(　)性を示す。",
+    "meaning": "c:酸性:中性:塩基性:酸性",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "4",
+    "word": "二酸化窒素は水に溶け空気より重いので、(　)で集める。",
+    "meaning": "c:水上置換:上方置換:下方置換:下方置換",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "5",
+    "word": "硝酸の化学式は？",
+    "meaning": "HNO₃",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "5",
+    "word": "硝酸は強力な(　)である。",
+    "meaning": "c:酸化剤:還元剤:酸化剤",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "5",
+    "word": "硝酸は光で分解し、NO₂を生じるので(　)に保存する。",
+    "meaning": "褐色瓶",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "5",
+    "word": "鉄、ニッケル、アルミニウムは、(　)をつくるため濃硝酸には溶けない。",
+    "meaning": "不動態",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "6",
+    "word": "オストワルト法において、(　)を触媒としてアンモニアと空気中の酸素を反応させてNOをつくる。",
+    "meaning": "白金",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "6",
+    "word": "オストワルト法におけるアンモニアの酸化の化学反応式、4NH₃ + 5O₂ → ( 化学式 ) + 6H₂O の穴を埋めよ。",
+    "meaning": "4NO",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "6",
+    "word": "オストワルト法において、NOを空気中の酸素と反応させて( 化学式 )にする。",
+    "meaning": "NO₂",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "6",
+    "word": "オストワルト法における一酸化窒素の酸化の化学反応式、2NO + O₂ → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "2NO₂",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "6",
+    "word": "オストワルト法において、NO₂を水に溶かして硝酸にする化学反応式、3NO₂ + H₂O → (　) + NO の穴を埋めよ。",
+    "meaning": "2HNO₃",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "7",
+    "word": "リンの単体には、性質のことなる(　)がある。",
+    "meaning": "同素体",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "7",
+    "word": "(　)は、淡黄色の固体で猛毒。空気中で(　)するので、水中に保存する。",
+    "meaning": "黄リン/自然発火",
+    "difficulty": "1;1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "7",
+    "word": "(　)は、赤褐色の固体。黄リンに比べて、毒性は少なく、反応性も乏しい。",
+    "meaning": "赤リン",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "7",
+    "word": "リンが燃焼すると、橙色の明るい光を放って燃え、十酸化四リンとなる化学反応式、4P + 5O₂ → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "P4O10",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "8",
+    "word": "十酸化四リンの分子式は？",
+    "meaning": "P₄O₁₀",
+    "difficulty": "1"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "8",
+    "word": "十酸化四リンは吸湿性が強く、(　)剤に用いられる。",
+    "meaning": "乾燥",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "8",
+    "word": "十酸化四リンに水を加えて加熱すると、(　)を生じる。",
+    "meaning": "リン酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "窒素リン",
+    "subcategory": "8",
+    "word": "十酸化四リンが水と反応してリン酸を生成する化学反応式、P₄O10 + 6H₂O → ( 化学式 ) の穴を埋めよ。",
+    "meaning": "4H₃PO₄",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "0",
+    "word": "酸素の化学式は？",
+    "meaning": "O2",
+    "difficulty": "1"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "0",
+    "word": "酸素は(　)色(　)臭の気体で水に(　)。また、(　)性がある。",
+    "meaning": "無/無/c:溶けやすい:溶けにくい:溶けない:溶けにくい/助燃",
+    "difficulty": "1;1;1;1"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "0",
+    "word": "酸素は実験室では(　)を(　)( 化学式 )を触媒に分解することで発生させる。",
+    "meaning": "過酸化水素水/酸化マンガン(Ⅳ)/MnO2",
+    "difficulty": "1;1;2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "0",
+    "word": "酸素には性質のことなる(　)がある。",
+    "meaning": "同素体",
+    "difficulty": "1"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "0",
+    "word": "酸素の同素体には何があるか？",
+    "meaning": "オゾン",
+    "difficulty": "1"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "1",
+    "word": "オゾンの化学式は？",
+    "meaning": "O₃",
+    "difficulty": "1"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "1",
+    "word": "オゾンは(　)色(　)臭の気体。",
+    "meaning": "無/特異",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "1",
+    "word": "オゾンは強力な(　)で、ヨウ化カリウムデンプン紙を(　)に変える。",
+    "meaning": "c:酸化剤:還元剤:酸化剤/青紫",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "1",
+    "word": "オゾンは酸素に(　)を当てるか、乾いた酸素中で(　)を行うことで発生させる。",
+    "meaning": "紫外線/無声放電",
+    "difficulty": "2;2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "2",
+    "word": "金属元素の酸化物は基本(　)酸化物である。",
+    "meaning": "c:酸性:中性:塩基性:両性:塩基性",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "2",
+    "word": "非金属元素の酸化物は基本(　)酸化物である。",
+    "meaning": "c:酸性:中性:塩基性:両性:酸性",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "2",
+    "word": "酸性酸化物と水の反応で生じる酸は、(　)である。",
+    "meaning": "オキソ酸",
+    "difficulty": "1"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "3",
+    "word": "硫黄の化学式は？",
+    "meaning": "S",
+    "difficulty": "1"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "3",
+    "word": "硫黄には(　)分子の斜方硫黄と単斜硫黄、(　)分子のゴム状硫黄がある。",
+    "meaning": "環状/長鎖状",
+    "difficulty": "3;3"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "3",
+    "word": "硫黄には(　)や(　)、(　)といった性質のことなる(　)がある。",
+    "meaning": "斜方硫黄/単斜硫黄/ゴム状硫黄/同素体",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "3",
+    "word": "硫黄の酸化数の範囲は(　)≦酸化数≦(　)である。",
+    "meaning": "-2/+6",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "3",
+    "word": "硫黄の同素体で室温においてもっとも安定なのは(　)である。",
+    "meaning": "斜方硫黄",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "3",
+    "word": "斜方硫黄を約120℃に加熱して冷やすと(　)ができる。",
+    "meaning": "単斜硫黄",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "3",
+    "word": "斜方硫黄を約250℃まで加熱して冷水に注いで急冷すると(　)ができる。",
+    "meaning": "ゴム状硫黄",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化水素の化学式は？",
+    "meaning": "H2S",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化水素は(　)臭で(　)色の気体で有毒である。",
+    "meaning": "腐卵/無色",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化水素は水に(　)、水溶液は(　)を示す。",
+    "meaning": "c:溶け:少し溶け:溶けず:少し溶け/c:強酸性:強塩基性:弱酸性:弱塩基性:弱酸性",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化水素は(　)として働く。",
+    "meaning": "c:酸化剤:還元剤:還元剤",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化水素はほとんどの重金属イオンと反応して(　)を作る。",
+    "meaning": "硫化物",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化水素は水に(　)、空気より(　)ため(　)で集める。",
+    "meaning": "c:溶け:少し溶け:溶けず:溶け/c:重い:軽い:重い/c:水上置換:上方置換:下方置換:下方置換",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化水素は実験室では(　)に(　)または(　)を加えて発生させる。",
+    "meaning": "硫化鉄/希硫酸/希塩酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "4",
+    "word": "硫化鉄(Ⅱ)に希硫酸を加えて硫化水素を発生させる化学反応式は？( 化学式 ) + H₂SO₄ → ( 化学式 ) + H₂S",
+    "meaning": "FeS/FeSO4",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "二酸化硫黄の化学式は？",
+    "meaning": "SO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "二酸化硫黄は(　)臭で(　)色の気体で有毒である。",
+    "meaning": "刺激/無色",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "二酸化硫黄は水に(　)、水溶液は(　)を示す。",
+    "meaning": "c:溶け:少し溶け:溶けず:溶け/c:強酸性:強塩基性:弱酸性:弱塩基性:弱酸性",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "二酸化硫黄は(　)として働く。ただし、硫化水素との反応では(　)として働く。",
+    "meaning": "c:酸化剤:還元剤:還元剤/c:酸化剤:還元剤:酸化剤",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "二酸化硫黄には(　)作用がある。",
+    "meaning": "漂白",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "二酸化硫黄は水に(　)、空気より(　)ため(　)で集める。",
+    "meaning": "c:溶け:少し溶け:溶けず:溶け/c:重い:軽い:重い/c:水上置換:上方置換:下方置換:下方置換",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "二酸化硫黄は実験室では(　)に(　)を加えて(　)することで発生させる。",
+    "meaning": "銅/濃硫酸/加熱",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "銅に濃硫酸を加える化学反応式は？Cu + ( 化学式 ) → ( 化学式 ) + 2H₂O + SO₂",
+    "meaning": "H2SO4/CuSO4",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "亜硫酸ナトリウムや亜硫酸水素ナトリウムに希硫酸を加えると(　)が発生する。",
+    "meaning": "二酸化硫黄",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "5",
+    "word": "亜硫酸ナトリウムと亜硫酸水素ナトリウムに希硫酸を加える化学反応式は？Na₂SO₃ + H₂SO₄ → Na₂SO₄ + H₂O +( 化学式 )　NaHSO₃ + H₂SO₄ → NaHAO₄ + H₂O + ( 化学式 )",
+    "meaning": "SO2",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "硫酸の化学式は？",
+    "meaning": "H2SO4",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "濃硫酸は密度が(　)く、(　)性のある(　)の液体。",
+    "meaning": "c:大きい:小さい:大きく/粘/c:揮発性:不揮発性:不揮発性",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "濃硫酸は(　)性が強いので(　)として用いられる。",
+    "meaning": "吸湿/乾燥剤",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "濃硫酸は有機化合物からHとOを取り除く(　)作用がある。",
+    "meaning": "脱水",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "熱濃硫酸は(　)力が強く、イオン化傾向の小さい銅や銀も溶かす。",
+    "meaning": "c:酸化:還元:酸化",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "濃硫酸を薄めるときは、(　)に(　)を加える。",
+    "meaning": "多量の水/濃硫酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "硫酸の工業的製法は？",
+    "meaning": "接触法",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "接触法では( 化学式 )を(　)( 化学式 )を触媒にして( 化学式 )にする。",
+    "meaning": "SO2/酸化バナジウム(Ⅴ)/V2O5/SO4",
+    "difficulty": "2"
+  },
+  {
+    "category": "酸素硫黄",
+    "subcategory": "6",
+    "word": "接触法では三酸化硫黄を(　)に吸収させて(　)にし、これを(　)で薄めて濃硫酸にする。",
+    "meaning": "濃硫酸/発煙硫酸/希硫酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "0",
+    "word": "周期表の17元素を何というか？",
+    "meaning": "ハロゲン",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "0",
+    "word": "ハロゲンの酸化数は(　)≦酸化数≦(　)である。",
+    "meaning": "-1/+7",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "0",
+    "word": "ハロゲンの単体はいずれも(　)で(　)色である。",
+    "meaning": "二原子分子/c:有:無:有",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "0",
+    "word": "ハロゲンの単体の融点や沸点は原子番号が大きいほど(　)なる。",
+    "meaning": "c:高く:低く:高く",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "0",
+    "word": "ハロゲンの単体は、原子番号が小さいほど(　)価の(　)イオンになりやすいため、酸化力が(　)。",
+    "meaning": "1/c:陽イオン:陰イオン:陰イオン/c:強い:弱い:強い",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "0",
+    "word": "ハロゲンの単体は別のハロゲンのイオンと反応し酸化力が強い方が(　)されてイオンになり、弱い方が(　)されて単体になる。",
+    "meaning": "c:酸化:還元:還元/c:酸化:還元:酸化",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "1",
+    "word": "フッ素の化学式は？",
+    "meaning": "F2",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "1",
+    "word": "フッ素は常温常圧で(　)色の(　)。",
+    "meaning": "淡黄/c:気体:液体:固体:気体",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "1",
+    "word": "フッ素は酸化力が(　)、(　)とも激しく反応する。",
+    "meaning": "c:強く:弱く:強く/水",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "1",
+    "word": "フッ素は元素中で最も陰性が強く、(　)酸化数をとらない。",
+    "meaning": "c:正の/負の/正の",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "塩素の化学式は？",
+    "meaning": "Cl2",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "塩素は常温常圧で(　)色の(　)。",
+    "meaning": "黄緑/c:気体:液体:固体:気体",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "塩素は水に溶けて(　)と(　)になるため、水溶液は(　)である。",
+    "meaning": "塩化水素/次亜塩素酸/c:酸性:中性:塩基性:酸性",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "次亜塩素酸やそのイオンは強い(　)剤で、殺菌・(　)作用がある。",
+    "meaning": "c:酸化:還元:酸化/漂白",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "塩素を水酸化カルシウムに吸収させると、(　)ができる。",
+    "meaning": "さらし粉",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "さらし粉( 化学式 )は次亜塩素酸イオンを含むので(　)・殺菌剤として使われる。",
+    "meaning": "CaCl(ClO)·H2O/漂白",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "塩素は実験室では(　)( 化学式 )に(　)を加え、(　)して発生させる。/で区切ること。",
+    "meaning": "酸化マンガン(Ⅳ)/MnO4/濃塩酸/加熱",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "酸化マンガン(Ⅳ)に濃塩酸を加えて加熱する化学反応式は？( 化学式 ) + 4HCl → ( 化学式 ) + 2H₂O + Cl₂",
+    "meaning": "MnO2/MnCl",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "2",
+    "word": "塩素の実験室的製法は濃塩酸を加熱するため( 化学式 )が発生する。そのため、(　)が入った洗気瓶を通してそれを除き(　)の入った洗気瓶を通して乾燥させ(　)置換で集める。",
+    "meaning": "HCl/水/濃硫酸/c:水上置換:上方置換:下方置換:下方置換",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "3",
+    "word": "臭素の化学式は？",
+    "meaning": "Br2",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "3",
+    "word": "臭素は常温常圧で(　)色の(　)。",
+    "meaning": "赤褐/c:気体:液体:固体:液体",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "3",
+    "word": "臭素は非金属元素でたった一つ常温常圧で単体が(　)になる。",
+    "meaning": "c:気体:液体:固体:液体",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "4",
+    "word": "ヨウ素の化学式は？",
+    "meaning": "I2",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "4",
+    "word": "ヨウ素は常温常圧で(　)色の(　)で(　)性を持つ。",
+    "meaning": "黒紫/c:気体:液体:固体:固体/昇華",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "4",
+    "word": "ヨウ素は水に(　)が、ヨウ化カリウム( 化学式 )水溶液には(　)( 化学式 )として溶け、(　)色の溶液になる。",
+    "meaning": "c:溶けやすい:溶けにくい:溶けない/KI/三ヨウ化物イオン/I3-/赤褐",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "5",
+    "word": "ハロゲン化水素はハロゲンの元素記号をXとすると化学式は( 化学式 )と表される。",
+    "meaning": "HX",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "5",
+    "word": "ハロゲン化水素は(　)色(　)臭の(　)で水に溶けて(　)を示す。",
+    "meaning": "無/刺激/c:気体:液体:固体:気体/c:酸性:中性:塩基性:酸性",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "5",
+    "word": "フッ化水素の水溶液のみが(　)性で他のハロゲン化水素は(　)性を示す。",
+    "meaning": "c:強酸:強塩基:弱酸:弱塩基:弱酸/c:強酸:強塩基:弱酸:弱塩基:弱酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "5",
+    "word": "ハロゲン化物イオンの酸は水に(　)。",
+    "meaning": "c:溶けやすい:溶けにくい:溶けやすい",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "5",
+    "word": "( 化学式 )以外のハロゲン化銀は(　)。",
+    "meaning": "AgF/c:易溶性:難溶性:難溶性",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "6",
+    "word": "フッ化水素はガラスや石英の主成分である(　)を溶かし(　)を生じる。",
+    "meaning": "二酸化ケイ素/ヘキサフルオロケイ酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "6",
+    "word": "フッ化水素が二酸化ケイ素を溶かす化学反応式は？( 化学式 ) + 6HF → ( 化学式 ) + 2H₂O",
+    "meaning": "SiO2/H2SiF6",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "6",
+    "word": "フッ化水素は実験室ではホタル石( 物質名 )( 化学式 )に(　)を反応させてつくる。",
+    "meaning": "フッ化カルシウム/CaF2/濃硫酸",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "6",
+    "word": "フッ化水素の実験室的製法の化学反応式は？( 化学式 ) + H₂SO₄ → ( 化学式 ) + 2HF",
+    "meaning": "CaF2/CaSO4",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "7",
+    "word": "塩化水素はアンモニアと反応すると(　)( 化学式 )の微粉末を(　)のように生じる。",
+    "meaning": "塩化アンモニウム/NH4Cl/白煙",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "7",
+    "word": "アンモニアと塩化アンモニウムの化学反応式は？HCl + NH₃ → ( 化学式 )",
+    "meaning": "NH4Cl",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "7",
+    "word": "塩化水素は実験室では(　)に(　)を加え、(　)して作る。",
+    "meaning": "塩化ナトリウム/濃硫酸/加熱",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "7",
+    "word": "塩化水素の実験室的製法の化学反応式は？NaCl + ( 化学式 ) → ( 化学式 ) + HCl",
+    "meaning": "H2SO4/NaHSO4",
+    "difficulty": "2"
+  },
+  {
+    "category": "ハロゲン",
+    "subcategory": "7",
+    "word": "塩化水素は水に(　)空気より(　)ため(　)置換で集める。",
+    "meaning": "c:よく溶け:あまり溶けず:溶けず:よく溶け/c:重い:軽い:重い/c:水上置換:上方置換:下方置換:下方置換",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "0",
+    "word": "原則として(　)と(　)と(　)は沈殿しない。",
+    "meaning": "r:1:アルカリ金属:アンモニウム塩:硝酸塩/r1/r1",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "0",
+    "word": "アルカリ金属のイオンは沈殿しないため(　)で区別する。",
+    "meaning": "炎色反応",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "0",
+    "word": "NH₄⁺は沈殿しないため(　)を加え、(　)の発生で調べる。",
+    "meaning": "c:強酸:強塩基:弱酸:弱塩基:強塩基/アンモニア",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "0",
+    "word": "NH₄+は濃塩酸を加えて(　)によって起こる化学反応で調べる。",
+    "meaning": "弱塩基の遊離",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "1",
+    "word": "原則として塩化物は(　)。",
+    "meaning": "c:沈殿する:沈殿しない:沈殿しない",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "1",
+    "word": "原則として塩化物は沈殿しないが、( 化学式 )と( 化学式 )はどちらも(　)色沈殿を作る。",
+    "meaning": "r:1:Ag+:Pb2+/r1/白",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "1",
+    "word": "AgClの沈殿は光で(　)くなる。",
+    "meaning": "黒",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "1",
+    "word": "PbCl₂の沈殿は(　)に溶ける。",
+    "meaning": "熱湯",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "1",
+    "word": "Ag+とPb²+は(　)で沈殿させ、色で判断する。Ag+の沈殿:( 化学式 )(　)色　Pb²+の沈殿( 化学式 )(　)色",
+    "meaning": "クロム酸イオン/Ag2CrO4/暗赤/PbCrO4/黄",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "2",
+    "word": "原則として硫酸塩は(　)。",
+    "meaning": "c:沈殿する:沈殿しない:沈殿しない",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "2",
+    "word": "原則として硫酸塩は沈殿しないが、(　)と( 化学式 )は(　)色沈殿をつくる。",
+    "meaning": "アルカリ土類金属のイオン/Pb2+/白",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "2",
+    "word": "アルカリ土類金属の硫酸塩が沈殿することを利用して、SO₄²-の検出を( 化学式 )で行う。",
+    "meaning": "Ba2+",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "2",
+    "word": "PbSO₄とアルカリ土類金属のイオンは似た条件で沈殿するため、(　)で区別する。",
+    "meaning": "炎色反応",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "3",
+    "word": "原則として炭酸塩は(　)。",
+    "meaning": "c:沈殿する:沈殿しない:沈殿する",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "3",
+    "word": "原則として炭酸塩は沈殿するが、(　)と( 化学式 )は沈殿しない。",
+    "meaning": "アルカリ金属/NH4+",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "3",
+    "word": "アルカリ土類金属の炭酸塩はどれも(　)色沈殿。",
+    "meaning": "白",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "3",
+    "word": "炭酸塩の沈殿は希塩酸にとけて( 化学式 )を発生し、(　)になる。この反応は(　)によって進む。",
+    "meaning": "CO2/塩化物/弱酸の遊離",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "原則として水酸化物は(　)。",
+    "meaning": "c:沈殿する:沈殿しない:沈殿する",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "原則として水酸化物は沈殿するが、(　)と(　)は沈殿しない。",
+    "meaning": "r:1:アルカリ金属:アルカリ土類金属/r1",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化物の沈殿が、過剰の水酸化ナトリウム水溶液に溶けるのは( 化学式 )( 化学式 )( 化学式 )( 化学式 )",
+    "meaning": "r:1:Al:Zn:Sn:Pb/r1/r1/r1",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化アルミニウムは(　)色(　)沈殿で過剰の水酸化ナトリウム水溶液に( 化学式 )として溶ける。",
+    "meaning": "白/ゲル状/[Al(OH)4]-",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化亜鉛は過剰の水酸化ナトリウム水溶液に( 化学式 )として溶ける。",
+    "meaning": "[Zn(OH)4]-",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化スズは過剰の水酸化ナトリウム水溶液に( 化学式 )として溶ける。",
+    "meaning": "[Sn(OH)4]-",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化鉛は過剰の水酸化ナトリウム水溶液に( 化学式 )として溶ける。",
+    "meaning": "[Pb(OH)4]-",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化アルミニウム、水酸化亜鉛、水酸化スズ、水酸化鉛は(　)色沈殿で、(　)水酸化物。また、これらの溶けた溶液はいずれも(　)色。",
+    "meaning": "白/c:酸性:中性:塩基性:両性:両性/無",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化物の沈殿が、過剰のアンモニア水に溶けるのは( 化学式 )( 化学式 )( 化学式 )",
+    "meaning": "r:1:Cu:Ag:Pb/r1/r1",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化銅は(　)色沈殿で過剰のアンモニア水に( 化学式 )として溶ける。",
+    "meaning": "青白/[Cu(NH3)4]2+",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化銀は(　)色沈殿で過剰のアンモニア水に( 化学式 )として溶ける。",
+    "meaning": "褐/[Ag(NH3)2]+",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化亜鉛は過剰のアンモニア水に( 化学式 )として溶ける。",
+    "meaning": "[Zn(NH3)4]2+",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "4",
+    "word": "水酸化銅が過剰のアンモニア水に溶けた溶液は(　)色溶液で水酸化銀と水酸化亜鉛が過剰のアンモニア水に溶けた溶液は(　)色溶液。",
+    "meaning": "深青/無",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "原則として硫化物は(　)。",
+    "meaning": "c:沈殿する:沈殿しない:沈殿する",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "金属イオンを含む溶液に( 化学式 )を通じると硫化物ができる。",
+    "meaning": "H2S",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "原則として硫化物は沈殿しないが、Znよりイオンか傾向が大きい(　)(　)( 化学式 )( 化学式 )のイオンは沈殿しない。",
+    "meaning": "r:1:アルカリ金属:アルカリ土類金属/r1/r:2:Mg:Al/r2",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "酸性(塩基性)で硫化物が沈殿するのは( 化学式 )( 化学式 )( 化学式 )( 化学式 )",
+    "meaning": "r:1:AgS:CuS:CdS:PbS/r1/r1/r1",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "AgS、CuS、CdS、PbSの沈殿のうち( 化学式 )が(　)色で他は(　)色。",
+    "meaning": "CdS/黄/黒",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "塩基性(中性)で硫化物が沈殿するのは( 化学式 )( 化学式 )( 化学式 )( 化学式 )( 化学式 )",
+    "meaning": "r:1:ZnS:FeS:NiS:CoS:MnS/r1/r1/r1/r1",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "ZnS、FeS、NiS、CoS、MnSの沈殿のうち( 化学式 )が(　)色、( 化学式 )が(　)色で他は(　)色。",
+    "meaning": "r:1:ZnS:MnS/r:2:白:淡紅/r1/r2/黒",
+    "difficulty": "2"
+  },
+  {
+    "category": "金属イオン",
+    "subcategory": "5",
+    "word": "Fe³+を含む溶液にH₂Sを通じるとFe³+が(　)されて( 化学式 )になる。",
+    "meaning": "c:酸化:還元:還元/Fe2+",
+    "difficulty": "2"
+  }
+]

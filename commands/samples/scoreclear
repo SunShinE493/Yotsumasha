@@ -1,0 +1,26 @@
+import { SlashCommandBuilder } from 'discord.js';
+
+// スコアをクリアするコマンドの定義
+
+export const data = new SlashCommandBuilder()
+
+  .setName('clear_scores')
+
+  .setDescription('全てのユーザーのスコアをクリアします');
+
+// スコアをクリアする関数
+
+export async function execute(interaction) {
+
+  // スコアをリセットする
+
+  Object.keys(participants).forEach(userId => {
+
+    participants[userId].score = 0; // スコアをクリア
+
+  });
+
+  await interaction.reply('全てのユーザーのスコアがクリアされました。');
+
+}
+
