@@ -1,0 +1,168 @@
+/**
+ * Aura Timetable Sync Bridge (v1.4 - 専用カレンダー対応版)
+ * --------------------------------------------------
+ * 「Aura Timetable」という名前の専用カレンダーを作成し、
+ * そこに予定を書き込みます。これにより、Googleカレンダーアプリで
+ * 授業予定の表示・非表示を簡単に切り替えられるようになります。
+ */
+
+const APP_TAG = "[AuraSync]";
+const CALENDAR_NAME = "Aura Timetable";
+
+/**
+ * 専用カレンダーを取得、なければ作成するヘルパー
+ */
+function getTargetCalendar() {
+  const calendars = CalendarApp.getCalendarsByName(CALENDAR_NAME);
+  if (calendars.length > 0) {
+    return calendars[0];
+  }
+  console.log("新しいカレンダーを作成します: " + CALENDAR_NAME);
+  const newCal = CalendarApp.createCalendar(CALENDAR_NAME);
+  newCal.setSelected(true); // デフォルトで表示するように設定
+  return newCal;
+}
+
+function doPost(e) {
+  const response = { status: "success", message: "", details: {} };
+  
+  try {
+    const contents = e.postData.contents;
+    console.log("=== 同期処理開始 (専用カレンダー) ===");
+    
+    const data = JSON.parse(contents);
+    const calendar = getTargetCalendar();
+    console.log("同期先: " + calendar.getName());
+
+    const parseJST = (dateStr) => {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d, 9, 0, 0); 
+    };
+
+    const semStart = parseJST(data.semesterStart);
+    const semEnd = parseJST(data.semesterEnd);
+
+    // 1. 既存予定のクリア
+    const existingEvents = calendar.getEvents(semStart, semEnd, { search: APP_TAG });
+    console.log(`既存予定の削除を開始... (${existingEvents.length}件)`);
+    existingEvents.forEach((ev, i) => {
+      ev.deleteEvent();
+      if (i > 0 && i % 20 === 0) Utilities.sleep(200); 
+    });
+
+    // 2. 祝日データの取得
+    const holidayCal = CalendarApp.getCalendarById('ja.japanese#holiday@group.v.calendar.google.com');
+    const holidays = holidayCal.getEvents(semStart, semEnd).reduce((acc, ev) => {
+      acc[Utilities.formatDate(ev.getStartTime(), "JST", "yyyy-MM-dd")] = ev.getTitle();
+      return acc;
+    }, {});
+
+    // 3. 生成ループ
+    let currentDate = new Date(semStart);
+    let createdCount = 0;
+
+    while (currentDate <= semEnd) {
+      const dateStr = Utilities.formatDate(currentDate, "JST", "yyyy-MM-dd");
+      const holidayName = holidays[dateStr];
+      const hasOverride = data.dayOverrides && data.dayOverrides[dateStr] !== undefined;
+
+      if (holidayName && !hasOverride) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
+
+      let dayIndex;
+      if (hasOverride) {
+        dayIndex = data.dayOverrides[dateStr];
+      } else {
+        const jsDay = currentDate.getDay();
+        dayIndex = jsDay === 0 ? 6 : jsDay - 1;
+      }
+
+      for (let p = 0; p < data.periods.length; p++) {
+        const entry = data.timetable[`${dayIndex}-${p}`];
+        if (!entry) continue;
+
+        const course = data.courses.find(c => c.id === entry.courseId);
+        if (!course) continue;
+
+        const periodTime = data.periods[p];
+        const start = new Date(currentDate);
+        const [sH, sM] = periodTime.start.split(':').map(Number);
+        start.setHours(sH, sM, 0, 0);
+
+        const end = new Date(currentDate);
+        const [eH, eM] = periodTime.end.split(':').map(Number);
+        end.setHours(eH, eM, 0, 0);
+
+        calendar.createEvent(course.name, start, end, {
+          description: `${APP_TAG}\n教員: ${course.teacher || '未指定'}`,
+          location: course.room || ""
+        });
+        
+        createdCount++;
+        Utilities.sleep(500); 
+        if (createdCount % 30 === 0) Utilities.sleep(2000);
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    response.message = `${createdCount}件の予定を専用カレンダーに同期しました。`;
+  } catch (err) {
+    response.status = "error";
+    response.message = err.toString();
+  }
+  return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 専用カレンダーから同期予定をすべて削除します。
+ */
+function clearAllSyncEvents() {
+  const calendar = getTargetCalendar();
+  const now = new Date();
+  const start = new Date(now.getFullYear() - 1, 0, 1);
+  const end = new Date(now.getFullYear() + 1, 11, 31);
+  
+  console.log("専用カレンダーから同期予定を取得中...");
+  const events = calendar.getEvents(start, end, { search: APP_TAG });
+  let count = 0;
+  
+  events.forEach((ev, i) => {
+    ev.deleteEvent();
+    count++;
+    if (count % 20 === 0) {
+      console.log(`${count}件削除済み...`);
+      Utilities.sleep(500);
+    }
+  });
+  
+  console.log(`削除完了: 合計 ${count} 件を削除しました。`);
+}
+
+/**
+ * メインカレンダー側に入ってしまった予定を掃除したい場合、
+ * この関数を手動で「実行」してください。
+ */
+function cleanMainCalendar() {
+  const calendar = CalendarApp.getDefaultCalendar();
+  const now = new Date();
+  const start = new Date(now.getFullYear() - 1, 0, 1);
+  const end = new Date(now.getFullYear() + 1, 11, 31);
+  
+  console.log("メインカレンダーから [AuraSync] タグの予定を掃除します...");
+  const events = calendar.getEvents(start, end, { search: APP_TAG });
+  let count = 0;
+  
+  events.forEach((ev) => {
+    if (ev.getDescription().includes(APP_TAG)) {
+      ev.deleteEvent();
+      count++;
+    }
+  });
+  console.log(`メインカレンダーの掃除完了: ${count}件を削除しました。`);
+}
+
+function authorize() {
+  const calendar = getTargetCalendar();
+  console.log("カレンダー（" + calendar.getName() + "）へのアクセス許可が完了しました！");
+}

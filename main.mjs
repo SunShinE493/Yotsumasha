@@ -5,6 +5,7 @@ import express from "express";
 import { Client, Collection, Events, GatewayIntentBits, ActivityType, EmbedBuilder, Partials } from "discord.js";
 import { createServer } from "http";
 import { WebSocketServer } from 'ws';
+import next from 'next';
 import CommandsRegister from "./regist-commands.mjs";
 import Notification from "./models/notification.mjs";
 import YoutubeFeeds from "./models/youtubeFeeds.mjs";
@@ -26,6 +27,10 @@ import { registerRoutes, performRestoreFromGist } from './server/routes.mjs';
 
 const youtubei = new Youtubei();
 
+const dev = process.env.NODE_ENV === 'development';
+console.log(`[DEBUG] Next.js mode: ${dev ? 'development' : 'production'}`);
+const nextApp = next({ dev, dir: path.join(process.cwd(), 'aura-timetable') });
+const nextHandler = nextApp.getRequestHandler();
 
 let postCount = 0;
 const app = express();
@@ -53,9 +58,13 @@ app.use(
   })
 );
 
-// SPA fallback: only for non-API, non-asset, non-file-extension paths
-// This prevents returning index.html for /assets/*.css|js and similar
-app.get(/^\/(?!api)(?!assets)(?!.*\.[^\/]+$).*/, (req, res) => {
+// Serve aura-timetable via Next.js handler
+app.all('/aura*', (req, res) => {
+  return nextHandler(req, res);
+});
+
+// SPA fallback: only for non-API, non-assets, non-aura, non-file-extension paths
+app.get(/^\/(?!api)(?!assets)(?!aura)(?!.*\.[^\/]+$).*/, (req, res) => {
   console.log(`[DEBUG] SPA Fallback matched for: ${req.path}`);
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(distDir, 'index.html'), (err) => {
@@ -94,6 +103,14 @@ app.post('/', function (req, res) {
 // Static and SPA fallback moved above to take precedence over legacy routes
 
 async function runWebserver() {
+  // Prepare Next.js app
+  try {
+    await nextApp.prepare();
+    console.log("Next.js app prepared");
+  } catch (err) {
+    console.error("Failed to prepare Next.js app:", err);
+  }
+
   // Set up Express middleware for JSON parsing
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -111,7 +128,21 @@ async function runWebserver() {
   const server = createServer(app);
   // --- WebSocket Real-time Battle ---
   const rooms = new Map(); // roomId -> { host, timeLimit, maxQuestions, asked, words, state, players: Map(name->ws), scores: Map(name->number>, idx, timer }
-  const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({ noServer: true });
+
+  server.on('upgrade', (request, socket, head) => {
+    const pathname = new URL(request.url, `http://${request.headers.host}`).pathname;
+
+    if (pathname.startsWith('/aura')) {
+      // Let Next.js handle its own WebSockets if any (HMR in dev mode)
+      return;
+    }
+
+    // Default to bot's WebSocket logic
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  });
 
   // Public API: list open rooms (waiting and running)
   app.get('/api/battle/rooms', (_req, res) => {
