@@ -41,14 +41,16 @@ export default function TimetableGrid() {
     return idx;
   }, [todayIndex, activeDayOffset, state.dayOverrides, todayIndexRaw]);
 
-  const handleCellClick = (dayIdx: number, periodIdx: number) => {
-    const course = getCourse(dayIdx, periodIdx);
+  const handleCellClick = (dayIdx: number, periodIdx: number, targetDate?: Date, effectiveDay?: number) => {
+    const finalDay = effectiveDay ?? dayIdx;
+    const course = getCourse(finalDay, periodIdx);
     
     if (state.appMode === 'edit') {
-      setEditTarget({ day: dayIdx, period: periodIdx, course });
+      setEditTarget({ day: finalDay, period: periodIdx, course });
     } else if (course) {
-      const lessonCount = getLessonCount(new Date(), state.semesterSettings.start);
-      setDetailTarget({ course, lessonCount, dayIndex: dayIdx });
+      const date = targetDate ?? getDateForDay(isToday ? (todayIndex + activeDayOffset) : dayIdx, todayIndexRaw);
+      const lessonCount = getLessonCount(date, finalDay, state);
+      setDetailTarget({ course, lessonCount, dayIndex: finalDay });
     }
   };
 
@@ -138,49 +140,58 @@ export default function TimetableGrid() {
                 <span className="period-time">{p.start}</span>
               </div>
               {visibleDays.map(di => {
-                const course = getCourse(di, pi);
-                const entry = state.timetable[cellKey(di, pi)];
-                const lessonCount = getLessonCount(new Date(), state.semesterSettings.start);
-                
+                const targetDate = getDateForDay(isToday ? (todayIndex + activeDayOffset) : di, todayIndexRaw);
+                const dateStr = formatDateYMD(targetDate);
+                const isHoliday = !!state.holidays[dateStr];
+                const hasOverride = state.dayOverrides[dateStr] !== undefined;
+                const effectiveDayIndex = hasOverride ? state.dayOverrides[dateStr] : di;
+                const isOutsideSemester = dateStr < state.semesterSettings.start || dateStr > state.semesterSettings.end;
+
+                const course = getCourse(effectiveDayIndex, pi);
+                const entry = state.timetable[cellKey(effectiveDayIndex, pi)];
+                const lessonCount = getLessonCount(targetDate, effectiveDayIndex, state);
+
                 return (
                   <div
                     key={`cell-${di}-${pi}`}
-                    className={`timetable__cell ${state.appMode === 'view' ? 'timetable__cell--readonly' : ''} ${entry?.slotOffset ? `timetable__cell--${entry.slotOffset}` : ''} ${state.holidays[getDateForDay(isToday ? (todayIndex + activeDayOffset) : di, todayIndexRaw).toISOString().split('T')[0]] ? 'timetable__cell--holiday' : ''}`}
-                    onClick={() => handleCellClick(di, pi)}
+                    className={`timetable__cell ${state.appMode === 'view' ? 'timetable__cell--readonly' : ''} ${entry?.slotOffset ? `timetable__cell--${entry.slotOffset}` : ''} ${isHoliday ? 'timetable__cell--holiday' : ''} ${isOutsideSemester ? 'timetable__cell--outside' : ''}`}
+                    onClick={() => handleCellClick(di, pi, targetDate, effectiveDayIndex)}
                   >
-                    {course ? (
-                      <div
-                        className={`course-card ${entry.slotOffset ? `course-card--${entry.slotOffset}` : ''}`}
-                        style={{ '--course-color': course.color, background: `${course.color}15` } as React.CSSProperties}
-                      >
-                        <span className="course-card__name">{course.name}</span>
-                        {course.room && <span className="course-card__room">📍 {course.room}</span>}
-                        {(state.syllabusDisplayEnabled && course.syllabus && course.syllabus[lessonCount-1]) && (
-                           <div className="course-card__syllabus">
-                             <span className="syllabus-idx">第{lessonCount}回</span>
-                             <p className="syllabus-text">{course.syllabus[lessonCount-1]}</p>
-                           </div>
-                        )}
-                        {/* Task list for Today View */}
-                        {isToday && (
-                          <div className="course-card__tasks">
-                            {state.todos
-                              .filter(t => t.courseId === course.id && !t.completed)
-                              .map(t => (
-                                <div key={t.id} className="task-mini-item">
-                                  <div className="task-dot" />
-                                  <span>{t.text}</span>
-                                </div>
-                              ))}
-                          </div>
-                        )}
-                        {/* Weekly view badge */}
-                        {(!isToday && state.showGridTodoBadges && state.todos.some(t => t.courseId === course.id && !t.completed)) && (
-                          <div className="course-todo-badge" />
-                        )}
-                      </div>
-                    ) : state.appMode === 'edit' ? (
-                      <div className="timetable__add-btn">+</div>
+                    {!isHoliday || hasOverride ? (
+                      course ? (
+                        <div
+                          className={`course-card ${entry?.slotOffset ? `course-card--${entry.slotOffset}` : ''}`}
+                          style={{ '--course-color': course.color, background: `${course.color}15`, opacity: isOutsideSemester ? 0.4 : 1 } as React.CSSProperties}
+                        >
+                          {isOutsideSemester && <div className="outside-label">期間外</div>}
+                          {hasOverride && <div className="override-badge">振替</div>}
+                          <span className="course-card__name">{course.name}</span>
+                          {course.room && <span className="course-card__room">📍 {course.room}</span>}
+                          {(state.syllabusDisplayEnabled && course.syllabus && course.syllabus[lessonCount - 1]) && (
+                            <div className="course-card__syllabus">
+                              <span className="syllabus-idx">第{lessonCount}回</span>
+                              <p className="syllabus-text">{course.syllabus[lessonCount - 1]}</p>
+                            </div>
+                          )}
+                          {isToday && (
+                            <div className="course-card__tasks">
+                              {state.todos
+                                .filter(t => t.courseId === course.id && !t.completed)
+                                .map(t => (
+                                  <div key={t.id} className="task-mini-item">
+                                    <div className="task-dot" />
+                                    <span>{t.text}</span>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                          {!isToday && state.showGridTodoBadges && state.todos.some(t => t.courseId === course.id && !t.completed) && (
+                            <div className="course-todo-badge" />
+                          )}
+                        </div>
+                      ) : state.appMode === 'edit' ? (
+                        <div className="timetable__add-btn">+</div>
+                      ) : null
                     ) : null}
                   </div>
                 );
@@ -288,6 +299,31 @@ export default function TimetableGrid() {
           border: 2px solid var(--bg-primary);
           box-shadow: 0 0 5px rgba(255, 69, 58, 0.5);
         }
+        .timetable__cell--outside {
+          background: rgba(0, 0, 0, 0.05);
+        }
+        .outside-label {
+          position: absolute;
+          top: 2px;
+          right: 4px;
+          font-size: 0.5rem;
+          color: var(--text-muted);
+          background: rgba(255, 255, 255, 0.1);
+          padding: 1px 4px;
+          border-radius: 3px;
+          z-index: 2;
+        }
+        .override-badge {
+          position: absolute;
+          bottom: 4px;
+          right: 4px;
+          font-size: 0.5rem;
+          color: var(--accent-blue);
+          border: 1px solid var(--accent-blue);
+          padding: 1px 4px;
+          border-radius: 3px;
+          opacity: 0.8;
+        }
       `}</style>
     </div>
   );
@@ -306,9 +342,46 @@ function formatDate(d: Date): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-function getLessonCount(date: Date, semesterStart: string): number {
-  const start = new Date(semesterStart);
-  const diffTime = Math.max(0, date.getTime() - start.getTime());
-  const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7)) + 1;
-  return Math.max(1, Math.min(15, diffWeeks));
+function formatDateYMD(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function getLessonCount(targetDate: Date, targetDayIndex: number, state: any): number {
+  if (!state.semesterSettings.start) return 1;
+  const start = new Date(state.semesterSettings.start);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(targetDate);
+  end.setHours(0, 0, 0, 0);
+
+  if (end < start) return 1;
+
+  let count = 0;
+  let current = new Date(start);
+
+  while (current <= end) {
+    const ymd = formatDateYMD(current);
+    const actualJsDay = current.getDay();
+    const actualIndex = actualJsDay === 0 ? 6 : actualJsDay - 1; // 0=Mon...6=Sun
+
+    // Effective Day Index (Day Override)
+    const hasOverride = state.dayOverrides[ymd] !== undefined;
+    const effectiveIndex = hasOverride ? state.dayOverrides[ymd] : actualIndex;
+
+    // Check if it's the target course day
+    if (effectiveIndex === targetDayIndex) {
+      const isHoliday = !!state.holidays[ymd];
+      const isInSpecial = state.specialPeriods.some((p: any) => ymd >= p.start && ymd <= p.end);
+
+      // Rule: Skip if holiday or special period, UNLESS it's an explicit override (priority B)
+      if (hasOverride || (!isHoliday && !isInSpecial)) {
+        count++;
+      }
+    }
+    current.setDate(current.getDate() + 1);
+  }
+
+  return Math.max(1, count);
 }
