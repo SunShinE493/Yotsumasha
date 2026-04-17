@@ -320,18 +320,8 @@ export default function CourseDetail({ course, currentLessonCount, dayIndex, onC
             </div>
           </div>
 
-          {/* Collapsible Sections */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <CollapsibleSection title="授業の目標" icon={<Award size={16}/>} content={course.objectives} />
-            <CollapsibleSection title="学修内容" icon={<Info size={16}/>} content={course.content} />
-            <CollapsibleSection title="受講要件" icon={<X size={16}/>} content={course.requirements} />
-            <CollapsibleSection title="成績評価の方法・基準" icon={<Award size={16}/>} content={course.grading} />
-            <CollapsibleSection title="テキスト・参考書" icon={<Book size={16}/>} content={course.textbook ? `【テキスト】\n${course.textbook}\n\n【参考書】\n${course.references || 'なし'}` : undefined} />
-            <CollapsibleSection title="予習・復習について" icon={<BookOpen size={16}/>} content={course.preparation} />
-          </div>
-
           {/* Quick Add Todo Section */}
-          <div className="quick-todo-section" style={{ marginTop: '20px', padding: '16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)' }}>
+          <div className="quick-todo-section" style={{ marginBottom: '20px', padding: '16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)' }}>
             <h3 style={{ fontSize: '0.9rem', marginBottom: '12px', color: 'var(--text-secondary)', fontWeight: 700 }}>
               📝 この授業の課題・メモを追加
             </h3>
@@ -385,6 +375,16 @@ export default function CourseDetail({ course, currentLessonCount, dayIndex, onC
                 />
               )}
             </div>
+          </div>
+
+          {/* Collapsible Sections */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <CollapsibleSection title="授業の目標" icon={<Award size={16}/>} content={course.objectives} />
+            <CollapsibleSection title="学修内容" icon={<Info size={16}/>} content={course.content} />
+            <CollapsibleSection title="受講要件" icon={<X size={16}/>} content={course.requirements} />
+            <CollapsibleSection title="成績評価の方法・基準" icon={<Award size={16}/>} content={course.grading} />
+            <CollapsibleSection title="テキスト・参考書" icon={<Book size={16}/>} content={course.textbook ? `【テキスト】\n${course.textbook}\n\n【参考書】\n${course.references || 'なし'}` : undefined} />
+            <CollapsibleSection title="予習・復習について" icon={<BookOpen size={16}/>} content={course.preparation} />
           </div>
 
           {/* Drive Files Section */}

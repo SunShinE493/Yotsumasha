@@ -171,7 +171,7 @@ export default function TimetableGrid() {
                           {isOutsideSemester && <div className="outside-label">期間外</div>}
                           {hasOverride && <div className="override-badge">振替</div>}
                           <span className="course-card__name">{course.name}</span>
-                          {course.room && <span className="course-card__room">📍 {course.room}</span>}
+                          {course.room && <span className="course-card__room" style={{ color: getContrastYIQ(course.color), opacity: 0.95 }}>📍 {course.room}</span>}
                           {(state.syllabusDisplayEnabled && course.syllabus && course.syllabus[lessonCount - 1]) && (
                             <div className="course-card__syllabus">
                               <span className="syllabus-idx">第{lessonCount}回</span>
