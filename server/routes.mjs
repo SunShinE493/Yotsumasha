@@ -236,6 +236,10 @@ export async function registerRoutes(app) {
 
   app.get('/api/aura/gist/load', optionalAuthentication, async (req, res) => {
     try {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
       const gistUtils = await import('../shared/gistUtils.mjs');
       const fileData = await gistUtils.getGistFile('aura-timetable-backup.json');
       if (fileData && fileData[req.userId]) {

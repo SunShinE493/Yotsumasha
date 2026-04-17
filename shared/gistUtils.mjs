@@ -16,7 +16,11 @@ export async function getGistFile(fileName) {
 
     try {
         const response = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
-            headers: { Authorization: `token ${GIST_TOKEN}` }
+            headers: { 
+                Authorization: `token ${GIST_TOKEN}`,
+                'Cache-Control': 'no-cache'
+            },
+            params: { t: Date.now() } // キャッシュ回避
         });
 
         const file = response.data.files[fileName];

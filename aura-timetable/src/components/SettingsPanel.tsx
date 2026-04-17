@@ -165,7 +165,8 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const handleGistLoad = async () => {
     setIsGistSyncing(true);
     try {
-      const res = await fetch('/api/aura/gist/load');
+      // キャッシュを強制的に無効化するためのタイムスタンプを付与
+      const res = await fetch('/api/aura/gist/load?t=' + Date.now());
       if (!res.ok) {
         if (res.status === 404) throw new Error('バックアップが見つかりません。先に保存を行ってください。');
         throw new Error(await res.text());
