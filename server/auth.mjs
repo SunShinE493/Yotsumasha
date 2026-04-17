@@ -53,9 +53,10 @@ passport.deserializeUser(async (id, done) => {
 });
 
 export function setupAuth(app) {
-  // Require SESSION_SECRET in production
+  // Fallback for SESSION_SECRET in production to prevent crash
   if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
-    throw new Error('SESSION_SECRET environment variable is required in production');
+    console.warn('WARNING: SESSION_SECRET is not set. Using a temporary random secret for sessions.');
+    process.env.SESSION_SECRET = randomUUID();
   }
 
   // Rate limiting for auth endpoints
