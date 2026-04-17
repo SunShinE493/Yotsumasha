@@ -138,13 +138,20 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   const handleGistSave = async () => {
     setIsGistSyncing(true);
     try {
+      // セキュリティのため、送信直前に最新のワンタイム有効なCSRFトークンを取得
+      const csrfRes = await fetch('/api/csrf');
+      const { csrfToken } = await csrfRes.json();
+
       const res = await fetch('/api/aura/gist/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'csrf-token': document.cookie.split('; ').find(row => row.startsWith('csrf-token='))?.split('=')[1] || ''
+          'csrf-token': csrfToken
         },
-        body: JSON.stringify(state)
+        body: JSON.stringify({
+          ...state,
+          _csrf: csrfToken // tiny-csrfが要求するボディパラメータ
+        })
       });
       if (!res.ok) throw new Error(await res.text());
       alert('クラウド(GIST)へ現在の時間割データを保存しました。');
