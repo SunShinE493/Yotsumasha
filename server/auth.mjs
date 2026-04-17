@@ -77,7 +77,7 @@ export function setupAuth(app) {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // 多くのホスティング環境（Render等）のプロキシを考慮してfalse
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     },
@@ -135,7 +135,7 @@ export function setupAuth(app) {
     res.cookie('csrf-token', token, {
       httpOnly: false,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // TLS終端環境でのCookie喪失を防ぐため
       path: '/',
     });
     res.json({ csrfToken: token });

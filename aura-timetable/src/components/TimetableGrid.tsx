@@ -183,7 +183,7 @@ export default function TimetableGrid() {
                               {state.todos
                                 .filter(t => t.courseId === course.id && !t.completed)
                                 .map(t => (
-                                  <div key={t.id} className="task-mini-item">
+                                  <div key={t.id} className="task-mini-item" style={{ color: getContrastYIQ(course.color) }}>
                                     <div className="task-dot" />
                                     <span>{t.text}</span>
                                   </div>
