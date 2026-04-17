@@ -22,11 +22,13 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
     setMobileTodoDateEnabled,
     setSyllabusDisplayEnabled,
     setGasSyncUrl,
-    setShowGridTodoBadges
+    setShowGridTodoBadges,
+    setCustomBackground
   } = useTimetable();
   const { data: session, status } = useSession();
   const [periods, setPeriods] = useState<PeriodTime[]>([...state.periods]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isGistSyncing, setIsGistSyncing] = useState(false);
   const [calendars, setCalendars] = useState<{ id: string, summary: string }[]>([]);
 
   // Fetch calendar list
@@ -133,6 +135,46 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const handleGistSave = async () => {
+    setIsGistSyncing(true);
+    try {
+      const res = await fetch('/api/aura/gist/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'csrf-token': document.cookie.split('; ').find(row => row.startsWith('csrf-token='))?.split('=')[1] || ''
+        },
+        body: JSON.stringify(state)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      alert('クラウド(GIST)へ現在の時間割データを保存しました。');
+    } catch (e: any) {
+      alert('保存エラー: ' + e.message);
+    } finally {
+      setIsGistSyncing(false);
+    }
+  };
+
+  const handleGistLoad = async () => {
+    setIsGistSyncing(true);
+    try {
+      const res = await fetch('/api/aura/gist/load');
+      if (!res.ok) {
+        if (res.status === 404) throw new Error('バックアップが見つかりません。先に保存を行ってください。');
+        throw new Error(await res.text());
+      }
+      const data = await res.json();
+      if (confirm('現在の時間割データを、クラウドのデータで上書きしますか？')) {
+        importState(data);
+        alert('データを復元しました。');
+      }
+    } catch (e: any) {
+      alert('復元エラー: ' + e.message);
+    } finally {
+      setIsGistSyncing(false);
+    }
+  };
+
   const handleDayOverrideAdd = () => {
     const dateStr = prompt('対象の日付を入力 (YYYY-MM-DD)');
     if (!dateStr) return;
@@ -177,6 +219,25 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
                       style={{ width: '50px' }}
                     />
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>時 (以降は明日を表示)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 1.5 Theme Settings */}
+            <div className="form-group">
+              <label>🎨 テーマ設定</label>
+              <div className="card settings-card">
+                <div className="settings-row">
+                  <span>背景色 (ページ全体)</span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input 
+                      type="color" 
+                      value={state.customBackground || '#0a0a0a'} 
+                      onChange={e => setCustomBackground(e.target.value)} 
+                      style={{ width: '40px', height: '30px', cursor: 'pointer', background: 'transparent', border: 'none', padding: 0 }}
+                    />
+                    <button className="btn btn-ghost btn-xs" onClick={() => setCustomBackground('')}>リセット</button>
                   </div>
                 </div>
               </div>
@@ -298,12 +359,22 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-             {/* Reset */}
+             {/* Reset & Sync */}
              <div className="form-group">
-              <label>🗑️ データ管理</label>
-              <button className="btn btn-danger btn-sm" onClick={handleReset} style={{ width: '100%' }}>
-                すべてのデータを初期化
-              </button>
+              <label>☁️ クラウド同期 & データ管理</label>
+              <div className="card settings-card" style={{ gap: '8px' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>別端末とデータを共有したい場合に使用します。<br/>(※ログイン中のアカウントにのみ紐づきます)</span>
+                <button className="btn btn-primary btn-sm" onClick={handleGistSave} disabled={isGistSyncing} style={{ width: '100%' }}>
+                  {isGistSyncing ? '通信中...' : '☁️ 現在のデータをクラウド(GIST)へ保存'}
+                </button>
+                <button className="btn btn-secondary btn-sm" onClick={handleGistLoad} disabled={isGistSyncing} style={{ width: '100%', background: 'rgba(255,255,255,0.1)' }}>
+                  {isGistSyncing ? '通信中...' : '📥 クラウド(GIST)からデータを復元'}
+                </button>
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '4px 0' }}></div>
+                <button className="btn btn-danger btn-sm" onClick={handleReset} style={{ width: '100%' }}>
+                  すべてのデータを初期化
+                </button>
+              </div>
             </div>
           </div>
         </div>

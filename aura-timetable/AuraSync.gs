@@ -23,6 +23,27 @@ function getTargetCalendar() {
   return newCal;
 }
 
+/**
+ * Aura側から送られてくるカラー（HSL）を
+ * Google Apps Scriptの EventColor（カレンダーの標準色）に変換します。
+ */
+function getColorIdFromString(colorStr) {
+  if (!colorStr) return CalendarApp.EventColor.PALE_BLUE;
+  const map = {
+    'hsl(220, 90%, 65%)': CalendarApp.EventColor.BLUE,        // blue
+    'hsl(265, 80%, 65%)': CalendarApp.EventColor.MAUVE,       // purple
+    'hsl(330, 80%, 65%)': CalendarApp.EventColor.PALE_RED,    // pink
+    'hsl(160, 70%, 50%)': CalendarApp.EventColor.PALE_GREEN,  // green
+    'hsl(30, 90%, 60%)': CalendarApp.EventColor.ORANGE,       // orange
+    'hsl(190, 80%, 55%)': CalendarApp.EventColor.CYAN,        // cyan
+    'hsl(0, 75%, 60%)': CalendarApp.EventColor.RED,           // red
+    'hsl(45, 90%, 60%)': CalendarApp.EventColor.YELLOW,       // yellow
+    'hsl(280, 60%, 55%)': CalendarApp.EventColor.PALE_BLUE,   // violet
+    'hsl(140, 60%, 45%)': CalendarApp.EventColor.GREEN        // teal
+  };
+  return map[colorStr] || CalendarApp.EventColor.PALE_BLUE;
+}
+
 function doPost(e) {
   const response = { status: "success", message: "", details: {} };
   
@@ -95,10 +116,17 @@ function doPost(e) {
         const [eH, eM] = periodTime.end.split(':').map(Number);
         end.setHours(eH, eM, 0, 0);
 
-        calendar.createEvent(course.name, start, end, {
+        const eventObj = calendar.createEvent(course.name, start, end, {
           description: `${APP_TAG}\n教員: ${course.teacher || '未指定'}`,
           location: course.room || ""
         });
+        
+        // 色を反映する
+        if (course.color) {
+          try {
+            eventObj.setColor(getColorIdFromString(course.color));
+          } catch (colorErr) {}
+        }
         
         createdCount++;
         Utilities.sleep(500); 
@@ -106,7 +134,58 @@ function doPost(e) {
       }
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    response.message = `${createdCount}件の予定を専用カレンダーに同期しました。`;
+    
+    // --- Google Tasks (Todo連携) ---
+    if (data.todos && data.todos.length > 0) {
+      console.log("=== Todo (Google Tasks) 同期開始 ===");
+      try {
+        const taskLists = Tasks.Tasklists.list().items;
+        let targetList = null;
+        if (taskLists) {
+          for (let i = 0; i < taskLists.length; i++) {
+            if (taskLists[i].title === CALENDAR_NAME) {
+              targetList = taskLists[i];
+              break;
+            }
+          }
+        }
+        if (!targetList) {
+          console.log(`新しいタスクリストを作成します: ${CALENDAR_NAME}`);
+          targetList = Tasks.Tasklists.insert({ title: CALENDAR_NAME });
+        }
+        
+        // 既存のタスクをクリア
+        const existingTasks = Tasks.Tasks.list(targetList.id).items;
+        if (existingTasks && existingTasks.length > 0) {
+          console.log(`既存のタスクを削除中... (${existingTasks.length}件)`);
+          existingTasks.forEach(t => Tasks.Tasks.remove(targetList.id, t.id));
+        }
+
+        // 新規タスクの登録
+        let tasksCreated = 0;
+        data.todos.forEach(todo => {
+          if (!todo.completed) {
+            const taskObj = {
+              title: todo.text || "(無題のタスク)",
+              notes: "Aura Timetableからの同期タスクです。"
+            };
+            if (todo.targetDate) {
+              taskObj.due = todo.targetDate + "T00:00:00.000Z";
+            }
+            Tasks.Tasks.insert(taskObj, targetList.id);
+            tasksCreated++;
+            Utilities.sleep(100);
+          }
+        });
+        console.log(`${tasksCreated}件のタスクを同期しました。`);
+        response.message += ` (さらに ${tasksCreated}件のタスクを連携しました)`;
+      } catch (taskErr) {
+        console.error("タスク同期エラー:", taskErr.toString());
+        response.message += "\n※Google Tasksへの同期は失敗しました。GASの「サービス」で「Tasks API」を追加してください。";
+      }
+    }
+
+    response.message = `${createdCount}件の予定を専用カレンダーに同期しました。` + (response.message.includes('タスク') ? `\n\n${response.message}` : '');
   } catch (err) {
     response.status = "error";
     response.message = err.toString();

@@ -77,6 +77,7 @@ export interface TimetableState {
   gasSyncUrl?: string; // URL for GAS Web App
   holidays: Record<string, string>; // "YYYY-MM-DD": "Holiday Name"
   showGridTodoBadges: boolean;
+  customBackground?: string;
 }
 
 export const COURSE_COLORS = [
@@ -93,12 +94,12 @@ export const COURSE_COLORS = [
 ];
 
 export const DEFAULT_PERIODS: PeriodTime[] = [
-  { start: '09:00', end: '10:30' },
-  { start: '10:40', end: '12:10' },
-  { start: '13:00', end: '14:30' },
-  { start: '14:40', end: '16:10' },
-  { start: '16:20', end: '17:50' },
-  { start: '18:00', end: '19:30' },
+  { start: '08:40', end: '10:10' },
+  { start: '10:20', end: '11:50' },
+  { start: '12:45', end: '14:15' },
+  { start: '14:25', end: '15:55' },
+  { start: '16:05', end: '17:35' },
+  { start: '17:50', end: '19:20' },
 ];
 
 export const DAY_LABELS_FULL = ['月', '火', '水', '木', '金', '土', '日'];
@@ -145,4 +146,54 @@ export function getTodayIndex(): number {
 
 export function cellKey(day: number, period: number): string {
   return day + '-' + period;
+}
+
+export function getContrastYIQ(colorStr: string): string {
+  if (!colorStr) return '#ffffff';
+  let r = 0, g = 0, b = 0;
+  colorStr = colorStr.trim();
+  
+  const matchHsl = colorStr.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  if (matchHsl) {
+    let h = parseInt(matchHsl[1]) / 360;
+    let s = parseInt(matchHsl[2]) / 100;
+    let l = parseInt(matchHsl[3]) / 100;
+    if (s === 0) { r = g = b = l * 255; }
+    else {
+      const hue2rgb = (p: number, q: number, t: number) => {
+        if(t < 0) t += 1;
+        if(t > 1) t -= 1;
+        if(t < 1/6) return p + (q - p) * 6 * t;
+        if(t < 1/2) return q;
+        if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3) * 255;
+      g = hue2rgb(p, q, h) * 255;
+      b = hue2rgb(p, q, h - 1/3) * 255;
+    }
+  } else if (colorStr.startsWith('#')) {
+    const hex = colorStr.replace('#', '');
+    if (hex.length === 3) {
+      r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+      g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+      b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+    } else if (hex.length === 6) {
+      r = parseInt(hex.substring(0, 2), 16);
+      g = parseInt(hex.substring(2, 4), 16);
+      b = parseInt(hex.substring(4, 6), 16);
+    }
+  } else if (colorStr.startsWith('rgb')) {
+    const matchRgb = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (matchRgb) {
+      r = parseInt(matchRgb[1]);
+      g = parseInt(matchRgb[2]);
+      b = parseInt(matchRgb[3]);
+    }
+  }
+
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return yiq >= 128 ? '#000000' : '#ffffff';
 }

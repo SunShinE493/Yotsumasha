@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTimetable } from '@/lib/store';
-import { getTodayIndex, Course, cellKey } from '@/lib/types';
+import { getTodayIndex, Course, cellKey, getContrastYIQ } from '@/lib/types';
 import CourseEditor from './CourseEditor';
 import CourseDetail from './CourseDetail';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
@@ -161,7 +161,12 @@ export default function TimetableGrid() {
                       course ? (
                         <div
                           className={`course-card ${entry?.slotOffset ? `course-card--${entry.slotOffset}` : ''}`}
-                          style={{ '--course-color': course.color, background: `${course.color}15`, opacity: isOutsideSemester ? 0.4 : 1 } as React.CSSProperties}
+                          style={{ 
+                            '--course-color': course.color, 
+                            background: course.color, 
+                            color: getContrastYIQ(course.color),
+                            opacity: isOutsideSemester ? 0.4 : 1 
+                          } as React.CSSProperties}
                         >
                           {isOutsideSemester && <div className="outside-label">期間外</div>}
                           {hasOverride && <div className="override-badge">振替</div>}
@@ -277,8 +282,8 @@ export default function TimetableGrid() {
           align-items: center;
           gap: 6px;
           font-size: 0.7rem;
-          color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.05);
+          color: inherit;
+          background: rgba(0, 0, 0, 0.15);
           padding: 4px 8px;
           border-radius: 6px;
         }

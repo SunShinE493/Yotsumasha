@@ -6,6 +6,7 @@ import AISnap from '@/components/AISnap';
 import SettingsPanel from '@/components/SettingsPanel';
 import TodoList from '@/components/TodoList';
 import { useTimetable } from '@/lib/store';
+import { getContrastYIQ } from '@/lib/types';
 import { Menu, X, Settings, Sparkles, Edit3, Eye, Calendar } from 'lucide-react';
 
 export default function Home() {
@@ -15,8 +16,28 @@ export default function Home() {
 
   const closePanel = () => setActivePanel('none');
 
+  const bgColor = state.customBackground;
+  let customStyles: React.CSSProperties | undefined;
+
+  if (bgColor) {
+    const textColor = getContrastYIQ(bgColor);
+    const isLight = textColor === '#000000';
+    
+    customStyles = {
+      '--bg-primary': bgColor,
+      '--bg-secondary': isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+      '--bg-card': isLight ? 'rgba(255,255,255,0.5)' : bgColor,
+      '--bg-glass': isLight ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.4)',
+      '--bg-card-hover': isLight ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.08)',
+      '--text-primary': textColor,
+      '--text-secondary': textColor,
+      '--text-muted': isLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)',
+      '--border-subtle': isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)',
+    } as React.CSSProperties;
+  }
+
   return (
-    <div className={`app-container app-mode--${state.appMode}`}>
+    <div className={`app-container app-mode--${state.appMode}`} style={customStyles}>
       {/* Header */}
       <header className="app-header">
         <div className="app-header__inner">
@@ -33,20 +54,6 @@ export default function Home() {
           </div>
           
           <div className="app-header__center">
-            <div className="mode-toggle">
-              <button
-                className={`mode-toggle__btn ${state.appMode === 'view' ? 'active' : ''}`}
-                onClick={() => setAppMode('view')}
-              >
-                <Eye size={14} /> 予定ビュー
-              </button>
-              <button
-                className={`mode-toggle__btn ${state.appMode === 'edit' ? 'active' : ''}`}
-                onClick={() => setAppMode('edit')}
-              >
-                <Edit3 size={14} /> 編集モード
-              </button>
-            </div>
           </div>
 
           <div className="app-header__actions desktop-only">

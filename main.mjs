@@ -58,10 +58,7 @@ app.use(
   })
 );
 
-// Serve aura-timetable via Next.js handler
-app.all('/aura*', (req, res) => {
-  return nextHandler(req, res);
-});
+
 
 // SPA fallback: only for non-API, non-assets, non-aura, non-file-extension paths
 app.get(/^\/(?!api)(?!assets)(?!aura)(?!.*\.[^\/]+$).*/, (req, res) => {
@@ -121,6 +118,20 @@ async function runWebserver() {
     try { await storage.loadFromDisk?.(); } catch { }
     await registerRoutes(app);
     console.log("Routes registered successfully");
+
+    // Protect and serve aura-timetable
+    app.all('/aura*', (req, res) => {
+      // API call protections are handled by their own routes (optionalAuthentication)
+      // This is for Next.js page requests
+      if (req.method === 'GET' && !req.isAuthenticated()) {
+        const accept = req.headers.accept || '';
+        if (accept.includes('text/html')) {
+          // Redirect browser requests to the auth page
+          return res.redirect(`/auth?redirect=${encodeURIComponent(req.originalUrl)}`);
+        }
+      }
+      return nextHandler(req, res);
+    });
   } catch (error) {
     console.error("Failed to register routes:", error);
   }

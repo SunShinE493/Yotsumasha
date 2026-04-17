@@ -13,6 +13,7 @@ import {
   getDefaultState,
   generateId,
   cellKey,
+  DEFAULT_PERIODS,
 } from './types';
 
 interface TimetableContextValue {
@@ -46,6 +47,7 @@ interface TimetableContextValue {
   setTodoPriorityMode: (mode: 'date-first' | 'no-date-first') => void;
   setGasSyncUrl: (url: string) => void;
   setShowGridTodoBadges: (show: boolean) => void;
+  setCustomBackground: (color: string) => void;
 }
 
 const TimetableContext = createContext<TimetableContextValue | null>(null);
@@ -75,6 +77,13 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as TimetableState;
+        
+        // マイグレーション: 古いデフォルト時間のままであれば、新デフォルト時間に書き換える
+        const oldPeriodsStr = '[{"start":"09:00","end":"10:30"},{"start":"10:40","end":"12:10"},{"start":"13:00","end":"14:30"},{"start":"14:40","end":"16:10"},{"start":"16:20","end":"17:50"},{"start":"18:00","end":"19:30"}]';
+        if (parsed.periods && JSON.stringify(parsed.periods) === oldPeriodsStr) {
+          parsed.periods = [...DEFAULT_PERIODS];
+        }
+
         const defaults = getDefaultState();
         setState({
           ...defaults,
@@ -311,6 +320,10 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, showGridTodoBadges: show }));
   }, []);
 
+  const setCustomBackground = useCallback((color: string) => {
+    setState(prev => ({ ...prev, customBackground: color }));
+  }, []);
+
   return (
     <TimetableContext.Provider
       value={{
@@ -342,6 +355,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         setTodoPriorityMode,
         setGasSyncUrl,
         setShowGridTodoBadges,
+        setCustomBackground,
       }}
     >
       {loaded ? children : null}

@@ -184,6 +184,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              <a href="/aura" className="px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium">時間割(Aura)</a>
               <a href="/" className="px-3 py-2 rounded-lg bg-secondary hover:bg-accent transition-colors text-sm">ホームへ</a>
               <button
                 className="touch-target p-2 rounded-lg bg-secondary hover:bg-accent transition-colors"

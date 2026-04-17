@@ -216,6 +216,38 @@ export async function registerRoutes(app) {
     }
   });
 
+  // Aura Timetable Data sync to Gist (per user)
+  app.post('/api/aura/gist/save', optionalAuthentication, async (req, res) => {
+    try {
+      const data = req.body;
+      const gistUtils = await import('../shared/gistUtils.mjs');
+      const fileData = await gistUtils.getGistFile('aura-timetable-backup.json') || {};
+      fileData[req.userId] = data; // store by userId to support multiple users
+      const success = await gistUtils.updateGistFile('aura-timetable-backup.json', fileData);
+      if (success) {
+        res.json({ ok: true });
+      } else {
+        res.status(500).json({ message: 'failed to save to gist' });
+      }
+    } catch (e) {
+      res.status(500).json({ message: 'failed to save', error: e.message });
+    }
+  });
+
+  app.get('/api/aura/gist/load', optionalAuthentication, async (req, res) => {
+    try {
+      const gistUtils = await import('../shared/gistUtils.mjs');
+      const fileData = await gistUtils.getGistFile('aura-timetable-backup.json');
+      if (fileData && fileData[req.userId]) {
+        res.json(fileData[req.userId]);
+      } else {
+        res.status(404).json({ message: 'No backup found for this user' });
+      }
+    } catch (e) {
+      res.status(500).json({ message: 'failed to load', error: e.message });
+    }
+  });
+
   app.post('/api/admin/import', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
