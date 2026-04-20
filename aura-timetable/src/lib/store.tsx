@@ -68,8 +68,16 @@ function getNextDateStr(dayIndex: number): string {
 }
 
 export function TimetableProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<TimetableState>(getDefaultState);
+  const [state, setRawState] = useState<TimetableState>(getDefaultState);
   const [loaded, setLoaded] = useState(false);
+
+  const setState = useCallback((updater: React.SetStateAction<TimetableState>, skipUpdateTs?: boolean) => {
+    setRawState(prev => {
+      const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
+      if (skipUpdateTs) return next;
+      return { ...next, updatedAt: Date.now() };
+    });
+  }, []);
 
   // Load from localStorage
   useEffect(() => {
@@ -88,7 +96,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         setState({
           ...defaults,
           ...parsed,
-        });
+        }, true);
       }
     } catch {
       // ignore
@@ -174,7 +182,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
   );
 
   const importState = useCallback((data: TimetableState) => {
-    setState(data);
+    setState(data, true);
   }, []);
 
   const mergeState = useCallback((data: Partial<TimetableState>) => {

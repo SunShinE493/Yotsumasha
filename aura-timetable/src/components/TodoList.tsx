@@ -155,9 +155,11 @@ export default function TodoList() {
                     </span>
                   )}
                 </div>
-                <button className="btn btn-icon btn-ghost todo-item__delete" onClick={() => deleteTodo(todo.id)} style={{ width: '28px', height: '28px' }}>
-                  <Trash2 size={14} />
-                </button>
+                {todo.completed && (
+                  <button className="btn btn-icon btn-ghost todo-item__delete" onClick={() => deleteTodo(todo.id)} style={{ width: '28px', height: '28px' }}>
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             );
           })

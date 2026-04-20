@@ -371,12 +371,12 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
              <div className="form-group">
               <label>☁️ クラウド同期 & データ管理</label>
               <div className="card settings-card" style={{ gap: '8px' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>別端末とデータを共有したい場合に使用します。<br/>(※ログイン中のアカウントにのみ紐づきます)</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>別端末とのデータは自動的にバックグラウンドで同期されます。<br/>(手動で強制的に送受信したい場合は以下のボタンを使用してください)</span>
                 <button className="btn btn-primary btn-sm" onClick={handleGistSave} disabled={isGistSyncing} style={{ width: '100%' }}>
-                  {isGistSyncing ? '通信中...' : '☁️ 現在のデータをクラウド(GIST)へ保存'}
+                  {isGistSyncing ? '通信中...' : '☁️ 今すぐデータをクラウドへ保存'}
                 </button>
                 <button className="btn btn-secondary btn-sm" onClick={handleGistLoad} disabled={isGistSyncing} style={{ width: '100%', background: 'rgba(255,255,255,0.1)' }}>
-                  {isGistSyncing ? '通信中...' : '📥 クラウド(GIST)からデータを復元'}
+                  {isGistSyncing ? '通信中...' : '📥 今すぐクラウドからデータを復元'}
                 </button>
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '4px 0' }}></div>
                 <button className="btn btn-danger btn-sm" onClick={handleReset} style={{ width: '100%' }}>

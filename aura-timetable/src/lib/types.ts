@@ -78,6 +78,7 @@ export interface TimetableState {
   holidays: Record<string, string>; // "YYYY-MM-DD": "Holiday Name"
   showGridTodoBadges: boolean;
   customBackground?: string;
+  updatedAt?: number;
 }
 
 export const COURSE_COLORS = [
@@ -135,6 +136,7 @@ export function getDefaultState(): TimetableState {
     todoPriorityMode: 'date-first',
     holidays: {},
     showGridTodoBadges: true,
+    updatedAt: Date.now(),
   };
 }
 

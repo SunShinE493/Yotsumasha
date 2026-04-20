@@ -3,6 +3,7 @@ import "./globals.css";
 import { TimetableProvider } from "@/lib/store";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import AuthProvider from "@/components/AuthProvider";
+import AutoSync from "@/components/AutoSync";
 
 export const metadata: Metadata = {
   title: "Aura Timetable — 時間割管理",
@@ -35,7 +36,10 @@ export default function RootLayout({
       <body>
         <ServiceWorkerRegistrar />
         <AuthProvider>
-          <TimetableProvider>{children}</TimetableProvider>
+          <TimetableProvider>
+            <AutoSync />
+            {children}
+          </TimetableProvider>
         </AuthProvider>
       </body>
     </html>
