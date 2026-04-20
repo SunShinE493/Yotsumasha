@@ -4,11 +4,12 @@
   "description": "MiniPotato Bot by EOi",
   "main": "main.mjs",
   "scripts": {
-    "start": "set NODE_ENV=production && node --env-file=.env main.mjs",
+    "start": "node main.mjs",
+    "start:local": "set NODE_ENV=production && node --env-file=.env main.mjs",
     "build:vite": "vite build",
     "build:aura": "cd aura-timetable && npm run build",
     "build": "npm run build:vite && npm run build:aura",
-    "dev": "npm run build && npm run start"
+    "dev": "npm run build && npm run start:local"
   },
   "dependencies": {
     "@gonetone/get-youtube-id-by-url": "^2.0.0",
