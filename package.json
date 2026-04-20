@@ -4,7 +4,7 @@
   "description": "MiniPotato Bot by EOi",
   "main": "main.mjs",
   "scripts": {
-    "start": "set NODE_ENV=production && node main.mjs",
+    "start": "set NODE_ENV=production && node --env-file=.env main.mjs",
     "build:vite": "vite build",
     "build:aura": "cd aura-timetable && npm run build",
     "build": "npm run build:vite && npm run build:aura",

@@ -82,12 +82,15 @@ JSONのみ
     {
       "name": "科目名",
       "teacher": "教員の名前",
-      "syllabus": [
-        "第1回の内容",
-        "第2回の内容",
-        ...
-        "第15回の内容"
-      ]
+      "className": "クラス (組) 名",
+      "syllabus": ["第1回内容", "...", "第15回内容"],
+      "objectives": "授業の目標内容 (改行含む)",
+      "content": "学修内容の詳細 (改行含む)",
+      "requirements": "受講要件・前提知識",
+      "textbook": "使用テキスト・ISBN",
+      "references": "参考書情報",
+      "preparation": "予習・復習についての指示",
+      "grading": "成績評価の方法と基準"
     }
   ]
 }
@@ -173,7 +176,7 @@ JSONのみ
       const parsed = JSON.parse(importText);
       if (parsed && typeof parsed === 'object') {
         const normalized: any = { ...parsed };
-        
+
         // Handle AI generated format or Syllabus format
         if (parsed.courses) {
           const courseMap: Record<string, string> = {};
@@ -183,14 +186,14 @@ JSONのみ
             courseMap[c.name] = newId;
             return { ...c, id: newId };
           });
-          
+
           if (parsed.timetable) {
             Object.keys(parsed.timetable).forEach(k => {
               const entry = parsed.timetable[k];
               if (entry && entry.courseId && courseMap[entry.courseId]) {
-                normalized.timetable[k] = { 
+                normalized.timetable[k] = {
                   courseId: courseMap[entry.courseId],
-                  slotOffset: entry.slotOffset 
+                  slotOffset: entry.slotOffset
                 };
               }
             });
@@ -203,7 +206,7 @@ JSONのみ
         } else {
           mergeState(normalized);
         }
-        
+
         setImportText('');
         alert('インポートが完了しました。');
       }
