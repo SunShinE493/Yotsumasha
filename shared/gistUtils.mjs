@@ -1,7 +1,19 @@
 import axios from 'axios';
 
-const GIST_TOKEN = process.env.GIST_TOKEN;
-const GIST_ID = process.env.GIST_ID;
+/**
+ * 環境変数からトークンとIDを取得し、余分な空白や引用符を除去します。
+ * Koyebなどのクラウド環境の管理画面で誤って追加されがちな記号をクリーンアップします。
+ */
+function getGistConfig() {
+    let token = process.env.GIST_TOKEN || '';
+    let id = process.env.GIST_ID || '';
+    
+    // 余分な空白、改行、コーテーションを除去
+    token = token.trim().replace(/^["']|["']$/g, '');
+    id = id.trim().replace(/^["']|["']$/g, '');
+    
+    return { token, id };
+}
 
 /**
  * Fetches the content of a specific file from the configured Gist.
@@ -9,16 +21,20 @@ const GIST_ID = process.env.GIST_ID;
  * @returns {Promise<any|null>} The parsed JSON content or null if not found/error.
  */
 export async function getGistFile(fileName) {
-    if (!GIST_TOKEN || !GIST_ID) {
+    const { token, id } = getGistConfig();
+
+    if (!token || !id) {
         console.error('GIST_TOKEN or GIST_ID is missing.');
         return null;
     }
 
     try {
-        const response = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
+        const response = await axios.get(`https://api.github.com/gists/${id}`, {
             headers: { 
-                Authorization: `token ${GIST_TOKEN}`,
-                'Cache-Control': 'no-cache'
+                Authorization: `Bearer ${token}`,
+                'Cache-Control': 'no-cache',
+                'User-Agent': 'MiniPotatoBot/1.0',
+                'Accept': 'application/vnd.github.v3+json'
             },
             params: { t: Date.now() } // キャッシュ回避
         });
@@ -46,20 +62,26 @@ export async function getGistFile(fileName) {
  * @returns {Promise<boolean>} True if successful, false otherwise.
  */
 export async function updateGistFile(fileName, data) {
-    if (!GIST_TOKEN || !GIST_ID) {
+    const { token, id } = getGistConfig();
+
+    if (!token || !id) {
         console.error('GIST_TOKEN or GIST_ID is missing.');
         return false;
     }
 
     try {
-        await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {
+        await axios.patch(`https://api.github.com/gists/${id}`, {
             files: {
                 [fileName]: {
                     content: JSON.stringify(data, null, 2)
                 }
             }
         }, {
-            headers: { Authorization: `token ${GIST_TOKEN}` }
+            headers: { 
+                Authorization: `Bearer ${token}`,
+                'User-Agent': 'MiniPotatoBot/1.0',
+                'Accept': 'application/vnd.github.v3+json'
+            }
         });
         return true;
     } catch (error) {
