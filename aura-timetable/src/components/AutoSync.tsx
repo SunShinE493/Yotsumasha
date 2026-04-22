@@ -2,13 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTimetable } from '@/lib/store';
-import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cloud, CloudOff, CheckCircle } from 'lucide-react';
 
 export default function AutoSync() {
   const { state, importState } = useTimetable();
-  const { status } = useSession();
   const lastSyncedTime = useRef<number>(state.updatedAt || 0);
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   
@@ -30,13 +28,16 @@ export default function AutoSync() {
   // Background Load (when returning to app or reloading)
   useEffect(() => {
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && status === 'authenticated') {
+      if (document.visibilityState === 'visible') {
+        const localTime = state.updatedAt || 0;
+        
+        // Show syncing only if we really need to check (optional, but good for feedback)
         showNotification('最新の予定を確認中...', 'syncing');
+        
         try {
           const res = await fetch('/api/aura/gist/load?t=' + Date.now());
           if (res.ok) {
             const remoteState = await res.json();
-            const localTime = state.updatedAt || 0;
             const remoteTime = remoteState.updatedAt || 0;
             
             // If remote is newer, import it
@@ -48,12 +49,16 @@ export default function AutoSync() {
             } else {
               showNotification('データは最新です', 'success', 2000);
             }
+          } else if (res.status === 404) {
+            // No backup found is normal for new users
+            setNotification(null);
+            console.log('AutoSync: No remote backup found.');
           } else {
             showNotification('同期の確認に失敗しました', 'error');
           }
         } catch (e) {
+          console.error('AutoSync Error:', e);
           showNotification('ネットワークエラーが発生しました', 'error');
-          // Silent fail on network error for logs
         }
       }
     };
@@ -66,13 +71,11 @@ export default function AutoSync() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (notificationTimeout.current) clearTimeout(notificationTimeout.current);
     };
-    // deliberately omitting state to avoid polling on every local state change
-  }, [status, importState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importState]);
 
   // Debounced Auto Save
   useEffect(() => {
-    if (status !== 'authenticated') return;
-
     const currentUpdated = state.updatedAt || 0;
     
     // Check if we have new local modifications since last sync
@@ -116,7 +119,7 @@ export default function AutoSync() {
     return () => {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [state, status]);
+  }, [state]);
 
   return (
     <AnimatePresence>

@@ -138,7 +138,7 @@ export function getDefaultState(): TimetableState {
     holidays: {},
     showGridTodoBadges: true,
     showTodoCountdown: false,
-    updatedAt: Date.now(),
+    updatedAt: 0,
   };
 }
 
