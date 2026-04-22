@@ -79,7 +79,8 @@ export interface TimetableState {
   showGridTodoBadges: boolean;
   showTodoCountdown: boolean;
   customBackground?: string;
-  updatedAt?: number;
+  updatedAt: number;
+  userId?: string;
 }
 
 export const COURSE_COLORS = [
@@ -139,6 +140,7 @@ export function getDefaultState(): TimetableState {
     showGridTodoBadges: true,
     showTodoCountdown: false,
     updatedAt: 0,
+    userId: undefined,
   };
 }
 

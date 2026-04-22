@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTimetable } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cloud, CloudOff, CheckCircle } from 'lucide-react';
+import { getDefaultState } from '@/lib/types';
 
 export default function AutoSync() {
   const { state, importState } = useTimetable();
@@ -31,18 +32,42 @@ export default function AutoSync() {
       if (document.visibilityState === 'visible') {
         const localTime = state.updatedAt || 0;
         
-        // Show syncing only if we really need to check (optional, but good for feedback)
         showNotification('最新の予定を確認中...', 'syncing');
         
         try {
+          // 1. Identity Check
+          let currentUserId: string | undefined;
+          try {
+            const userRes = await fetch('/api/user');
+            if (userRes.ok) {
+              const userData = await userRes.json();
+              currentUserId = userData.id;
+            }
+          } catch (e) {
+            console.error('AutoSync: Failed to fetch user info', e);
+          }
+
+          // If identity mismatch detected (Account switched)
+          if (currentUserId && state.userId && currentUserId !== state.userId) {
+            console.warn('AutoSync: Identity mismatch detected. Resetting local state to prevent data leak.');
+            // Force reset to new user's state
+            importState({ ...getDefaultState(), userId: currentUserId });
+            lastSyncedTime.current = 0;
+            // Immediate load follows
+          } else if (currentUserId && !state.userId) {
+             // First time logging in or identifying
+             importState({ ...state, userId: currentUserId });
+          }
+
+          // 2. Load from Gist
           const res = await fetch('/api/aura/gist/load?t=' + Date.now());
           if (res.ok) {
             const remoteState = await res.json();
             const remoteTime = remoteState.updatedAt || 0;
             
             // If remote is newer, import it
-            if (remoteTime > localTime) {
-              importState(remoteState);
+            if (remoteTime > localTime || (currentUserId && currentUserId !== state.userId)) {
+              importState({ ...remoteState, userId: currentUserId });
               lastSyncedTime.current = remoteTime;
               showNotification('最新の予定を読み込みました', 'success');
               console.log('AutoSync: Loaded newer state from Gist.');
@@ -83,6 +108,22 @@ export default function AutoSync() {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
       
       saveTimeout.current = setTimeout(async () => {
+        // Double check user identity before saving to prevent overwriting other's gist
+        let currentUserId: string | undefined;
+        try {
+          const userRes = await fetch('/api/user');
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            currentUserId = userData.id;
+          }
+        } catch {}
+
+        if (currentUserId && state.userId && currentUserId !== state.userId) {
+          console.error('AutoSync: Refusing to save due to identity mismatch.');
+          showNotification('認証エラー: 保存を中止しました', 'error');
+          return;
+        }
+
         showNotification('変更を保存中...', 'syncing');
         try {
           // get fresh csrf token
@@ -98,6 +139,7 @@ export default function AutoSync() {
             },
             body: JSON.stringify({
               ...state,
+              userId: currentUserId || state.userId,
               _csrf: csrfToken
             })
           });
