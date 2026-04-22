@@ -77,6 +77,7 @@ export interface TimetableState {
   gasSyncUrl?: string; // URL for GAS Web App
   holidays: Record<string, string>; // "YYYY-MM-DD": "Holiday Name"
   showGridTodoBadges: boolean;
+  showTodoCountdown: boolean;
   customBackground?: string;
   updatedAt?: number;
 }
@@ -136,6 +137,7 @@ export function getDefaultState(): TimetableState {
     todoPriorityMode: 'date-first',
     holidays: {},
     showGridTodoBadges: true,
+    showTodoCountdown: false,
     updatedAt: Date.now(),
   };
 }

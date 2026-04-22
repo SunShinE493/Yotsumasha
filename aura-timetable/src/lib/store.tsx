@@ -48,6 +48,7 @@ interface TimetableContextValue {
   setGasSyncUrl: (url: string) => void;
   setShowGridTodoBadges: (show: boolean) => void;
   setCustomBackground: (color: string) => void;
+  setShowTodoCountdown: (show: boolean) => void;
 }
 
 const TimetableContext = createContext<TimetableContextValue | null>(null);
@@ -328,6 +329,10 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, showGridTodoBadges: show }));
   }, []);
 
+  const setShowTodoCountdown = useCallback((show: boolean) => {
+    setState(prev => ({ ...prev, showTodoCountdown: show }));
+  }, []);
+
   const setCustomBackground = useCallback((color: string) => {
     setState(prev => ({ ...prev, customBackground: color }));
   }, []);
@@ -364,6 +369,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         setGasSyncUrl,
         setShowGridTodoBadges,
         setCustomBackground,
+        setShowTodoCountdown,
       }}
     >
       {loaded ? children : null}

@@ -23,7 +23,8 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
     setSyllabusDisplayEnabled,
     setGasSyncUrl,
     setShowGridTodoBadges,
-    setCustomBackground
+    setCustomBackground,
+    setShowTodoCountdown
   } = useTimetable();
   const { data: session, status } = useSession();
   const [periods, setPeriods] = useState<PeriodTime[]>([...state.periods]);
@@ -263,6 +264,10 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
                   <span>時間割に課題バッジを表示</span>
                   <span className={`toggle-pill ${state.showGridTodoBadges ? 'active' : ''}`}></span>
                 </button>
+                <button className="btn btn-ghost settings-row-btn" onClick={() => setShowTodoCountdown(!state.showTodoCountdown)}>
+                  <span>TODOリストに残り日数を表示</span>
+                  <span className={`toggle-pill ${state.showTodoCountdown ? 'active' : ''}`}></span>
+                </button>
                 <button className="btn btn-ghost settings-row-btn" onClick={() => setMobileTodoDateEnabled(!state.mobileTodoDateEnabled)}>
                   <span>スマホでTODOの日付指定を有効化</span>
                   <span className={`toggle-pill ${state.mobileTodoDateEnabled ? 'active' : ''}`}></span>
@@ -401,6 +406,9 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
         }
         @media (min-width: 640px) {
           .settings-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .modal--settings, .modal--settings h2, .modal--settings label, .modal--settings span, .modal--settings .settings-row, .modal--settings button {
+          color: white !important;
         }
         .settings-card {
           padding: 16px;

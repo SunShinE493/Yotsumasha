@@ -181,7 +181,7 @@ export default function TimetableGrid() {
                           {isToday && (
                             <div className="course-card__tasks">
                               {state.todos
-                                .filter(t => t.courseId === course.id && !t.completed)
+                                .filter(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr))
                                 .map(t => (
                                   <div key={t.id} className="task-mini-item" style={{ color: getContrastYIQ(course.color) }}>
                                     <div className="task-dot" />
@@ -190,7 +190,7 @@ export default function TimetableGrid() {
                                 ))}
                             </div>
                           )}
-                          {!isToday && state.showGridTodoBadges && state.todos.some(t => t.courseId === course.id && !t.completed) && (
+                          {!isToday && state.showGridTodoBadges && state.todos.some(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr)) && (
                             <div className="course-todo-badge" />
                           )}
                         </div>

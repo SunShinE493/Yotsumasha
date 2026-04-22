@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTimetable } from '@/lib/store';
-import { generateId, Todo, DAY_LABELS_FULL } from '@/lib/types';
+import { generateId, Todo, DAY_LABELS_FULL, getContrastYIQ } from '@/lib/types';
 import { Plus, Trash2, CheckCircle, Circle, Calendar, Clock, Book } from 'lucide-react';
 
 export default function TodoList() {
@@ -44,8 +44,10 @@ export default function TodoList() {
     });
   }, [state.todos, state.todoPriorityMode]);
 
+  const textColor = state.customBackground ? getContrastYIQ(state.customBackground) : 'var(--text-primary)';
+
   return (
-    <div className="todo-panel glass">
+    <div className="todo-panel glass" style={{ color: textColor }}>
       <div className="todo-panel__header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h3 className="todo-panel__title">TODO リスト</h3>
         <button 
@@ -155,6 +157,21 @@ export default function TodoList() {
                     </span>
                   )}
                 </div>
+
+                {state.showTodoCountdown && todo.targetDate && !todo.completed && (() => {
+                  const targetDateObj = new Date(todo.targetDate);
+                  const todayObj = new Date(todayStr);
+                  const diffTime = targetDateObj.getTime() - todayObj.getTime();
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  if (diffDays > 0) {
+                    return <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>あと{diffDays}日</span>;
+                  } else if (diffDays === 0) {
+                    return <span style={{ fontSize: '0.7rem', color: 'var(--accent-orange)', fontWeight: 'bold' }}>今日まで</span>;
+                  } else {
+                    return <span style={{ fontSize: '0.7rem', color: 'var(--accent-red)', fontWeight: 'bold' }}>{Math.abs(diffDays)}日超過</span>;
+                  }
+                })()}
+
                 {todo.completed && (
                   <button className="btn btn-icon btn-ghost todo-item__delete" onClick={() => deleteTodo(todo.id)} style={{ width: '28px', height: '28px' }}>
                     <Trash2 size={14} />
