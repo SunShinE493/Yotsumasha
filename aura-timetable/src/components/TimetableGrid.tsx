@@ -14,6 +14,13 @@ export default function TimetableGrid() {
   const [activeDayOffset, setActiveDayOffset] = useState(0); 
   const [editTarget, setEditTarget] = useState<{ day: number; period: number; course?: Course } | null>(null);
   const [detailTarget, setDetailTarget] = useState<{ course: Course, lessonCount: number, dayIndex: number } | null>(null);
+  const [now, setNow] = useState(new Date());
+
+  // Update 'now' every minute
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Transition to Tomorrow logic
   const todayIndexRaw = useMemo(() => getTodayIndex(), []);
@@ -182,12 +189,25 @@ export default function TimetableGrid() {
                             <div className="course-card__tasks">
                               {state.todos
                                 .filter(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr))
-                                .map(t => (
-                                  <div key={t.id} className="task-mini-item" style={{ color: getContrastYIQ(course.color) }}>
-                                    <div className="task-dot" />
-                                    <span>{t.text}</span>
-                                  </div>
-                                ))}
+                                .map(t => {
+                                  const isDueToday = t.targetDate === dateStr;
+                                  let hoursLeft: number | null = null;
+                                  if (isDueToday && t.targetDate) {
+                                    const deadline = new Date(t.targetDate);
+                                    deadline.setHours(23, 59, 59, 999);
+                                    hoursLeft = Math.max(0, Math.floor((deadline.getTime() - now.getTime()) / (1000 * 60 * 60)));
+                                  }
+
+                                  return (
+                                    <div key={t.id} className="task-mini-item" style={{ color: getContrastYIQ(course.color) }}>
+                                      <div className="task-dot" />
+                                      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.text}</span>
+                                      {hoursLeft !== null && (
+                                        <span style={{ fontSize: '0.6rem', opacity: 0.8, marginLeft: '4px', whiteSpace: 'nowrap' }}>({hoursLeft}h)</span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                             </div>
                           )}
                           {!isToday && state.showGridTodoBadges && state.todos.some(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr)) && (

@@ -11,6 +11,13 @@ export default function TodoList() {
   const [targetType, setTargetType] = useState<'none' | 'day' | 'date'>('none');
   const [targetDay, setTargetDay] = useState<number>(0);
   const [targetDate, setTargetDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [now, setNow] = useState(new Date());
+
+  // Update 'now' every minute to keep countdowns fresh
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleAdd = () => {
     if (!text.trim()) return;
@@ -163,10 +170,22 @@ export default function TodoList() {
                   const todayObj = new Date(todayStr);
                   const diffTime = targetDateObj.getTime() - todayObj.getTime();
                   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  
                   if (diffDays > 0) {
                     return <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>あと{diffDays}日</span>;
                   } else if (diffDays === 0) {
-                    return <span style={{ fontSize: '0.7rem', color: 'var(--accent-orange)', fontWeight: 'bold' }}>今日まで</span>;
+                    // Calculate remaining hours for today
+                    const deadline = new Date(todo.targetDate);
+                    deadline.setHours(23, 59, 59, 999);
+                    const diffMs = deadline.getTime() - now.getTime();
+                    const diffHours = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60)));
+                    
+                    if (diffHours > 0) {
+                      return <span style={{ fontSize: '0.7rem', color: 'var(--accent-orange)', fontWeight: 'bold' }}>あと{diffHours}時間</span>;
+                    } else {
+                      const diffMins = Math.max(0, Math.floor(diffMs / (1000 * 60)));
+                      return <span style={{ fontSize: '0.7rem', color: 'var(--accent-orange)', fontWeight: 'bold' }}>あと{diffMins}分</span>;
+                    }
                   } else {
                     return <span style={{ fontSize: '0.7rem', color: 'var(--accent-red)', fontWeight: 'bold' }}>{Math.abs(diffDays)}日超過</span>;
                   }
