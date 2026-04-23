@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTimetable } from '@/lib/store';
 import { generateId, Todo, DAY_LABELS_FULL, getContrastYIQ } from '@/lib/types';
 import { Plus, Trash2, CheckCircle, Circle, Calendar, Clock, Book } from 'lucide-react';
