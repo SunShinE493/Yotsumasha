@@ -1089,8 +1089,10 @@ async function runai(content, message, aisikibetsu) {
 
       // ストリーム応答を逐次処理
       for await (const chunk of result) {
-        const chunkText = chunk.text;
+        const chunkText = chunk.text || "";
+        if (!chunkText) continue;
         fullResponse += chunkText;
+
 
         // 2000文字を超えたら、その部分を送信し、fullResponseをクリア
         // ただし、最後のチャンクでない限り、既存メッセージの編集は行わない
@@ -1355,8 +1357,10 @@ async function runai(content, message, aisikibetsu) {
 
       // ストリーム応答を逐次処理
       for await (const chunk of result) {
-        const chunkText = chunk.text;
+        const chunkText = chunk.text || "";
+        if (!chunkText) continue;
         fullResponse += chunkText;
+
 
         // 2000文字を超えたら、その部分を送信し、fullResponseをクリア
         // ただし、最後のチャンクでない限り、既存メッセージの編集は行わない
