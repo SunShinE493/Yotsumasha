@@ -101,7 +101,10 @@ function doPost(e) {
       }
 
       for (let p = 0; p < data.periods.length; p++) {
-        const entry = data.timetable[`${dayIndex}-${p}`];
+        let entry = data.cellOverrides && data.cellOverrides[`${dateStr}-${p}`];
+        if (!entry) {
+          entry = data.timetable[`${dayIndex}-${p}`];
+        }
         if (!entry) continue;
 
         const course = data.courses.find(c => c.id === entry.courseId);

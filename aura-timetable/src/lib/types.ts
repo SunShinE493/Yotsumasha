@@ -76,6 +76,7 @@ export interface TimetableState {
   todoPriorityMode: 'date-first' | 'no-date-first';
   gasSyncUrl?: string; // URL for GAS Web App
   holidays: Record<string, string>; // "YYYY-MM-DD": "Holiday Name"
+  cellOverrides: Record<string, TimetableEntry>; // "YYYY-MM-DD-periodIndex": { courseId, ... }
   showGridTodoBadges: boolean;
   showTodoCountdown: boolean;
   customBackground?: string;
@@ -137,6 +138,7 @@ export function getDefaultState(): TimetableState {
     syllabusDisplayEnabled: true,
     todoPriorityMode: 'date-first',
     holidays: {},
+    cellOverrides: {},
     showGridTodoBadges: true,
     showTodoCountdown: false,
     updatedAt: 0,
@@ -150,8 +152,15 @@ export function getTodayIndex(): number {
   return jsDay === 0 ? 6 : jsDay - 1;
 }
 
-export function cellKey(day: number, period: number): string {
+export function cellKey(day: number | string, period: number): string {
   return day + '-' + period;
+}
+
+export function formatYMD(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 export function getContrastYIQ(colorStr: string): string {

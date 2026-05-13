@@ -8,10 +8,11 @@ interface CourseEditorProps {
   day: number;
   period: number;
   existingCourse?: Course;
+  date?: string;
   onClose: () => void;
 }
 
-export default function CourseEditor({ day, period, existingCourse, onClose }: CourseEditorProps) {
+export default function CourseEditor({ day, period, existingCourse, date, onClose }: CourseEditorProps) {
   const { state, addCourse, updateCourse, deleteCourse, setCellCourse } = useTimetable();
 
   const [mode, setMode] = useState<'select' | 'new' | 'edit'>(
@@ -27,7 +28,7 @@ export default function CourseEditor({ day, period, existingCourse, onClose }: C
   
   // Slot offset for current cell
   const [slotOffset, setSlotOffset] = useState<'none' | 'second-half' | 'first-half'>(
-    (state.timetable[day + '-' + period] as any)?.slotOffset ?? 'none'
+    (date ? (state.cellOverrides[date + '-' + period] as any)?.slotOffset : (state.timetable[day + '-' + period] as any)?.slotOffset) ?? 'none'
   );
 
   const [className, setClassName] = useState(existingCourse?.className ?? '');
@@ -67,14 +68,14 @@ export default function CourseEditor({ day, period, existingCourse, onClose }: C
     };
 
     if (mode === 'select' && selectedCourseId) {
-      setCellCourse(day, period, selectedCourseId, slotOffset);
+      setCellCourse(day, period, selectedCourseId, slotOffset, date);
     } else if (mode === 'new') {
       if (!name.trim()) return;
       const course = addCourse(data);
-      setCellCourse(day, period, course.id, slotOffset);
+      setCellCourse(day, period, course.id, slotOffset, date);
     } else if (mode === 'edit' && existingCourse) {
       updateCourse({ ...existingCourse, ...data });
-      setCellCourse(day, period, existingCourse.id, slotOffset);
+      setCellCourse(day, period, existingCourse.id, slotOffset, date);
     }
     onClose();
   };
@@ -86,8 +87,8 @@ export default function CourseEditor({ day, period, existingCourse, onClose }: C
   };
 
   const handleDelete = () => {
-    if (existingCourse) {
-      setCellCourse(day, period, null);
+    if (existingCourse || date) {
+      setCellCourse(day, period, null, 'none', date);
     }
     onClose();
   };
@@ -108,6 +109,7 @@ export default function CourseEditor({ day, period, existingCourse, onClose }: C
         <div className="modal__header">
           <h2 className="modal__title">
             {dayLabel}曜 {periodLabel} の設定
+            {date && <span style={{ fontSize: '0.7rem', marginLeft: '8px', color: 'var(--accent-red)' }}>({date} のみ)</span>}
           </h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">
             ✕
@@ -319,17 +321,18 @@ export default function CourseEditor({ day, period, existingCourse, onClose }: C
 
         <div className="modal__actions">
           {existingCourse && (
-            <div style={{ display: 'flex', gap: '8px', marginRight: 'auto' }}>
               <button className="btn btn-danger" onClick={handleDelete} style={{ flex: 0 }}>
-                解除
+                {date ? 'この日だけ解除' : '解除'}
               </button>
-              <button
-                className="btn btn-danger"
-                onClick={handleDeleteCourse}
-                style={{ flex: 0, fontSize: '0.7rem', padding: '0 8px' }}
-              >
-                科目自体を抹消
-              </button>
+              {!date && (
+                <button
+                  className="btn btn-danger"
+                  onClick={handleDeleteCourse}
+                  style={{ flex: 0, fontSize: '0.7rem', padding: '0 8px' }}
+                >
+                  科目自体を抹消
+                </button>
+              )}
             </div>
           )}
           <button className="btn btn-ghost" onClick={onClose}>

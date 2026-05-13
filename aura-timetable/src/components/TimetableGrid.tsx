@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTimetable } from '@/lib/store';
-import { getTodayIndex, Course, cellKey, getContrastYIQ } from '@/lib/types';
+import { getTodayIndex, Course, cellKey, getContrastYIQ, formatDateYMD } from '@/lib/types';
 import CourseEditor from './CourseEditor';
 import CourseDetail from './CourseDetail';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
@@ -41,7 +41,7 @@ export default function TimetableGrid() {
     if (idx < 0) idx += 7;
     
     // Check for Day Overrides
-    const dateStr = getDateForDay(idx, todayIndexRaw).toISOString().split('T')[0];
+    const dateStr = formatDateYMD(getDateForDay(idx, todayIndexRaw));
     if (state.dayOverrides[dateStr] !== undefined) {
        return state.dayOverrides[dateStr];
     }
@@ -49,11 +49,13 @@ export default function TimetableGrid() {
   }, [todayIndex, activeDayOffset, state.dayOverrides, todayIndexRaw]);
 
   const handleCellClick = (dayIdx: number, periodIdx: number, targetDate?: Date, effectiveDay?: number) => {
+    const date = targetDate ?? getDateForDay(isToday ? (todayIndex + activeDayOffset) : dayIdx, todayIndexRaw);
+    const dateStr = formatDateYMD(date);
     const finalDay = effectiveDay ?? dayIdx;
-    const course = getCourse(finalDay, periodIdx);
+    const course = getCourse(finalDay, periodIdx, dateStr);
     
     if (state.appMode === 'edit') {
-      setEditTarget({ day: finalDay, period: periodIdx, course });
+      setEditTarget({ day: finalDay, period: periodIdx, course, dateStr });
     } else if (course) {
       const date = targetDate ?? getDateForDay(isToday ? (todayIndex + activeDayOffset) : dayIdx, todayIndexRaw);
       const lessonCount = getLessonCount(date, finalDay, state);
@@ -127,16 +129,15 @@ export default function TimetableGrid() {
           {visibleDays.map(day => {
              const isHighlight = day === todayIndex;
              const displayDate = getDateForDay(isToday ? (todayIndex + activeDayOffset) : day, todayIndexRaw);
-             const dateStr = displayDate.toISOString().split('T')[0];
-             const holidayName = state.holidays[dateStr];
-             
-             return (
-               <div key={`header-${day}`} className={`timetable__header ${isHighlight ? 'timetable__header--today-highlight' : ''} ${holidayName ? 'timetable__header--holiday' : ''}`}>
-                 <span>{state.dayLabels[day]}</span>
-                 <span className={`day-date ${holidayName ? 'day-date--holiday' : ''}`}>{formatDate(displayDate)}</span>
-                 {holidayName && <span className="holiday-label" title={holidayName}>{holidayName}</span>}
-               </div>
-             );
+              const actualDayIndex = (displayDate.getDay() + 6) % 7;
+              
+              return (
+                <div key={`header-${day}`} className={`timetable__header ${isHighlight ? 'timetable__header--today-highlight' : ''} ${holidayName ? 'timetable__header--holiday' : ''}`}>
+                  <span>{state.dayLabels[actualDayIndex]}</span>
+                  <span className={`day-date ${holidayName ? 'day-date--holiday' : ''}`}>{formatDate(displayDate)}</span>
+                  {holidayName && <span className="holiday-label" title={holidayName}>{holidayName}</span>}
+                </div>
+              );
           })}
 
           {/* Period rows */}
@@ -154,20 +155,21 @@ export default function TimetableGrid() {
                 const effectiveDayIndex = hasOverride ? state.dayOverrides[dateStr] : di;
                 const isOutsideSemester = dateStr < state.semesterSettings.start || dateStr > state.semesterSettings.end;
 
-                const course = getCourse(effectiveDayIndex, pi);
-                const entry = state.timetable[cellKey(effectiveDayIndex, pi)];
+                const course = getCourse(effectiveDayIndex, pi, dateStr);
+                const entry = dateStr ? state.cellOverrides[cellKey(dateStr, pi)] : undefined;
+                const effectiveEntry = entry || state.timetable[cellKey(effectiveDayIndex, pi)];
                 const lessonCount = getLessonCount(targetDate, effectiveDayIndex, state);
 
                 return (
                   <div
                     key={`cell-${di}-${pi}`}
-                    className={`timetable__cell ${state.appMode === 'view' ? 'timetable__cell--readonly' : ''} ${entry?.slotOffset ? `timetable__cell--${entry.slotOffset}` : ''} ${isHoliday ? 'timetable__cell--holiday' : ''} ${isOutsideSemester ? 'timetable__cell--outside' : ''}`}
+                    className={`timetable__cell ${state.appMode === 'view' ? 'timetable__cell--readonly' : ''} ${effectiveEntry?.slotOffset ? `timetable__cell--${effectiveEntry.slotOffset}` : ''} ${isHoliday ? 'timetable__cell--holiday' : ''} ${isOutsideSemester ? 'timetable__cell--outside' : ''}`}
                     onClick={() => handleCellClick(di, pi, targetDate, effectiveDayIndex)}
                   >
                     {!isHoliday || hasOverride ? (
                       course ? (
                         <div
-                          className={`course-card ${entry?.slotOffset ? `course-card--${entry.slotOffset}` : ''}`}
+                          className={`course-card ${effectiveEntry?.slotOffset ? `course-card--${effectiveEntry.slotOffset}` : ''}`}
                           style={{ 
                             '--course-color': course.color, 
                             background: course.color, 
@@ -176,7 +178,8 @@ export default function TimetableGrid() {
                           } as React.CSSProperties}
                         >
                           {isOutsideSemester && <div className="outside-label">期間外</div>}
-                          {hasOverride && <div className="override-badge">振替</div>}
+                          {hasOverride && !state.cellOverrides[cellKey(dateStr, pi)] && <div className="override-badge">振替</div>}
+                          {state.cellOverrides[cellKey(dateStr, pi)] && <div className="override-badge" style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>特別</div>}
                           <span className="course-card__name">{course.name}</span>
                           {course.room && <span className="course-card__room" style={{ color: getContrastYIQ(course.color), opacity: 0.95 }}>📍 {course.room}</span>}
                           {(state.syllabusDisplayEnabled && course.syllabus && course.syllabus[lessonCount - 1]) && (
@@ -231,6 +234,7 @@ export default function TimetableGrid() {
           day={editTarget.day}
           period={editTarget.period}
           existingCourse={editTarget.course}
+          date={editTarget.dateStr}
           onClose={() => setEditTarget(null)}
         />
       )}

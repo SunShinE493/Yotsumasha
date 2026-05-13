@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTimetable } from '@/lib/store';
-import { generateId, Todo, DAY_LABELS_FULL, getContrastYIQ } from '@/lib/types';
+import { generateId, Todo, DAY_LABELS_FULL, getContrastYIQ, formatDateYMD } from '@/lib/types';
 import { Plus, Trash2, CheckCircle, Circle, Calendar, Clock, Book } from 'lucide-react';
 
 export default function TodoList() {
@@ -10,7 +10,7 @@ export default function TodoList() {
   const [text, setText] = useState('');
   const [targetType, setTargetType] = useState<'none' | 'day' | 'date'>('none');
   const [targetDay, setTargetDay] = useState<number>(0);
-  const [targetDate, setTargetDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [targetDate, setTargetDate] = useState<string>(formatDateYMD(new Date()));
   const [now, setNow] = useState(new Date());
 
   // Update 'now' every minute to keep countdowns fresh
@@ -29,7 +29,7 @@ export default function TodoList() {
     setText('');
   };
 
-  const todayStr = React.useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayStr = React.useMemo(() => formatDateYMD(new Date()), []);
   const showDateOptions = !state.mobileTodoDateEnabled ? 'desktop-only' : '';
 
   const sortedTodos = React.useMemo(() => {

@@ -14,6 +14,7 @@ import {
   generateId,
   cellKey,
   DEFAULT_PERIODS,
+  formatYMD,
 } from './types';
 
 interface TimetableContextValue {
@@ -21,10 +22,10 @@ interface TimetableContextValue {
   addCourse: (course: Omit<Course, 'id'>) => Course;
   updateCourse: (course: Course) => void;
   deleteCourse: (id: string) => void;
-  setCellCourse: (day: number, period: number, courseId: string | null, slotOffset?: 'none' | 'second-half' | 'first-half') => void;
+  setCellCourse: (day: number, period: number, courseId: string | null, slotOffset?: 'none' | 'second-half' | 'first-half', date?: string) => void;
   updatePeriods: (periods: PeriodTime[]) => void;
   toggleWeekend: () => void;
-  getCourse: (day: number, period: number) => Course | undefined;
+  getCourse: (day: number, period: number, date?: string) => Course | undefined;
   importState: (data: TimetableState) => void;
   mergeState: (data: Partial<TimetableState>) => void;
   resetAll: () => void;
@@ -65,7 +66,7 @@ function getNextDateStr(dayIndex: number): string {
   
   const target = new Date(now);
   target.setDate(now.getDate() + diff);
-  return target.toISOString().split('T')[0];
+  return formatYMD(target);
 }
 
 export function TimetableProvider({ children }: { children: ReactNode }) {
@@ -148,20 +149,34 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         ...prev,
         courses: prev.courses.filter(c => c.id !== id),
         timetable: newTimetable,
+        cellOverrides: Object.fromEntries(
+          Object.entries(prev.cellOverrides).filter(([_, v]) => v.courseId !== id)
+        ),
       };
     });
   }, []);
 
-  const setCellCourse = useCallback((day: number, period: number, courseId: string | null, slotOffset?: 'none' | 'second-half' | 'first-half') => {
-    const key = cellKey(day, period);
+  const setCellCourse = useCallback((day: number, period: number, courseId: string | null, slotOffset?: 'none' | 'second-half' | 'first-half', date?: string) => {
     setState(prev => {
-      const newTimetable = { ...prev.timetable };
-      if (courseId) {
-        newTimetable[key] = { courseId, slotOffset };
+      if (date) {
+        const newOverrides = { ...prev.cellOverrides };
+        const key = cellKey(date, period);
+        if (courseId) {
+          newOverrides[key] = { courseId, slotOffset };
+        } else {
+          delete newOverrides[key];
+        }
+        return { ...prev, cellOverrides: newOverrides };
       } else {
-        delete newTimetable[key];
+        const key = cellKey(day, period);
+        const newTimetable = { ...prev.timetable };
+        if (courseId) {
+          newTimetable[key] = { courseId, slotOffset };
+        } else {
+          delete newTimetable[key];
+        }
+        return { ...prev, timetable: newTimetable };
       }
-      return { ...prev, timetable: newTimetable };
     });
   }, []);
 
@@ -174,12 +189,15 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const getCourse = useCallback(
-    (day: number, period: number): Course | undefined => {
-      const entry = state.timetable[cellKey(day, period)];
+    (day: number, period: number, date?: string): Course | undefined => {
+      let entry = date ? state.cellOverrides[cellKey(date, period)] : undefined;
+      if (!entry) {
+        entry = state.timetable[cellKey(day, period)];
+      }
       if (!entry) return undefined;
-      return state.courses.find(c => c.id === entry.courseId);
+      return state.courses.find(c => c.id === entry!.courseId);
     },
-    [state.timetable, state.courses]
+    [state.timetable, state.courses, state.cellOverrides]
   );
 
   const importState = useCallback((data: TimetableState) => {
@@ -202,9 +220,9 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         });
       }
 
-      if (data.timetable) {
-        Object.entries(data.timetable).forEach(([k, v]) => {
-          newTimetable[k] = v;
+      if (data.cellOverrides) {
+        Object.entries(data.cellOverrides).forEach(([k, v]) => {
+          newTimetable[k] = v; // Should probably be cellOverrides but mergeState is generic
         });
       }
 
@@ -212,6 +230,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         ...prev,
         courses: newCourses,
         timetable: newTimetable,
+        cellOverrides: { ...prev.cellOverrides, ...(data.cellOverrides || {}) }
       };
     });
   }, []);

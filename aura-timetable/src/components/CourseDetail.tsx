@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Course, TimetableState } from '@/lib/types';
+import { Course, TimetableState, formatDateYMD } from '@/lib/types';
 import { useTimetable } from '@/lib/store';
 import { 
   X, MapPin, User, BookOpen, ChevronDown, Award, 
@@ -258,7 +258,7 @@ export default function CourseDetail({ course, currentLessonCount, dayIndex, onC
   const { addTodo } = useTimetable();
   const [todoText, setTodoText] = useState('');
   const [deadlineMode, setDeadlineMode] = useState<'next' | '2weeks' | 'custom'>('next');
-  const [customDate, setCustomDate] = useState(new Date().toISOString().split('T')[0]);
+  const [customDate, setCustomDate] = useState(formatDateYMD(new Date()));
 
   const getWeeklyDate = (dIdx: number, offsetWeeks = 1) => {
     const now = new Date();
@@ -268,7 +268,7 @@ export default function CourseDetail({ course, currentLessonCount, dayIndex, onC
     if (diff <= 0) diff += 7;
     const target = new Date(now);
     target.setDate(now.getDate() + diff + (offsetWeeks - 1) * 7);
-    return target.toISOString().split('T')[0];
+    return formatDateYMD(target);
   };
 
   const handleAddTodo = () => {

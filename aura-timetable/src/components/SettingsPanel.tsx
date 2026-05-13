@@ -118,7 +118,8 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
           timetable: state.timetable,
           courses: state.courses,
           periods: state.periods,
-          dayOverrides: state.dayOverrides
+          dayOverrides: state.dayOverrides,
+          cellOverrides: state.cellOverrides
         }),
       });
 
