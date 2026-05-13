@@ -700,11 +700,11 @@ async function SchTrigger() {
   }
 
   // 2. 既存の定時処理
-  if (hour === 4) {
+  if (hour === 26) {
     const channel2 = await client.channels.fetch('838468033789558848');
     dailyTrigger(channel2);
     console.log('積分');
-  } else if (hour > 4 && hour < 23) {
+  } else if (hour > 23 && hour < 23) {
     const channelId = '838468033789558848';
     wcount++;
     askQuiz(client, channelId, wcount);
@@ -1074,7 +1074,7 @@ async function runai(content, message, aisikibetsu) {
     try {
 
       let result = await ai.models.generateContentStream({
-        model: "gemma-3-27b-it",
+        model: "gemma-4-31b-it",
         contents: content,
         config: { // 前回確認した通り、configで問題ないならこれでOK
           temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
