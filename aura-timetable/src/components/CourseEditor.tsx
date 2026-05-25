@@ -321,6 +321,7 @@ export default function CourseEditor({ day, period, existingCourse, date, onClos
 
         <div className="modal__actions">
           {existingCourse && (
+            <div style={{ display: 'flex', gap: '8px', marginRight: 'auto' }}>
               <button className="btn btn-danger" onClick={handleDelete} style={{ flex: 0 }}>
                 {date ? 'この日だけ解除' : '解除'}
               </button>

@@ -6,13 +6,86 @@ import { getTodayIndex, Course, cellKey, getContrastYIQ, formatDateYMD } from '@
 import CourseEditor from './CourseEditor';
 import CourseDetail from './CourseDetail';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Loader2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { mapEventsToTimetable } from '@/lib/google-calendar';
 
 export default function TimetableGrid() {
-  const { state, getCourse } = useTimetable();
+  const { state, getCourse, importState, setAiPlan } = useTimetable();
+  const { data: session } = useSession();
+  const [isConfirmingProposed, setIsConfirmingProposed] = useState(false);
+
+  const handleConfirmProposedTask = async (task: any) => {
+    if (!state.gasSyncUrl) {
+      alert("GASの同期URLが設定されていません。「設定」から入力してください。");
+      return;
+    }
+
+    if (!confirm(`この提案タスク「${task.text}」を確定してカレンダーに登録しますか？`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/aura/ai/schedule/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gasSyncUrl: state.gasSyncUrl,
+          tasks: [task],
+          periods: state.periods
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      const nextScheduledTasks = state.aiPlan?.scheduledTasks.filter(
+        t => !(t.date === task.date && t.period === task.period)
+      ) || [];
+
+      try {
+        const calId = state.selectedCalendarId || 'primary';
+        const calRes = await fetch(`/api/calendar?calendarId=${encodeURIComponent(calId)}`);
+        if (calRes.ok) {
+          const events = await calRes.json();
+          const newState = mapEventsToTimetable(events, state);
+          importState({
+            ...newState,
+            aiPlan: nextScheduledTasks.length > 0 ? {
+              ...state.aiPlan!,
+              scheduledTasks: nextScheduledTasks
+            } : undefined
+          });
+          alert('タスクをカレンダーに登録し、同期しました！🎉');
+        } else {
+          importState({
+            ...state,
+            aiPlan: nextScheduledTasks.length > 0 ? {
+              ...state.aiPlan!,
+              scheduledTasks: nextScheduledTasks
+            } : undefined
+          });
+          alert('タスクをカレンダーに登録しました！');
+        }
+      } catch (err) {
+        importState({
+          ...state,
+          aiPlan: nextScheduledTasks.length > 0 ? {
+            ...state.aiPlan!,
+            scheduledTasks: nextScheduledTasks
+          } : undefined
+        });
+        alert('タスクをカレンダーに登録しました！');
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert('登録エラー: ' + e.message);
+    }
+  };
   const [viewMode, setViewMode] = useState<'today' | 'weekly'>('today');
   const [activeDayOffset, setActiveDayOffset] = useState(0); 
-  const [editTarget, setEditTarget] = useState<{ day: number; period: number; course?: Course } | null>(null);
+  const [editTarget, setEditTarget] = useState<{ day: number; period: number; course?: Course; dateStr?: string } | null>(null);
   const [detailTarget, setDetailTarget] = useState<{ course: Course, lessonCount: number, dayIndex: number } | null>(null);
   const [now, setNow] = useState(new Date());
 
@@ -129,15 +202,17 @@ export default function TimetableGrid() {
           {visibleDays.map(day => {
              const isHighlight = day === todayIndex;
              const displayDate = getDateForDay(isToday ? (todayIndex + activeDayOffset) : day, todayIndexRaw);
-              const actualDayIndex = (displayDate.getDay() + 6) % 7;
+             const actualDayIndex = (displayDate.getDay() + 6) % 7;
+             const displayDateStr = formatDateYMD(displayDate);
+             const holidayName = state.holidays[displayDateStr];
               
-              return (
-                <div key={`header-${day}`} className={`timetable__header ${isHighlight ? 'timetable__header--today-highlight' : ''} ${holidayName ? 'timetable__header--holiday' : ''}`}>
-                  <span>{state.dayLabels[actualDayIndex]}</span>
-                  <span className={`day-date ${holidayName ? 'day-date--holiday' : ''}`}>{formatDate(displayDate)}</span>
-                  {holidayName && <span className="holiday-label" title={holidayName}>{holidayName}</span>}
-                </div>
-              );
+             return (
+               <div key={`header-${day}`} className={`timetable__header ${isHighlight ? 'timetable__header--today-highlight' : ''} ${holidayName ? 'timetable__header--holiday' : ''}`}>
+                 <span>{state.dayLabels[actualDayIndex]}</span>
+                 <span className={`day-date ${holidayName ? 'day-date--holiday' : ''}`}>{formatDate(displayDate)}</span>
+                 {holidayName && <span className="holiday-label" title={holidayName}>{holidayName}</span>}
+               </div>
+             );
           })}
 
           {/* Period rows */}
@@ -217,9 +292,46 @@ export default function TimetableGrid() {
                             <div className="course-todo-badge" />
                           )}
                         </div>
-                      ) : state.appMode === 'edit' ? (
-                        <div className="timetable__add-btn">+</div>
-                      ) : null
+                      ) : (() => {
+                        const proposedTask = state.aiPlan?.scheduledTasks?.find(t => t.date === dateStr && t.period === pi);
+                        if (proposedTask && state.appMode === 'view') {
+                          return (
+                            <div
+                              className="course-card course-card--proposed animate-pulse"
+                              style={{
+                                border: '1.5px dashed rgba(167, 139, 250, 0.6)',
+                                background: 'rgba(124, 58, 237, 0.08)',
+                                color: '#e9d5ff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                padding: '10px 8px',
+                                gap: '4px',
+                                height: '100%',
+                                borderRadius: '12px',
+                                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.05)',
+                                transition: 'all 0.2s',
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleConfirmProposedTask(proposedTask);
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Sparkles size={11} style={{ color: '#c084fc' }} />
+                                <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI提案</span>
+                              </div>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.2' }}>{proposedTask.text}</span>
+                              <span style={{ fontSize: '0.55rem', opacity: 0.7, marginTop: '2px', color: '#c084fc' }}>タップで確定</span>
+                            </div>
+                          );
+                        }
+                        return state.appMode === 'edit' ? (
+                          <div className="timetable__add-btn">+</div>
+                        ) : null;
+                      })()
                     ) : null}
                   </div>
                 );
@@ -369,13 +481,6 @@ function getDateForDay(dayIndex: number, todayIndexRaw: number): Date {
 
 function formatDate(d: Date): string {
   return `${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-function formatDateYMD(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 function getLessonCount(targetDate: Date, targetDayIndex: number, state: any): number {

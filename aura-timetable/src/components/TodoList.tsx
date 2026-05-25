@@ -3,15 +3,74 @@
 import React, { useState, useEffect } from 'react';
 import { useTimetable } from '@/lib/store';
 import { generateId, Todo, DAY_LABELS_FULL, getContrastYIQ, formatDateYMD } from '@/lib/types';
-import { Plus, Trash2, CheckCircle, Circle, Calendar, Clock, Book } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Calendar, Clock, Book, Sparkles, Check, Loader2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { mapEventsToTimetable } from '@/lib/google-calendar';
 
 export default function TodoList() {
-  const { state, addTodo, toggleTodo, deleteTodo, setTodoPriorityMode } = useTimetable();
+  const { state, addTodo, toggleTodo, deleteTodo, setTodoPriorityMode, setAiPlan, importState } = useTimetable();
+  const { data: session } = useSession();
   const [text, setText] = useState('');
   const [targetType, setTargetType] = useState<'none' | 'day' | 'date'>('none');
   const [targetDay, setTargetDay] = useState<number>(0);
   const [targetDate, setTargetDate] = useState<string>(formatDateYMD(new Date()));
   const [now, setNow] = useState(new Date());
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  const handleClearPlan = () => {
+    setAiPlan(undefined);
+  };
+
+  const handleConfirmAll = async () => {
+    if (!state.aiPlan || !state.aiPlan.scheduledTasks || state.aiPlan.scheduledTasks.length === 0) return;
+    if (!state.gasSyncUrl) {
+      alert("GASの同期URLが設定されていません。「設定」から入力してください。");
+      return;
+    }
+
+    setIsConfirming(true);
+    try {
+      const res = await fetch('/api/aura/ai/schedule/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gasSyncUrl: state.gasSyncUrl,
+          tasks: state.aiPlan.scheduledTasks,
+          periods: state.periods
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      // Reload calendar events immediately so they appear as actual events in the grid
+      try {
+        const calId = state.selectedCalendarId || 'primary';
+        const calRes = await fetch(`/api/calendar?calendarId=${encodeURIComponent(calId)}`);
+        if (calRes.ok) {
+          const events = await calRes.json();
+          const newState = mapEventsToTimetable(events, state);
+          importState({
+            ...newState,
+            aiPlan: undefined
+          });
+          alert('スケジュールを一括登録し、Googleカレンダーと同期しました！🎉');
+        } else {
+          setAiPlan(undefined);
+          alert('スケジュールを一括登録しました！(カレンダーの反映には数分かかる場合があります)');
+        }
+      } catch (err) {
+        setAiPlan(undefined);
+        alert('スケジュールを一括登録しました！');
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert('確定エラー: ' + e.message);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   // Update 'now' every minute to keep countdowns fresh
   useEffect(() => {
@@ -65,6 +124,85 @@ export default function TodoList() {
           {state.todoPriorityMode === 'date-first' ? '📅 日付優先' : '📝 日付なし優先'}
         </button>
       </div>
+
+      {/* Aura AI Proposal Box */}
+      {state.aiPlan && (
+        <div className="ai-proposal-box glass" style={{
+          margin: '12px 16px 16px 16px',
+          padding: '14px',
+          borderRadius: '16px',
+          background: 'rgba(124, 58, 237, 0.08)',
+          border: '1px dashed rgba(124, 58, 237, 0.3)',
+          boxShadow: '0 8px 32px rgba(124, 58, 237, 0.05)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg, #7c3aed, #ec4899)'
+          }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <Sparkles size={14} style={{ color: '#a78bfa' }} />
+            <h4 style={{ fontSize: '0.8rem', fontWeight: 700, margin: 0, color: '#c084fc', letterSpacing: '0.05em' }}>Aura AI アシスタント</h4>
+            <span style={{ fontSize: '0.55rem', background: 'rgba(167, 139, 250, 0.15)', color: '#c084fc', padding: '2px 6px', borderRadius: '8px', marginLeft: 'auto', fontWeight: 600 }}>提案中</span>
+          </div>
+          <p style={{ fontSize: '0.7rem', lineHeight: '1.45', margin: '0 0 10px 0', color: 'rgba(255,255,255,0.95)' }}>
+            {state.aiPlan.message}
+          </p>
+          {state.aiPlan.scheduledTasks && state.aiPlan.scheduledTasks.length > 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginTop: '4px' }}>
+              <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>
+                {state.aiPlan.scheduledTasks.length}件の学習枠を提案中
+              </span>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button 
+                  onClick={handleClearPlan}
+                  className="btn btn-ghost btn-xs"
+                  style={{ fontSize: '0.6rem', padding: '2px 6px', borderRadius: '6px', color: 'var(--text-muted)', minHeight: 'unset' }}
+                >
+                  クリア
+                </button>
+                <button 
+                  onClick={handleConfirmAll}
+                  disabled={isConfirming}
+                  className="btn btn-xs"
+                  style={{
+                    fontSize: '0.6rem',
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                    background: 'linear-gradient(90deg, #7c3aed, #ec4899)',
+                    color: 'white',
+                    border: 'none',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.2)',
+                    minHeight: 'unset'
+                  }}
+                >
+                  {isConfirming ? <Loader2 size={10} className="animate-spin" /> : <Check size={10} />}
+                  一括登録
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={handleClearPlan}
+                className="btn btn-ghost btn-xs"
+                style={{ fontSize: '0.6rem', padding: '2px 6px', borderRadius: '6px', color: 'var(--text-muted)', minHeight: 'unset' }}
+              >
+                閉じる
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="todo-input-area">
         <div className="todo-input-row">

@@ -12,6 +12,180 @@ import fetch from "node-fetch";
 import { WebSocketServer } from "ws";
 import bcrypt from "bcrypt";
 
+let isSavingToGist = false;
+let pendingSaveToGist = false;
+
+async function saveAllDataToGist() {
+  if (isSavingToGist) {
+    pendingSaveToGist = true;
+    return;
+  }
+  isSavingToGist = true;
+  pendingSaveToGist = false;
+
+  try {
+    const token = process.env.GIST_TOKEN;
+    const gistId = process.env.GIST_ID;
+    const file = process.env.GIST_FILE || 'backup.json';
+    if (!token || !gistId) {
+      console.warn('Gist env not configured for automatic backup');
+      isSavingToGist = false;
+      return false;
+    }
+
+    // ユーザーデータを全てエクスポートし、JSON形式でGistにパッチ（更新）する
+    const all = await storage.exportAllUsersData();
+
+    // Read extra files (schedule.json, wordlist.json) if they exist
+    const extraFiles = {};
+    const fs = await import('fs/promises');
+    for (const fname of ['schedule.json', 'wordlist.json', 'word list.json']) {
+      try {
+        const content = await fs.readFile(fname, 'utf8');
+        extraFiles[fname] = content;
+      } catch { }
+    }
+
+    // Read all uploaded JSON files
+    const uploadedFiles = {};
+    try {
+      const uploads = await fileUtils.exportUploadedJsonFiles(); // returns array of {name, content}
+      for (const up of uploads) {
+        uploadedFiles[up.name] = up.content;
+      }
+    } catch { }
+
+    // Embed into backup payload
+    if (Object.keys(extraFiles).length) all.extraFiles = extraFiles;
+
+    const payload = {
+      files: { [file]: { content: JSON.stringify(all, null, 2) } }
+    };
+
+    // Add uploaded files as separate entries in 'files'
+    for (const [name, content] of Object.entries(uploadedFiles)) {
+      payload.files[name] = { content: content };
+    }
+    const r = await fetch(`https://api.github.com/gists/${gistId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) {
+      const text = await r.text();
+      console.error('Failed to auto-save to gist:', r.status, text);
+    } else {
+      console.log('Successfully auto-saved to Gist');
+    }
+  } catch (e) {
+    console.error('Failed to auto-save to Gist:', e);
+  } finally {
+    isSavingToGist = false;
+    if (pendingSaveToGist) {
+      setTimeout(() => {
+        saveAllDataToGist();
+      }, 5000);
+    }
+  }
+}
+
+/**
+ * AIとの通信を行う統合ヘルパー関数
+ * - preferOllamaが真の場合、またはAPIキーがない場合はローカルのOllama (http://localhost:11434) を試行
+ * - それ以外、またはOllama失敗時は Google Gemini (GOOGLE_API_KEY) / Groq を使用
+ */
+async function callAI(prompt, systemInstruction, preferOllama = false) {
+  if (preferOllama) {
+    try {
+      console.log("[Aura AI] Attempting Ollama (local)...");
+      const r = await fetch('http://localhost:11434/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'gemma', // ユーザー指定のgemmaをデフォルトに設定
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: prompt }
+          ],
+          stream: false,
+          options: { temperature: 0.7 }
+        })
+      });
+      if (r.ok) {
+        const json = await r.json();
+        return json.message?.content || json.response || "";
+      } else {
+        console.warn("[Aura AI] Ollama returned status " + r.status);
+      }
+    } catch (e) {
+      console.warn("[Aura AI] Ollama local connection failed (falling back): " + e.message);
+    }
+  }
+
+  // Google Gemini APIをフォールバックまたはメインエンジンとして使用
+  const googleApiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+  if (googleApiKey) {
+    try {
+      console.log("[Aura AI] Using Google Gen AI (Gemini)...");
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${googleApiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `${systemInstruction}\n\nUser Request:\n${prompt}` }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          }
+        })
+      });
+      if (response.ok) {
+        const resJson = await response.json();
+        return resJson.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      } else {
+        const errText = await response.text();
+        console.error("[Aura AI] Gemini API error: " + response.status + " " + errText);
+      }
+    } catch (err) {
+      console.error("[Aura AI] Gemini API connection failed: ", err);
+    }
+  }
+
+  // DeepSeek / Groq を最終フォールバックとして使用
+  const groqApiKey = process.env.Deepseek_API;
+  if (groqApiKey) {
+    try {
+      console.log("[Aura AI] Using Groq (DeepSeek/Llama)...");
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${groqApiKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7
+        })
+      });
+      if (response.ok) {
+        const resJson = await response.json();
+        return resJson.choices?.[0]?.message?.content || "";
+      }
+    } catch (err) {
+      console.error("[Aura AI] Groq API failed: ", err);
+    }
+  }
+
+  throw new Error("No AI service available (Ollama, Gemini, and Groq all failed or are not configured).");
+}
+
 export async function registerRoutes(app) {
   // Setup authentication middleware
   setupAuth(app);
@@ -252,6 +426,226 @@ export async function registerRoutes(app) {
     }
   });
 
+  // Aura AI Schedule Optimization Route
+  app.post('/api/aura/ai/schedule', optionalAuthentication, async (req, res) => {
+    try {
+      const data = req.body; // Full state sent from frontend
+      if (!data.gasSyncUrl) {
+        return res.status(400).json({ message: "GASの同期URLが設定されていません。「設定」から入力してください。" });
+      }
+      
+      // Calculate date range for the next 14 days
+      const now = new Date();
+      const formatDate = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+      
+      const startDate = formatDate(now);
+      const endDateObj = new Date(now);
+      endDateObj.setDate(now.getDate() + 13); // 2 weeks
+      const endDate = formatDate(endDateObj);
+      
+      console.log(`[Aura AI] Fetching free slots from GAS between ${startDate} and ${endDate}...`);
+      
+      // 1. Call GAS to get free slots
+      const gasResponse = await fetch(data.gasSyncUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: "getFreeSlots",
+          startDate: startDate,
+          endDate: endDate,
+          periods: data.periods,
+          timetable: data.timetable,
+          dayOverrides: data.dayOverrides,
+          cellOverrides: data.cellOverrides,
+          semesterStart: data.semesterSettings?.start,
+          semesterEnd: data.semesterSettings?.end,
+          showWeekend: data.showWeekend
+        })
+      });
+      
+      if (!gasResponse.ok) {
+        throw new Error(`GASへの空き時間問い合わせに失敗しました（ステータス: ${gasResponse.status}）`);
+      }
+      
+      const gasResult = await gasResponse.json();
+      if (gasResult.status !== "success" || !Array.isArray(gasResult.freeSlots)) {
+        throw new Error("GASからの空き時間応答データ形式が正しくありません: " + JSON.stringify(gasResult));
+      }
+      
+      const freeSlots = gasResult.freeSlots;
+      const uncompletedTodos = (data.todos || []).filter(t => !t.completed);
+      
+      if (uncompletedTodos.length === 0) {
+        return res.json({
+          scheduledTasks: [],
+          message: "未完了のタスクがありません！TODOリストにタスクを追加しましょう。✨"
+        });
+      }
+      
+      if (freeSlots.length === 0) {
+        return res.json({
+          scheduledTasks: [],
+          message: "直近2週間に空き時間がありません。少し予定を調整するか、適度に休憩を挟みましょうね。☕"
+        });
+      }
+      
+      // 2. Call Gemini/Gemma to optimize schedule
+      console.log(`[Aura AI] Optimizing schedule for ${uncompletedTodos.length} tasks and ${freeSlots.length} free slots...`);
+      
+      const optimizePrompt = `
+Uncompleted Tasks:
+${JSON.stringify(uncompletedTodos.map(t => ({ id: t.id, text: t.text, targetDate: t.targetDate, courseId: t.courseId })), null, 2)}
+
+Available Free Slots (next 14 days):
+${JSON.stringify(freeSlots, null, 2)}
+`;
+      
+      const systemInstruction = `
+You are the Aura AI Assistant, an advanced timetable and task scheduling agent for university students.
+Your goal is to optimize the student's study schedule by fitting their uncompleted tasks (todos) into their empty time slots (freeSlots).
+
+RULES:
+1. You must ONLY assign tasks to available free time slots in the provided 'freeSlots' array.
+2. A single time slot (defined by 'date' and 'period') can hold at most ONE task.
+3. You do not need to assign all tasks if there are not enough free slots. Focus on assigning the highest priority tasks first.
+4. If a task has a targetDate, prioritize putting it on or before that date.
+5. The schedule output MUST be a valid JSON array of objects. Do not include any explanations or markdown.
+
+OUTPUT FORMAT:
+Output ONLY a raw JSON array matching this format (no markdown code blocks like \`\`\`json, no explanation):
+[
+  {
+    "todoId": "The ID of the todo task",
+    "text": "The text description of the task",
+    "date": "YYYY-MM-DD of the assigned slot",
+    "period": number (0-based period index)
+  }
+]
+`;
+      
+      let scheduledTasksText = "";
+      try {
+        // 重たい最適化処理はGoogle Geminiを使用
+        scheduledTasksText = await callAI(optimizePrompt, systemInstruction, false);
+      } catch (aiErr) {
+        console.error("[Aura AI] Scheduling model call failed: ", aiErr);
+        throw aiErr;
+      }
+      
+      // Parse output
+      let scheduledTasks = [];
+      try {
+        let cleanText = scheduledTasksText.trim();
+        if (cleanText.startsWith("```")) {
+          cleanText = cleanText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+        }
+        scheduledTasks = JSON.parse(cleanText);
+      } catch (jsonErr) {
+        console.error("[Aura AI] Failed to parse schedule JSON. Raw was: " + scheduledTasksText);
+        throw new Error("AIからの応答データをパースできませんでした。もう一度お試しください。");
+      }
+      
+      // 3. Call Ollama (Lightweight operation) to generate the motivational message!
+      console.log("[Aura AI] Generating motivating advice using Ollama...");
+      const messagePrompt = `
+以下のスケジュール割り当てが決定しました。
+${JSON.stringify(scheduledTasks.map(t => ({ text: t.text, date: t.date, period: t.period + 1 })), null, 2)}
+
+この結果を踏まえ、学生に向けて温かくモチベーションを高めるアドバイス・メッセージを日本語で2〜3文で作成してください。
+疲労に配慮した優しいトーンでお願いします。
+`;
+      
+      const messageSystemInstruction = `
+You are a warm, supportive, and empathetic AI coach who encourages university students.
+Generate a motivating 2-3 sentence message in Japanese based on the student's study plan.
+`;
+      
+      let adviceMessage = "";
+      try {
+        // 比較的軽い操作（メッセージ生成）にはOllamaを優先して使用！
+        adviceMessage = await callAI(messagePrompt, messageSystemInstruction, true);
+      } catch (msgErr) {
+        console.warn("[Aura AI] Ollama advice call failed, falling back: ", msgErr);
+        adviceMessage = "新しいスケジュール案を作成しました！空き時間を活用して、一歩ずつ進めていきましょう。応援しています！🌟";
+      }
+      
+      // 4. Save the generated plan to Gist (plan.json)
+      try {
+        const gistUtils = await import('../shared/gistUtils.mjs');
+        const planData = await gistUtils.getGistFile('aura-timetable-plan.json') || {};
+        const newPlan = {
+          message: adviceMessage.trim(),
+          scheduledTasks: scheduledTasks,
+          generatedAt: Date.now()
+        };
+        planData[req.userId] = newPlan;
+        await gistUtils.updateGistFile('aura-timetable-plan.json', planData);
+        console.log("[Aura AI] Plan successfully saved to Gist.");
+      } catch (gistErr) {
+        console.error("[Aura AI] Failed to save plan to Gist:", gistErr);
+      }
+      
+      res.json({
+        scheduledTasks: scheduledTasks,
+        message: adviceMessage.trim()
+      });
+      
+    } catch (e) {
+      console.error("[Aura AI] AI Schedule error:", e);
+      res.status(500).json({ message: "スケジュール生成中にエラーが発生しました", error: e.message });
+    }
+  });
+
+  app.post('/api/aura/ai/schedule/confirm', optionalAuthentication, async (req, res) => {
+    try {
+      const { gasSyncUrl, tasks, periods } = req.body;
+      if (!gasSyncUrl) {
+        return res.status(400).json({ message: "gasSyncUrl is required" });
+      }
+      
+      console.log(`[Aura AI] Confirming and writing ${tasks.length} tasks to Google Calendar...`);
+      
+      const gasResponse = await fetch(gasSyncUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: "writeTasks",
+          tasks: tasks,
+          periods: periods
+        })
+      });
+      
+      if (!gasResponse.ok) {
+        throw new Error(`GAS write request failed with status ${gasResponse.status}`);
+      }
+      
+      const gasResult = await gasResponse.json();
+      if (gasResult.status !== "success") {
+        throw new Error("GAS task write returned failure status: " + JSON.stringify(gasResult));
+      }
+      
+      res.json({ ok: true, created: gasResult.created });
+      
+    } catch (e) {
+      console.error("[Aura AI] Schedule confirmation error:", e);
+      res.status(500).json({ message: "スケジュール確定処理中にエラーが発生しました", error: e.message });
+    }
+  });
+
+  app.post('/api/gist/autosave', optionalAuthentication, async (req, res) => {
+    try {
+      saveAllDataToGist().catch(err => console.error("Gist auto-save failed in autosave endpoint:", err));
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ message: 'failed to trigger gist save', error: e.message });
+    }
+  });
+
   app.post('/api/admin/import', optionalAuthentication, async (req, res) => {
     try {
       if (!isBackupAdmin(req)) return res.status(403).json({ message: 'forbidden' });
@@ -356,6 +750,9 @@ export async function registerRoutes(app) {
       }
       // Append words without clearing (default behavior)
       const createdWords = await storage.createVocabularyWords(userId, words);
+
+      // Auto-save to Gist
+      saveAllDataToGist().catch(err => console.error("Gist auto-save failed in upload:", err));
 
       res.json({
         message: "Vocabulary uploaded successfully",
@@ -543,6 +940,9 @@ export async function registerRoutes(app) {
       if (!session) {
         return res.status(404).json({ message: "Study session not found" });
       }
+      if (updates && updates.isCompleted === true) {
+        saveAllDataToGist().catch(err => console.error("Gist auto-save failed in session completion:", err));
+      }
       res.json(session);
     } catch (error) {
       res.status(500).json({ message: "Failed to update study session" });
@@ -556,6 +956,9 @@ export async function registerRoutes(app) {
       const session = await storage.updateStudySession(userId, req.params.id, updates);
       if (!session) {
         return res.status(404).json({ message: "Study session not found" });
+      }
+      if (updates && updates.isCompleted === true) {
+        saveAllDataToGist().catch(err => console.error("Gist auto-save failed in session completion:", err));
       }
       res.json(session);
     } catch (error) {
@@ -681,6 +1084,7 @@ export async function registerRoutes(app) {
         return res.status(400).json({ message: 'Invalid dataset' });
       }
       const saved = await storage.saveDataset(req.userId, name, words);
+      saveAllDataToGist().catch(err => console.error("Gist auto-save failed in saveDataset:", err));
       res.json(saved);
     } catch (e) {
       res.status(500).json({ message: 'Failed to save dataset' });
@@ -692,6 +1096,7 @@ export async function registerRoutes(app) {
       const { name } = req.body || {};
       if (!name) return res.status(400).json({ message: 'name required' });
       const result = await storage.applyDataset(req.userId, name);
+      saveAllDataToGist().catch(err => console.error("Gist auto-save failed in applyDataset:", err));
       res.json(result);
     } catch (e) {
       res.status(500).json({ message: 'Failed to apply dataset' });
@@ -748,6 +1153,7 @@ export async function registerRoutes(app) {
       }
       const result = await saveUploadedJsonFile(name, content, { overwrite: false });
       try { storage.setUploadedOwner(result.name, req.userId); } catch { }
+      saveAllDataToGist().catch(err => console.error("Gist auto-save failed in createFile:", err));
       res.json({ ok: true, name: result.name, wordCount: result.wordCount });
     } catch (error) {
       if (error && error.code === 'FILE_EXISTS') {
@@ -775,6 +1181,7 @@ export async function registerRoutes(app) {
       }
       const result = await saveUploadedJsonFile(fileName, content, { overwrite: true });
       if (!meta) { try { storage.setUploadedOwner(fileName, req.userId); } catch { } }
+      saveAllDataToGist().catch(err => console.error("Gist auto-save failed in updateFile:", err));
       res.json({ ok: true, name: result.name, wordCount: result.wordCount });
     } catch (error) {
       res.status(400).json({ message: error?.message || 'Failed to update file' });
@@ -796,6 +1203,7 @@ export async function registerRoutes(app) {
         return res.status(403).json({ message: 'forbidden (not owner)' });
       }
       await deleteUploadedJsonFile(fileName);
+      saveAllDataToGist().catch(err => console.error("Gist auto-save failed in deleteFile:", err));
       res.json({ ok: true });
     } catch (error) {
       res.status(404).json({ message: error?.message || 'File not found' });

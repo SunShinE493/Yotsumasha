@@ -15,6 +15,7 @@ import {
   cellKey,
   DEFAULT_PERIODS,
   formatYMD,
+  AIPlan,
 } from './types';
 
 interface TimetableContextValue {
@@ -50,6 +51,7 @@ interface TimetableContextValue {
   setShowGridTodoBadges: (show: boolean) => void;
   setCustomBackground: (color: string) => void;
   setShowTodoCountdown: (show: boolean) => void;
+  setAiPlan: (plan: AIPlan | undefined) => void;
 }
 
 const TimetableContext = createContext<TimetableContextValue | null>(null);
@@ -356,6 +358,10 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, customBackground: color }));
   }, []);
 
+  const setAiPlan = useCallback((aiPlan: AIPlan | undefined) => {
+    setState(prev => ({ ...prev, aiPlan }));
+  }, []);
+
   return (
     <TimetableContext.Provider
       value={{
@@ -389,6 +395,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         setShowGridTodoBadges,
         setCustomBackground,
         setShowTodoCountdown,
+        setAiPlan,
       }}
     >
       {loaded ? children : null}

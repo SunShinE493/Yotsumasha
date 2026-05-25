@@ -7,12 +7,46 @@ import SettingsPanel from '@/components/SettingsPanel';
 import TodoList from '@/components/TodoList';
 import { useTimetable } from '@/lib/store';
 import { getContrastYIQ } from '@/lib/types';
-import { Menu, X, Settings, Sparkles, Edit3, Eye, Calendar } from 'lucide-react';
+import { Menu, X, Settings, Sparkles, Edit3, Eye, Calendar, Home as HomeIcon, Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const { state, setAppMode } = useTimetable();
+  const { state, setAppMode, setAiPlan } = useTimetable();
   const [showMenu, setShowMenu] = useState(false);
   const [activePanel, setActivePanel] = useState<'none' | 'ai' | 'settings'>('none');
+  const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
+
+  const handleGenerateAiSchedule = async () => {
+    if (!state.gasSyncUrl) {
+      alert("GASの同期URLが設定されていません。「設定」から入力してください。");
+      return;
+    }
+
+    setIsGeneratingSchedule(true);
+    try {
+      const res = await fetch('/api/aura/ai/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      const result = await res.json();
+      setAiPlan({
+        message: result.message,
+        scheduledTasks: result.scheduledTasks,
+        generatedAt: Date.now()
+      });
+      alert("AIによる最適スケジュールが作成されました！時間割とTODOリストで提案を確認してください。✨");
+    } catch (e: any) {
+      console.error(e);
+      alert("AIスケジュール生成エラー: " + e.message);
+    } finally {
+      setIsGeneratingSchedule(false);
+    }
+  };
 
   const closePanel = () => setActivePanel('none');
 
@@ -99,6 +133,10 @@ export default function Home() {
              <button className="drawer-item" onClick={() => { setShowMenu(false); setActivePanel('settings'); }}>
                <Settings size={18} /> 設定
              </button>
+             <hr />
+             <a className="drawer-item" href="/" style={{ textDecoration: 'none' }}>
+               <HomeIcon size={18} /> ホームに戻る
+             </a>
           </nav>
         </aside>
       </div>
@@ -225,10 +263,58 @@ export default function Home() {
           top: 10px;
           right: 10px;
         }
+        .floating-ai-btn {
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+          color: white;
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4), 
+                      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          cursor: pointer;
+          z-index: 999;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          outline: none;
+        }
+        .floating-ai-btn:hover:not(:disabled) {
+          transform: scale(1.1) translateY(-4px) rotate(8deg);
+          box-shadow: 0 12px 40px rgba(124, 58, 237, 0.6), 
+                      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        .floating-ai-btn:active:not(:disabled) {
+          transform: scale(0.95);
+        }
+        .floating-ai-btn:disabled {
+          background: #3f3f46;
+          box-shadow: none;
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
         @media (max-width: 1023px) {
           .desktop-only { display: none; }
         }
       `}</style>
+
+      {/* Floating Action Button (Sparkle Rescheduling Trigger) */}
+      <button
+        onClick={handleGenerateAiSchedule}
+        disabled={isGeneratingSchedule}
+        className="floating-ai-btn"
+        title="AI スケジュール自動生成"
+      >
+        {isGeneratingSchedule ? (
+          <Loader2 className="animate-spin" size={24} />
+        ) : (
+          <Sparkles size={24} />
+        )}
+      </button>
     </div>
   );
 }

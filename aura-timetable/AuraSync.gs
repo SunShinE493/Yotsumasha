@@ -45,13 +45,23 @@ function getColorIdFromString(colorStr) {
 }
 
 function doPost(e) {
-  const response = { status: "success", message: "", details: {} };
-  
   try {
     const contents = e.postData.contents;
+    const data = JSON.parse(contents);
+    
+    if (data.action === "getFreeSlots") {
+      console.log("=== 空き時間抽出アクション開始 ===");
+      const result = getFreeSlots(data);
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    } else if (data.action === "writeTasks") {
+      console.log("=== タスク書き込みアクション開始 ===");
+      const result = writeTasks(data);
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const response = { status: "success", message: "", details: {} };
     console.log("=== 同期処理開始 (専用カレンダー) ===");
     
-    const data = JSON.parse(contents);
     const calendar = getTargetCalendar();
     console.log("同期先: " + calendar.getName());
 
@@ -247,4 +257,142 @@ function cleanMainCalendar() {
 function authorize() {
   const calendar = getTargetCalendar();
   console.log("カレンダー（" + calendar.getName() + "）へのアクセス許可が完了しました！");
+}
+
+/**
+ * 空き時間（授業がなく、かつカレンダーの他の予定とも重複しない時間枠）を抽出します。
+ */
+function getFreeSlots(data) {
+  const parseJST = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d, 9, 0, 0); 
+  };
+  
+  const start = parseJST(data.startDate || data.semesterStart);
+  const end = parseJST(data.endDate || data.semesterEnd);
+  
+  const calendar = getTargetCalendar();
+  const events = calendar.getEvents(start, end);
+  
+  // 祝日データの取得
+  let holidays = {};
+  try {
+    const holidayCal = CalendarApp.getCalendarById('ja.japanese#holiday@group.v.calendar.google.com');
+    holidayCal.getEvents(start, end).forEach(ev => {
+      holidays[Utilities.formatDate(ev.getStartTime(), "JST", "yyyy-MM-dd")] = ev.getTitle();
+    });
+  } catch (e) {
+    console.warn("祝日の取得に失敗しました: " + e.toString());
+  }
+  
+  const freeSlots = [];
+  let currentDate = new Date(start);
+  
+  while (currentDate <= end) {
+    const dateStr = Utilities.formatDate(currentDate, "JST", "yyyy-MM-dd");
+    const holidayName = holidays[dateStr];
+    const hasOverride = data.dayOverrides && data.dayOverrides[dateStr] !== undefined;
+    
+    // 祝日で振替授業もない場合はスキップ
+    if (holidayName && !hasOverride) {
+      currentDate.setDate(currentDate.getDate() + 1);
+      continue;
+    }
+    
+    let dayIndex;
+    if (hasOverride) {
+      dayIndex = data.dayOverrides[dateStr];
+    } else {
+      const jsDay = currentDate.getDay();
+      dayIndex = jsDay === 0 ? 6 : jsDay - 1;
+    }
+    
+    // 週末のチェック
+    const isWeekend = dayIndex > 4;
+    if (isWeekend && !data.showWeekend) {
+      currentDate.setDate(currentDate.getDate() + 1);
+      continue;
+    }
+    
+    for (let p = 0; p < data.periods.length; p++) {
+      // 1. 時間割に授業が入っているかチェック
+      let entry = data.cellOverrides && data.cellOverrides[`${dateStr}-${p}`];
+      if (!entry) {
+        entry = data.timetable[`${dayIndex}-${p}`];
+      }
+      if (entry && entry.courseId) {
+        continue; // 授業がある枠は空き時間ではない
+      }
+      
+      // 2. Googleカレンダーに他の予定が入っているかチェック
+      const periodTime = data.periods[p];
+      const startPeriod = new Date(currentDate);
+      const [sH, sM] = periodTime.start.split(':').map(Number);
+      startPeriod.setHours(sH, sM, 0, 0);
+      
+      const endPeriod = new Date(currentDate);
+      const [eH, eM] = periodTime.end.split(':').map(Number);
+      endPeriod.setHours(eH, eM, 0, 0);
+      
+      const isOccupied = events.some(ev => {
+        const evStart = ev.getStartTime();
+        const evEnd = ev.getEndTime();
+        return evStart < endPeriod && evEnd > startPeriod;
+      });
+      
+      if (!isOccupied) {
+        freeSlots.push({
+          date: dateStr,
+          period: p,
+          start: periodTime.start,
+          end: periodTime.end
+        });
+      }
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return { status: "success", freeSlots: freeSlots };
+}
+
+/**
+ * 提案されて確定されたタスクをGoogleカレンダーに登録します。
+ */
+function writeTasks(data) {
+  const calendar = getTargetCalendar();
+  const created = [];
+  
+  (data.tasks || []).forEach(task => {
+    const [y, m, d] = task.date.split('-').map(Number);
+    const periodTime = data.periods[task.period];
+    if (!periodTime) return;
+    
+    const start = new Date(y, m - 1, d);
+    const [sH, sM] = periodTime.start.split(':').map(Number);
+    start.setHours(sH, sM, 0, 0);
+    
+    const end = new Date(y, m - 1, d);
+    const [eH, eM] = periodTime.end.split(':').map(Number);
+    end.setHours(eH, eM, 0, 0);
+    
+    const eventObj = calendar.createEvent(`[Task] ${task.text}`, start, end, {
+      description: `${APP_TAG}\n[Task]\nTodo ID: ${task.todoId || ''}`
+    });
+    
+    try {
+      eventObj.setColor(CalendarApp.EventColor.ORANGE);
+    } catch(err) {}
+    
+    created.push({
+      todoId: task.todoId,
+      text: task.text,
+      date: task.date,
+      period: task.period,
+      eventId: eventObj.getId()
+    });
+    
+    Utilities.sleep(100);
+  });
+  
+  return { status: "success", created: created };
 }

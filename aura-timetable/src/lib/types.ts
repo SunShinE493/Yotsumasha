@@ -55,6 +55,19 @@ export interface SpecialPeriod {
   end: string;
 }
 
+export interface AIScheduledTask {
+  todoId: string;
+  text: string;
+  date: string;
+  period: number;
+}
+
+export interface AIPlan {
+  message: string;
+  scheduledTasks: AIScheduledTask[];
+  generatedAt: number;
+}
+
 export interface TimetableState {
   courses: Course[];
   timetable: TimetableData;
@@ -80,6 +93,7 @@ export interface TimetableState {
   showGridTodoBadges: boolean;
   showTodoCountdown: boolean;
   customBackground?: string;
+  aiPlan?: AIPlan;
   updatedAt: number;
   userId?: string;
 }
@@ -141,6 +155,7 @@ export function getDefaultState(): TimetableState {
     cellOverrides: {},
     showGridTodoBadges: true,
     showTodoCountdown: false,
+    aiPlan: undefined,
     updatedAt: 0,
     userId: undefined,
   };
@@ -162,6 +177,8 @@ export function formatYMD(d: Date): string {
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+export const formatDateYMD = formatYMD;
 
 export function getContrastYIQ(colorStr: string): string {
   if (!colorStr) return '#ffffff';
