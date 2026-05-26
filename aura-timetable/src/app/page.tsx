@@ -23,10 +23,19 @@ export default function Home() {
 
     setIsGeneratingSchedule(true);
     try {
+      const csrfRes = await fetch('/api/csrf');
+      const { csrfToken } = await csrfRes.json();
+
       const res = await fetch('/api/aura/ai/schedule', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(state)
+        headers: { 
+          'Content-Type': 'application/json',
+          'csrf-token': csrfToken
+        },
+        body: JSON.stringify({
+          ...state,
+          _csrf: csrfToken
+        })
       });
 
       if (!res.ok) {

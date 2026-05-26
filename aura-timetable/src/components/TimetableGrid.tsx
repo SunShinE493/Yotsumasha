@@ -26,13 +26,20 @@ export default function TimetableGrid() {
     }
 
     try {
+      const csrfRes = await fetch('/api/csrf');
+      const { csrfToken } = await csrfRes.json();
+
       const res = await fetch('/api/aura/ai/schedule/confirm', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'csrf-token': csrfToken
+        },
         body: JSON.stringify({
           gasSyncUrl: state.gasSyncUrl,
           tasks: [task],
-          periods: state.periods
+          periods: state.periods,
+          _csrf: csrfToken
         })
       });
 
