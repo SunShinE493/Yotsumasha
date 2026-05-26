@@ -1,9 +1,20 @@
 /**
- * Aura Timetable Sync Bridge (v1.4 - 専用カレンダー対応版)
- * --------------------------------------------------
- * 「Aura Timetable」という名前の専用カレンダーを作成し、
- * そこに予定を書き込みます。これにより、Googleカレンダーアプリで
- * 授業予定の表示・非表示を簡単に切り替えられるようになります。
+ * Aura Timetable Sync Bridge (v2.0 - AI スケジュール最適化対応版)
+ * ================================================================
+ *
+ * 【システム構成 / 設計仕様】
+ *  - データ基盤: Googleカレンダー（確定済み予定）＋ Gist（タスクDB・計画記録）
+ *  - 処理エンジン: GAS（カレンダー操作）＋ Gemini API（最適スケジュール生成）
+ *
+ * 【主な機能】
+ *  1. doPost: カレンダー同期 / 空き時間抽出 / タスク書き込みのルーティング
+ *  2. getFreeSlots: 全カレンダーを横断し、1秒でも予定が重なるコマを除外した
+ *                   「本当の空きコマ」を返す（AI最適化への入力データ）
+ *  3. writeTasks: AIが確定したタスクをカレンダーに [Task] 形式で登録する
+ *
+ * 【重要: デプロイについて】
+ *  コードを修正したあとは必ず「デプロイを管理」→「新しいバージョンに更新」を
+ *  実行してください。保存だけでは反映されません。
  */
 
 const APP_TAG = "[AuraSync]";
@@ -260,99 +271,196 @@ function authorize() {
 }
 
 /**
- * 空き時間（授業がなく、かつカレンダーの他の予定とも重複しない時間枠）を抽出します。
+ * 空き時間を抽出します。
+ *
+ * 【判定ロジック】
+ *  1. 時間割アプリに授業が登録されているコマ → 除外
+ *  2. ユーザーの全カレンダー（プライマリ・共有・Aura専用を含む）に
+ *     1秒でも予定が重なるコマ → 除外
+ *  3. 祝日（振替なし） → 除外
+ *  4. 週末は showWeekend フラグで制御
+ *
+ * 【v2.0 修正点】
+ *  - イベント取得範囲を 0:00〜23:59:59 に変更
+ *    (旧: 9:00 開始 → 9時前に終わる予定を見逃すバグを修正)
+ *  - 全カレンダー横断取得 + 詳細ログで問題の特定を容易に
+ *
+ * @param {Object} data - フロントエンドから送られてくる時間割ステート
+ * @returns {{ status: string, freeSlots: Array, debug: Object }}
  */
 function getFreeSlots(data) {
-  const parseJST = (dateStr) => {
+
+  // その日の 0:00:00 を返す (イベント取得範囲の開始)
+  const parseDayStart = (dateStr) => {
     const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d, 9, 0, 0); 
+    return new Date(y, m - 1, d, 0, 0, 0);
   };
-  
-  const start = parseJST(data.startDate || data.semesterStart);
-  const end = parseJST(data.endDate || data.semesterEnd);
-  
-  const calendar = getTargetCalendar();
-  const events = calendar.getEvents(start, end);
-  
-  // 祝日データの取得
-  let holidays = {};
+
+  // その日の 23:59:59 を返す (イベント取得範囲の終了)
+  const parseDayEnd = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d, 23, 59, 59);
+  };
+
+  const startDateStr = data.startDate || data.semesterStart;
+  const endDateStr   = data.endDate   || data.semesterEnd;
+
+  // イベント取得範囲: 対象期間の 0:00 〜 最終日の 23:59:59
+  // ※ 9:00 開始にすると「8:00-8:50」などの早朝イベントを取りこぼすため修正
+  const fetchStart = parseDayStart(startDateStr);
+  const fetchEnd   = parseDayEnd(endDateStr);
+
+  console.log(`[getFreeSlots] v2.0 開始 | 対象期間: ${startDateStr} 〜 ${endDateStr}`);
+  console.log(`[getFreeSlots] イベント取得範囲: ${fetchStart.toISOString()} 〜 ${fetchEnd.toISOString()}`);
+
+  // ─── 全カレンダーから予定を収集 ─────────────────────────────────────────
+  // 「Aura Timetable」専用カレンダーだけでなく、プライマリや共有
+  // カレンダーも含め、1つでも予定が重なるコマは「空き」から除外する。
+  const events  = [];
+  const seenIds = new Set();
+  const auraCalendar = getTargetCalendar();
+
   try {
-    const holidayCal = CalendarApp.getCalendarById('ja.japanese#holiday@group.v.calendar.google.com');
-    holidayCal.getEvents(start, end).forEach(ev => {
-      holidays[Utilities.formatDate(ev.getStartTime(), "JST", "yyyy-MM-dd")] = ev.getTitle();
+    const allCalendars = CalendarApp.getAllCalendars();
+    console.log(`[getFreeSlots] 取得対象カレンダー数: ${allCalendars.length}`);
+
+    for (const cal of allCalendars) {
+      if (cal.getId().includes('holiday')) continue; // 祝日は別途処理
+      try {
+        const calEvents = cal.getEvents(fetchStart, fetchEnd);
+        for (const ev of calEvents) {
+          if (!seenIds.has(ev.getId())) {
+            seenIds.add(ev.getId());
+            events.push(ev);
+          }
+        }
+        if (calEvents.length > 0) {
+          console.log(`  └ ${cal.getName()}: ${calEvents.length}件の予定を取得`);
+        }
+      } catch (calErr) {
+        console.warn(`  └ [WARN] ${cal.getName()} の取得失敗: ${calErr}`);
+      }
+    }
+  } catch (e) {
+    // フォールバック: 全カレンダー取得失敗時はAura専用カレンダーのみ
+    console.warn('[getFreeSlots] getAllCalendars 失敗、フォールバック: ' + e);
+    auraCalendar.getEvents(fetchStart, fetchEnd).forEach(ev => {
+      if (!seenIds.has(ev.getId())) {
+        seenIds.add(ev.getId());
+        events.push(ev);
+      }
+    });
+  }
+
+  console.log(`[getFreeSlots] 収集した予定の総数: ${events.length}件`);
+
+  // ─── 祝日データの取得 ──────────────────────────────────────────────────
+  const holidays = {};
+  try {
+    const holidayCal = CalendarApp.getCalendarById(
+      'ja.japanese#holiday@group.v.calendar.google.com'
+    );
+    holidayCal.getEvents(fetchStart, fetchEnd).forEach(ev => {
+      holidays[Utilities.formatDate(ev.getStartTime(), 'JST', 'yyyy-MM-dd')] = ev.getTitle();
     });
   } catch (e) {
-    console.warn("祝日の取得に失敗しました: " + e.toString());
+    console.warn('[getFreeSlots] 祝日の取得に失敗: ' + e);
   }
-  
+
+  // ─── 空き時間の抽出ループ ──────────────────────────────────────────────
   const freeSlots = [];
-  let currentDate = new Date(start);
-  
-  while (currentDate <= end) {
-    const dateStr = Utilities.formatDate(currentDate, "JST", "yyyy-MM-dd");
+  let blockedByCalendar  = 0;
+  let blockedByTimetable = 0;
+
+  // currentDate は 0:00 スタート（正確な日付判定のため）
+  let currentDate = parseDayStart(startDateStr);
+  const loopEnd   = parseDayEnd(endDateStr);
+
+  while (currentDate <= loopEnd) {
+    const dateStr     = Utilities.formatDate(currentDate, 'JST', 'yyyy-MM-dd');
     const holidayName = holidays[dateStr];
     const hasOverride = data.dayOverrides && data.dayOverrides[dateStr] !== undefined;
-    
-    // 祝日で振替授業もない場合はスキップ
+
+    // 祝日（振替授業の設定がない場合）はスキップ
     if (holidayName && !hasOverride) {
       currentDate.setDate(currentDate.getDate() + 1);
       continue;
     }
-    
+
+    // 曜日インデックスの決定 (0=月 〜 6=日)
     let dayIndex;
     if (hasOverride) {
       dayIndex = data.dayOverrides[dateStr];
     } else {
-      const jsDay = currentDate.getDay();
+      const jsDay = currentDate.getDay(); // 0=Sun ... 6=Sat
       dayIndex = jsDay === 0 ? 6 : jsDay - 1;
     }
-    
-    // 週末のチェック
-    const isWeekend = dayIndex > 4;
-    if (isWeekend && !data.showWeekend) {
+
+    // 週末スキップ
+    if (dayIndex > 4 && !data.showWeekend) {
       currentDate.setDate(currentDate.getDate() + 1);
       continue;
     }
-    
+
     for (let p = 0; p < data.periods.length; p++) {
-      // 1. 時間割に授業が入っているかチェック
-      let entry = data.cellOverrides && data.cellOverrides[`${dateStr}-${p}`];
-      if (!entry) {
-        entry = data.timetable[`${dayIndex}-${p}`];
-      }
+
+      // ── チェック①: 時間割に授業がある ──────────────────────────────────
+      const overrideKey  = `${dateStr}-${p}`;
+      const timetableKey = `${dayIndex}-${p}`;
+      const entry = (data.cellOverrides && data.cellOverrides[overrideKey])
+                 || data.timetable[timetableKey];
+
       if (entry && entry.courseId) {
-        continue; // 授業がある枠は空き時間ではない
+        blockedByTimetable++;
+        continue;
       }
-      
-      // 2. Googleカレンダーに他の予定が入っているかチェック
+
+      // ── チェック②: カレンダーに1秒でも予定が重なる ─────────────────────
       const periodTime = data.periods[p];
-      const startPeriod = new Date(currentDate);
-      const [sH, sM] = periodTime.start.split(':').map(Number);
-      startPeriod.setHours(sH, sM, 0, 0);
-      
-      const endPeriod = new Date(currentDate);
-      const [eH, eM] = periodTime.end.split(':').map(Number);
-      endPeriod.setHours(eH, eM, 0, 0);
-      
+      const [sH, sM]   = periodTime.start.split(':').map(Number);
+      const [eH, eM]   = periodTime.end.split(':').map(Number);
+
+      const slotStart = new Date(currentDate);
+      slotStart.setHours(sH, sM, 0, 0);
+
+      const slotEnd = new Date(currentDate);
+      slotEnd.setHours(eH, eM, 0, 0);
+
+      // 重複判定: evStart < slotEnd && evEnd > slotStart
+      // → イベントが少しでもコマの時間帯に重なれば「ブロック」
       const isOccupied = events.some(ev => {
         const evStart = ev.getStartTime();
-        const evEnd = ev.getEndTime();
-        return evStart < endPeriod && evEnd > startPeriod;
+        const evEnd   = ev.getEndTime();
+        return evStart < slotEnd && evEnd > slotStart;
       });
-      
-      if (!isOccupied) {
-        freeSlots.push({
-          date: dateStr,
-          period: p,
-          start: periodTime.start,
-          end: periodTime.end
-        });
+
+      if (isOccupied) {
+        blockedByCalendar++;
+        continue;
       }
+
+      // ── 空きコマとして登録 ─────────────────────────────────────────────
+      freeSlots.push({
+        date:   dateStr,
+        period: p,
+        start:  periodTime.start,
+        end:    periodTime.end
+      });
     }
+
     currentDate.setDate(currentDate.getDate() + 1);
   }
-  
-  return { status: "success", freeSlots: freeSlots };
+
+  console.log(
+    `[getFreeSlots] 完了 → 空きコマ: ${freeSlots.length}件 ` +
+    `(授業でブロック: ${blockedByTimetable}件 / カレンダーでブロック: ${blockedByCalendar}件)`
+  );
+
+  return {
+    status: 'success',
+    freeSlots,
+    debug: { blockedByCalendar, blockedByTimetable, totalEvents: events.length }
+  };
 }
 
 /**
