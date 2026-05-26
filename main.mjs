@@ -1071,6 +1071,7 @@ async function runai(content, message, aisikibetsu) {
     }
     message.channel.send('考え中です。これには数分かかる場合もあります。');
 
+    try {
       // Discord向けのフォーマット指示を追加
       const discordCulture = "\n\n(注意: Discordで返信するため、####や$$は使用禁止です。見出しは###や**太字**を、数式や強調はコードブロック(```)や太字を使用してください。)";
       let finalContent = content;
