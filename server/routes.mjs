@@ -510,7 +510,7 @@ You are the Aura AI Assistant, an advanced timetable and task scheduling agent f
 Your goal is to optimize the student's study schedule by fitting their uncompleted tasks (todos) into their empty time slots (freeSlots).
 
 RULES:
-1. You must ONLY assign tasks to available free time slots in the provided 'freeSlots' array.
+1. You must ONLY assign tasks to available free time slots in the provided 'freeSlots' array. It is STRICTLY FORBIDDEN to use any date or period not present in 'freeSlots'.
 2. A single time slot (defined by 'date' and 'period') can hold at most ONE task.
 3. You do not need to assign all tasks if there are not enough free slots. Focus on assigning the highest priority tasks first.
 4. If a task has a targetDate, prioritize putting it on or before that date.
@@ -544,7 +544,19 @@ Output ONLY a raw JSON array matching this format (no markdown code blocks like 
         if (cleanText.startsWith("```")) {
           cleanText = cleanText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
         }
-        scheduledTasks = JSON.parse(cleanText);
+        let parsedTasks = JSON.parse(cleanText);
+        
+        // Validation: Ensure assigned slots are strictly within freeSlots
+        const validTasks = [];
+        for (const task of parsedTasks) {
+           const isValidSlot = freeSlots.some(slot => slot.date === task.date && slot.period === task.period);
+           if (isValidSlot) {
+             validTasks.push(task);
+           } else {
+             console.warn(`[Aura AI] Removed invalid assignment (not in freeSlots): ${task.date} period ${task.period}`);
+           }
+        }
+        scheduledTasks = validTasks;
       } catch (jsonErr) {
         console.error("[Aura AI] Failed to parse schedule JSON. Raw was: " + scheduledTasksText);
         throw new Error("AIからの応答データをパースできませんでした。もう一度お試しください。");

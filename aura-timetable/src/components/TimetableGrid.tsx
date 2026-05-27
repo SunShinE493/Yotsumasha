@@ -14,6 +14,7 @@ export default function TimetableGrid() {
   const { state, getCourse, importState, setAiPlan } = useTimetable();
   const { data: session } = useSession();
   const [isConfirmingProposed, setIsConfirmingProposed] = useState(false);
+  const [proposedTaskMenu, setProposedTaskMenu] = useState<{ task: any, rect: DOMRect } | null>(null);
 
   const handleConfirmProposedTask = async (task: any) => {
     if (!state.gasSyncUrl) {
@@ -31,7 +32,7 @@ export default function TimetableGrid() {
 
       const res = await fetch('/api/aura/ai/schedule/confirm', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'csrf-token': csrfToken
         },
@@ -91,7 +92,7 @@ export default function TimetableGrid() {
     }
   };
   const [viewMode, setViewMode] = useState<'today' | 'weekly'>('today');
-  const [activeDayOffset, setActiveDayOffset] = useState(0); 
+  const [activeDayOffset, setActiveDayOffset] = useState(0);
   const [editTarget, setEditTarget] = useState<{ day: number; period: number; course?: Course; dateStr?: string } | null>(null);
   const [detailTarget, setDetailTarget] = useState<{ course: Course, lessonCount: number, dayIndex: number } | null>(null);
   const [now, setNow] = useState(new Date());
@@ -107,7 +108,7 @@ export default function TimetableGrid() {
   const todayIndex = useMemo(() => {
     const now = new Date();
     if (now.getHours() >= state.transitionHour) {
-       return (todayIndexRaw + 1) % 7;
+      return (todayIndexRaw + 1) % 7;
     }
     return todayIndexRaw;
   }, [todayIndexRaw, state.transitionHour]);
@@ -119,11 +120,11 @@ export default function TimetableGrid() {
   const currentDayIndex = useMemo(() => {
     let idx = (todayIndex + activeDayOffset) % 7;
     if (idx < 0) idx += 7;
-    
+
     // Check for Day Overrides
     const dateStr = formatDateYMD(getDateForDay(idx, todayIndexRaw));
     if (state.dayOverrides[dateStr] !== undefined) {
-       return state.dayOverrides[dateStr];
+      return state.dayOverrides[dateStr];
     }
     return idx;
   }, [todayIndex, activeDayOffset, state.dayOverrides, todayIndexRaw]);
@@ -133,7 +134,7 @@ export default function TimetableGrid() {
     const dateStr = formatDateYMD(date);
     const finalDay = effectiveDay ?? dayIdx;
     const course = getCourse(finalDay, periodIdx, dateStr);
-    
+
     if (state.appMode === 'edit') {
       setEditTarget({ day: finalDay, period: periodIdx, course, dateStr });
     } else if (course) {
@@ -177,19 +178,19 @@ export default function TimetableGrid() {
 
         {isToday && (
           <div className="day-nav-controls">
-             <button className="btn btn-icon btn-ghost" onClick={() => swipe(-1)}>
-               <ChevronLeft size={20} />
-             </button>
-             <button className="btn btn-ghost" style={{fontSize: '0.8rem', padding: '4px 8px'}} onClick={() => setActiveDayOffset(0)}>今日</button>
-             <button className="btn btn-icon btn-ghost" onClick={() => swipe(1)}>
-               <ChevronRight size={20} />
-             </button>
+            <button className="btn btn-icon btn-ghost" onClick={() => swipe(-1)}>
+              <ChevronLeft size={20} />
+            </button>
+            <button className="btn btn-ghost" style={{ fontSize: '0.8rem', padding: '4px 8px' }} onClick={() => setActiveDayOffset(0)}>今日</button>
+            <button className="btn btn-icon btn-ghost" onClick={() => swipe(1)}>
+              <ChevronRight size={20} />
+            </button>
           </div>
         )}
       </div>
 
       <div className="timetable-container" style={{ position: 'relative', overflow: 'hidden' }}>
-        <motion.div 
+        <motion.div
           className={`timetable__grid ${isToday ? 'timetable__grid--today' : 'timetable__grid--weekly'}`}
           style={!isToday ? { '--day-count': dayCount } as React.CSSProperties : undefined}
           drag={isToday ? "x" : false}
@@ -207,19 +208,19 @@ export default function TimetableGrid() {
 
           {/* Day headers */}
           {visibleDays.map(day => {
-             const isHighlight = day === todayIndex;
-             const displayDate = getDateForDay(isToday ? (todayIndex + activeDayOffset) : day, todayIndexRaw);
-             const actualDayIndex = (displayDate.getDay() + 6) % 7;
-             const displayDateStr = formatDateYMD(displayDate);
-             const holidayName = state.holidays[displayDateStr];
-              
-             return (
-               <div key={`header-${day}`} className={`timetable__header ${isHighlight ? 'timetable__header--today-highlight' : ''} ${holidayName ? 'timetable__header--holiday' : ''}`}>
-                 <span>{state.dayLabels[actualDayIndex]}</span>
-                 <span className={`day-date ${holidayName ? 'day-date--holiday' : ''}`}>{formatDate(displayDate)}</span>
-                 {holidayName && <span className="holiday-label" title={holidayName}>{holidayName}</span>}
-               </div>
-             );
+            const isHighlight = day === todayIndex;
+            const displayDate = getDateForDay(isToday ? (todayIndex + activeDayOffset) : day, todayIndexRaw);
+            const actualDayIndex = (displayDate.getDay() + 6) % 7;
+            const displayDateStr = formatDateYMD(displayDate);
+            const holidayName = state.holidays[displayDateStr];
+
+            return (
+              <div key={`header-${day}`} className={`timetable__header ${isHighlight ? 'timetable__header--today-highlight' : ''} ${holidayName ? 'timetable__header--holiday' : ''}`}>
+                <span>{state.dayLabels[actualDayIndex]}</span>
+                <span className={`day-date ${holidayName ? 'day-date--holiday' : ''}`}>{formatDate(displayDate)}</span>
+                {holidayName && <span className="holiday-label" title={holidayName}>{holidayName}</span>}
+              </div>
+            );
           })}
 
           {/* Period rows */}
@@ -252,11 +253,11 @@ export default function TimetableGrid() {
                       course ? (
                         <div
                           className={`course-card ${effectiveEntry?.slotOffset ? `course-card--${effectiveEntry.slotOffset}` : ''}`}
-                          style={{ 
-                            '--course-color': course.color, 
-                            background: course.color, 
+                          style={{
+                            '--course-color': course.color,
+                            background: course.color,
                             color: getContrastYIQ(course.color),
-                            opacity: isOutsideSemester ? 0.4 : 1 
+                            opacity: isOutsideSemester ? 0.4 : 1
                           } as React.CSSProperties}
                         >
                           {isOutsideSemester && <div className="outside-label">期間外</div>}
@@ -302,6 +303,10 @@ export default function TimetableGrid() {
                       ) : (() => {
                         const proposedTask = state.aiPlan?.scheduledTasks?.find(t => t.date === dateStr && t.period === pi);
                         if (proposedTask && state.appMode === 'view') {
+                          const linkedTodo = state.todos.find(t => t.id === proposedTask.todoId);
+                          const linkedCourse = linkedTodo && linkedTodo.courseId ? state.courses.find(c => c.id === linkedTodo.courseId) : null;
+                          const displayText = linkedCourse ? `[${linkedCourse.name}] ${proposedTask.text}` : proposedTask.text;
+
                           return (
                             <div
                               className="course-card course-card--proposed animate-pulse"
@@ -323,15 +328,16 @@ export default function TimetableGrid() {
                               }}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleConfirmProposedTask(proposedTask);
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setProposedTaskMenu({ task: proposedTask, rect });
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Sparkles size={11} style={{ color: '#c084fc' }} />
                                 <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI提案</span>
                               </div>
-                              <span style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.2' }}>{proposedTask.text}</span>
-                              <span style={{ fontSize: '0.55rem', opacity: 0.7, marginTop: '2px', color: '#c084fc' }}>タップで確定</span>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.2' }}>{displayText}</span>
+                              <span style={{ fontSize: '0.55rem', opacity: 0.7, marginTop: '2px', color: '#c084fc' }}>タップで選択</span>
                             </div>
                           );
                         }
@@ -359,12 +365,74 @@ export default function TimetableGrid() {
       )}
 
       {detailTarget && (
-        <CourseDetail 
+        <CourseDetail
           course={detailTarget.course}
           currentLessonCount={detailTarget.lessonCount}
           dayIndex={detailTarget.dayIndex}
           onClose={() => setDetailTarget(null)}
         />
+      )}
+
+      {proposedTaskMenu && (
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 999 }}
+            onClick={() => setProposedTaskMenu(null)}
+          />
+          <div
+            className="glass"
+            style={{
+              position: 'fixed',
+              top: Math.min(proposedTaskMenu.rect.bottom + 8, window.innerHeight - 150),
+              left: Math.max(8, Math.min(proposedTaskMenu.rect.left, window.innerWidth - 200)),
+              zIndex: 1000,
+              padding: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              width: '200px',
+              borderRadius: '12px',
+              boxShadow: 'var(--shadow-lg)'
+            }}
+          >
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+              この提案をどうしますか？
+            </div>
+            <button
+              className="btn btn-sm"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #ec4899)', color: 'white', border: 'none', justifyContent: 'center' }}
+              onClick={() => {
+                handleConfirmProposedTask(proposedTaskMenu.task);
+                setProposedTaskMenu(null);
+              }}
+            >
+              カレンダーに確定する
+            </button>
+            <button
+              className="btn btn-sm btn-ghost"
+              style={{ justifyContent: 'center' }}
+              onClick={() => {
+                const newTasks = state.aiPlan?.scheduledTasks.filter(t => t !== proposedTaskMenu.task) || [];
+                setAiPlan({ ...state.aiPlan!, scheduledTasks: newTasks });
+                alert("この提案を取り消しました。空き時間ができたため、AIアシスタントから再度スケジュール生成を依頼すると別の候補が提案されます。");
+                setProposedTaskMenu(null);
+              }}
+            >
+              別の日時にずらす
+            </button>
+            <button
+              className="btn btn-sm btn-ghost"
+              style={{ color: 'var(--accent-red)', justifyContent: 'center' }}
+              onClick={() => {
+                const newTasks = state.aiPlan?.scheduledTasks.filter(t => t !== proposedTaskMenu.task) || [];
+                setAiPlan({ ...state.aiPlan!, scheduledTasks: newTasks });
+                setProposedTaskMenu(null);
+              }}
+            >
+              キャンセル
+            </button>
+          </div>
+        </>
       )}
 
       <style jsx>{`
@@ -479,7 +547,7 @@ export default function TimetableGrid() {
 
 function getDateForDay(dayIndex: number, todayIndexRaw: number): Date {
   const today = new Date();
-  const currentMon = todayIndexRaw; 
+  const currentMon = todayIndexRaw;
   const diff = dayIndex - currentMon;
   const d = new Date(today);
   d.setDate(today.getDate() + diff);

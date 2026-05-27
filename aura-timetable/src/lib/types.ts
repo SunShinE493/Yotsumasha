@@ -22,6 +22,7 @@ export interface Course {
 export interface TimetableEntry {
   courseId: string;
   slotOffset?: 'none' | 'second-half' | 'first-half';
+  hasConflict?: boolean;
 }
 
 // day (0-6 for Mon-Sun), period (0-based index)

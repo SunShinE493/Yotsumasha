@@ -161,7 +161,7 @@ export default function TodoList() {
             {state.aiPlan.message}
           </p>
           {state.aiPlan.scheduledTasks && state.aiPlan.scheduledTasks.length > 0 ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginTop: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>
                 {state.aiPlan.scheduledTasks.length}件の学習枠を提案中
               </span>

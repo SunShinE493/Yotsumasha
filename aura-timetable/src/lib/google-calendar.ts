@@ -56,7 +56,19 @@ export function mapEventsToTimetable(
         }
 
         const key = cellKey(dayIndex, periodIdx);
-        newTimetable[key] = { courseId: course.id };
+        if (newTimetable[key]) {
+          // すでに予定が存在する場合
+          const existingCourse = newCourses.find(c => c.id === newTimetable[key].courseId);
+          if (existingCourse && (existingCourse.name.startsWith('[Task]') || event.summary.startsWith('[Task]'))) {
+             newTimetable[key] = { ...newTimetable[key], hasConflict: true };
+          }
+          // [Task]ではない方を優先して上書きする（または既存のままにする）
+          if (event.summary.startsWith('[Task]')) {
+             // 新しいのがタスクなら上書きしない
+             return;
+          }
+        }
+        newTimetable[key] = { ...newTimetable[key], courseId: course.id };
       }
     });
   });

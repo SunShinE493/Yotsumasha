@@ -79,6 +79,8 @@ export default function Home() {
     } as React.CSSProperties;
   }
 
+  const hasConflict = Object.values(state.timetable).some(entry => entry.hasConflict);
+
   return (
     <div className={`app-container app-mode--${state.appMode}`} style={customStyles}>
       {/* Header */}
@@ -117,6 +119,20 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {hasConflict && (
+        <div style={{ padding: '8px 16px', background: 'var(--accent-red)', color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', zIndex: 90, position: 'relative' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>⚠️ カレンダーの予定と課題が重複しています</span>
+          <button 
+            className="btn btn-xs" 
+            style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '4px', fontSize: '0.7rem' }}
+            onClick={handleGenerateAiSchedule}
+            disabled={isGeneratingSchedule}
+          >
+            {isGeneratingSchedule ? '再編成中...' : 'AIで再編成'}
+          </button>
+        </div>
+      )}
 
       {/* Sidebar Drawer */}
       <div className={`app-drawer-overlay ${showMenu ? 'open' : ''}`} onClick={() => setShowMenu(false)}>
