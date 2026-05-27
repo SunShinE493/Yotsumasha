@@ -12,9 +12,9 @@ export default async(interaction) => {
 	} catch (error) {
 		console.error(error);
 		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'コマンド実行中にエラーが発生しました。', ephemeral: true });
+			await interaction.followUp({ content: 'コマンド実行中にエラーが発生しました。', flags: 64 });
 		} else {
-			await interaction.reply({ content: 'コマンド実行中にエラーが発生しました。', ephemeral: true });
+			await interaction.reply({ content: 'コマンド実行中にエラーが発生しました。', flags: 64 });
 		}
 	}
 };

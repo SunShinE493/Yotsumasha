@@ -14,7 +14,7 @@ export async function execute(interaction) {
     const apiKey = process.env.GOOGLE_API_KEY;
 
     if (!apiKey) {
-        return interaction.reply({ content: 'APIキー (GOOGLE_API_KEY) が設定されていません。', ephemeral: true });
+        return interaction.reply({ content: 'APIキー (GOOGLE_API_KEY) が設定されていません。', flags: 64 });
     }
 
     // 応答に時間がかかる可能性があるため、保留状態にする
@@ -22,7 +22,7 @@ export async function execute(interaction) {
 
     try {
         // main.mjs の形式に合わせる
-        const ai = new GoogleGenAI(apiKey, {});
+        const ai = new GoogleGenAI({ apiKey: apiKey });
         
         // Gemini 3.1 Pro Previewを使用
         const response = await ai.models.generateContent({
@@ -57,7 +57,7 @@ export async function execute(interaction) {
         if (interaction.deferred) {
             await interaction.editReply(errorMessage);
         } else {
-            await interaction.reply({ content: errorMessage, ephemeral: true });
+            await interaction.reply({ content: errorMessage, flags: 64 });
         }
     }
 }
