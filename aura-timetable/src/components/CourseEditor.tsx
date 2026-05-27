@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useTimetable } from '@/lib/store';
 import { Course, COURSE_COLORS } from '@/lib/types';
+import { Reorder } from 'framer-motion';
+import { GripVertical } from 'lucide-react';
 
 interface CourseEditorProps {
   day: number;
@@ -23,7 +25,9 @@ export default function CourseEditor({ day, period, existingCourse, date, onClos
   const [teacher, setTeacher] = useState(existingCourse?.teacher ?? '');
   const [color, setColor] = useState(existingCourse?.color ?? COURSE_COLORS[0]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
-  const [syllabus, setSyllabus] = useState<string[]>(existingCourse?.syllabus ?? Array(15).fill(''));
+  const [syllabusItems, setSyllabusItems] = useState<{id: string, text: string}[]>(
+    (existingCourse?.syllabus ?? Array(15).fill('')).map((text, i) => ({ id: `syl-${Date.now()}-${i}`, text }))
+  );
   const [showSyllabus, setShowSyllabus] = useState(false);
   
   // Slot offset for current cell
@@ -56,7 +60,7 @@ export default function CourseEditor({ day, period, existingCourse, date, onClos
       room: room.trim(), 
       teacher: teacher.trim(), 
       color,
-      syllabus: syllabus.some(s => s.trim()) ? syllabus : undefined,
+      syllabus: syllabusItems.map(item => item.text).some(s => s.trim()) ? syllabusItems.map(item => item.text) : undefined,
       className: className.trim(),
       objectives: objectives.trim(),
       content: content.trim(),
@@ -81,9 +85,9 @@ export default function CourseEditor({ day, period, existingCourse, date, onClos
   };
 
   const updateSyllabusItem = (idx: number, val: string) => {
-    const newSyllabus = [...syllabus];
-    newSyllabus[idx] = val;
-    setSyllabus(newSyllabus);
+    const newItems = [...syllabusItems];
+    newItems[idx].text = val;
+    setSyllabusItems(newItems);
   };
 
   const handleDelete = () => {
@@ -251,23 +255,34 @@ export default function CourseEditor({ day, period, existingCourse, date, onClos
                 </button>
                 
                 {showSyllabus && (
-                  <div className="syllabus-grid" style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {syllabus.map((text, i) => (
-                      <div key={i} className="form-group" style={{ marginBottom: 0 }}>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: '40px' }}>第{i+1}回</span>
-                          <input 
-                            type="text" 
-                            className="input" 
-                            style={{ fontSize: '0.8rem', padding: '4px 8px' }}
-                            value={text} 
-                            onChange={(e) => updateSyllabusItem(i, e.target.value)}
-                            placeholder="例: 行列の演算"
-                          />
+                  <Reorder.Group 
+                    axis="y" 
+                    values={syllabusItems} 
+                    onReorder={setSyllabusItems} 
+                    className="syllabus-grid" 
+                    style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px', listStyle: 'none', padding: 0 }}
+                  >
+                    {syllabusItems.map((item, i) => (
+                      <Reorder.Item 
+                        key={item.id} 
+                        value={item} 
+                        style={{ display: 'flex', gap: '8px', alignItems: 'center', background: 'rgba(0,0,0,0.05)', padding: '6px', borderRadius: '8px' }}
+                      >
+                        <div style={{ cursor: 'grab', display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}>
+                          <GripVertical size={16} />
                         </div>
-                      </div>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', width: '40px' }}>第{i+1}回</span>
+                        <input 
+                          type="text" 
+                          className="input" 
+                          style={{ fontSize: '0.8rem', padding: '4px 8px', flex: 1 }}
+                          value={item.text} 
+                          onChange={(e) => updateSyllabusItem(i, e.target.value)}
+                          placeholder="例: 行列の演算"
+                        />
+                      </Reorder.Item>
                     ))}
-                  </div>
+                  </Reorder.Group>
                 )}
               </div>
 

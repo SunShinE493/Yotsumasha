@@ -96,12 +96,27 @@ export default function TimetableGrid() {
   const [editTarget, setEditTarget] = useState<{ day: number; period: number; course?: Course; dateStr?: string } | null>(null);
   const [detailTarget, setDetailTarget] = useState<{ course: Course, lessonCount: number, dayIndex: number } | null>(null);
   const [now, setNow] = useState(new Date());
+  const [todayEvents, setTodayEvents] = useState<any[]>([]);
 
   // Update 'now' every minute
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (viewMode === 'today' && session) {
+      const calId = state.selectedCalendarId || 'primary';
+      fetch(`/api/calendar?calendarId=${encodeURIComponent(calId)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setTodayEvents(data);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [viewMode, session, state.selectedCalendarId]);
 
   // Transition to Tomorrow logic
   const todayIndexRaw = useMemo(() => getTodayIndex(), []);
@@ -341,6 +356,51 @@ export default function TimetableGrid() {
                             </div>
                           );
                         }
+
+                        const matchedEvents = todayEvents.filter(ev => {
+                          const evStartStr = ev.start?.dateTime || ev.start?.date;
+                          if (!evStartStr) return false;
+                          const evDate = new Date(evStartStr);
+                          if (formatDateYMD(evDate) !== dateStr) return false;
+                          
+                          const evMins = evDate.getHours() * 60 + evDate.getMinutes();
+                          const [ph, pm] = p.start.split(':').map(Number);
+                          const pMins = ph * 60 + pm;
+                          return Math.abs(evMins - pMins) <= 45;
+                        });
+
+                        if (matchedEvents.length > 0 && state.appMode === 'view') {
+                          return (
+                            <div
+                              className="course-card"
+                              style={{
+                                border: '1.5px solid rgba(255, 255, 255, 0.15)',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                color: 'var(--text-primary)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px',
+                                padding: '8px',
+                                borderRadius: '12px',
+                                height: '100%',
+                              }}
+                            >
+                              {matchedEvents.map((ev, idx) => {
+                                const st = new Date(ev.start?.dateTime || ev.start?.date);
+                                const en = new Date(ev.end?.dateTime || ev.end?.date);
+                                const timeStr = ev.start?.dateTime ? `${st.getHours()}:${String(st.getMinutes()).padStart(2, '0')} - ${en.getHours()}:${String(en.getMinutes()).padStart(2, '0')}` : '終日';
+                                return (
+                                  <div key={idx} style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
+                                    <div style={{ fontSize: '0.6rem', color: 'var(--accent-blue)', fontWeight: 'bold' }}>{timeStr}</div>
+                                    <div style={{ fontWeight: 600, marginTop: '2px' }}>📅 {ev.summary}</div>
+                                    {ev.location && <div style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '2px' }}>📍 {ev.location}</div>}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        }
+
                         return state.appMode === 'edit' ? (
                           <div className="timetable__add-btn">+</div>
                         ) : null;
