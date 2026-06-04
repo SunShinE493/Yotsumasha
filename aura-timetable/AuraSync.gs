@@ -159,9 +159,54 @@ function doPost(e) {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // --- Google Tasks (Todo連携) ---
+    // --- Google Tasks (Todo連携) & カレンダーへのテスト課題自動同期 ---
     if (data.todos && data.todos.length > 0) {
-      console.log("=== Todo (Google Tasks) 同期開始 ===");
+      console.log("=== Todo (Google Tasks) & テスト課題同期開始 ===");
+      
+      try {
+        console.log("「テスト」課題をカレンダーに同期中...");
+        let testEventsCreated = 0;
+        const testTodos = data.todos.filter(t => t.text && t.text.includes("テスト") && !t.completed);
+        
+        testTodos.forEach(todo => {
+          let targetDateStr = todo.targetDate;
+          if (!targetDateStr && todo.originalDay !== undefined) {
+             const today = new Date();
+             const todayDay = today.getDay() === 0 ? 6 : today.getDay() - 1;
+             let diff = todo.originalDay - todayDay;
+             if (diff < 0) diff += 7;
+             const targetDate = new Date(today);
+             targetDate.setDate(today.getDate() + diff);
+             targetDateStr = Utilities.formatDate(targetDate, "JST", "yyyy-MM-dd");
+          }
+          
+          if (targetDateStr) {
+            const [y, m, d] = targetDateStr.split('-').map(Number);
+            const eventDate = new Date(y, m - 1, d);
+            
+            const existing = calendar.getEventsForDay(eventDate, { search: todo.id });
+            if (existing.length === 0) {
+               let courseName = "";
+               if (todo.courseId) {
+                 const course = data.courses.find(c => c.id === todo.courseId);
+                 if (course) courseName = `[${course.name}] `;
+               }
+               const ev = calendar.createAllDayEvent(`📝テスト: ${courseName}${todo.text}`, eventDate, {
+                 description: `${APP_TAG}\nTodo ID: ${todo.id}`
+               });
+               ev.setColor(CalendarApp.EventColor.RED);
+               testEventsCreated++;
+               Utilities.sleep(100);
+            }
+          }
+        });
+        if (testEventsCreated > 0) {
+           response.message += ` (${testEventsCreated}件のテスト課題をカレンダーに登録しました)`;
+        }
+      } catch (e) {
+        console.warn("テスト課題のカレンダー同期に失敗しました", e);
+      }
+
       try {
         const taskLists = Tasks.Tasklists.list().items;
         let targetList = null;
@@ -425,6 +470,12 @@ function getFreeSlots(data) {
 
       const slotEnd = new Date(currentDate);
       slotEnd.setHours(eH, eM, 0, 0);
+
+      // 過去の時間は「空きコマ」として提案しない
+      const now = new Date();
+      if (slotStart < now) {
+        continue;
+      }
 
       // 重複判定: evStart < slotEnd && evEnd > slotStart
       // → イベントが少しでもコマの時間帯に重なれば「ブロック」

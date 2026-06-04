@@ -340,6 +340,7 @@ export default function TimetableGrid() {
                                 borderRadius: '12px',
                                 boxShadow: '0 4px 12px rgba(124, 58, 237, 0.05)',
                                 transition: 'all 0.2s',
+                                position: 'relative'
                               }}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -347,9 +348,9 @@ export default function TimetableGrid() {
                                 setProposedTaskMenu({ task: proposedTask, rect });
                               }}
                             >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <Sparkles size={11} style={{ color: '#c084fc' }} />
-                                <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI提案</span>
+                              <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(124, 58, 237, 0.15)', padding: '2px 4px', borderRadius: '4px' }}>
+                                <Sparkles size={10} style={{ color: '#c084fc' }} />
+                                <span style={{ fontSize: '0.45rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI提案</span>
                               </div>
                               <span style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.2' }}>{displayText}</span>
                               <span style={{ fontSize: '0.55rem', opacity: 0.7, marginTop: '2px', color: '#c084fc' }}>タップで選択</span>

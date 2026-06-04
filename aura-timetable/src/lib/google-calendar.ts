@@ -33,15 +33,17 @@ export function mapEventsToTimetable(
 
     // Find overlapping periods
     const eventStartTime = startDate.getHours() * 60 + startDate.getMinutes();
+    const eventEndTimeStr = event.end.dateTime || event.end.date;
+    const endDate = eventEndTimeStr ? new Date(eventEndTimeStr) : startDate;
+    const eventEndTime = event.end.dateTime ? endDate.getHours() * 60 + endDate.getMinutes() : eventStartTime + 60;
     
     // Attempt to find the best-fitting period
     newState.periods.forEach((period, periodIdx) => {
       const pStart = parseTime(period.start);
       const pEnd = parseTime(period.end);
 
-      // Simple overlap check: if event starts within period or period starts within event
-      // For a timetable, we usually just see if the event's start time is close to the period start.
-      if (Math.abs(eventStartTime - pStart) < 30) {
+      // Improved overlap check: event and period intersect in time
+      if (eventStartTime < pEnd && eventEndTime > pStart) {
         // Look for existing course by name or create new
         let course = newCourses.find(c => c.name === event.summary);
         if (!course) {

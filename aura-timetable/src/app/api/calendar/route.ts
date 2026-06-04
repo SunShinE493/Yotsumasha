@@ -21,8 +21,21 @@ export async function GET(req: NextRequest) {
   try {
     const response = await calendar.events.list({
       calendarId: calendarId,
-      timeMin: new Date().toISOString(),
-      maxResults: 50,
+      timeMin: (() => {
+        const now = new Date();
+        const jstDate = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+        jstDate.setDate(jstDate.getDate() - 7);
+        jstDate.setHours(0, 0, 0, 0);
+        return new Date(jstDate.getTime() - 9 * 60 * 60 * 1000).toISOString();
+      })(),
+      timeMax: (() => {
+        const now = new Date();
+        const jstDate = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+        jstDate.setDate(jstDate.getDate() + 30);
+        jstDate.setHours(23, 59, 59, 999);
+        return new Date(jstDate.getTime() - 9 * 60 * 60 * 1000).toISOString();
+      })(),
+      maxResults: 250,
       singleEvents: true,
       orderBy: 'startTime',
     });
