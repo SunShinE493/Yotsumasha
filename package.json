@@ -115,5 +115,8 @@
   "keywords": [
     "node",
     "glitch"
+  ],
+  "workspaces": [
+    "aura-timetable"
   ]
 }
