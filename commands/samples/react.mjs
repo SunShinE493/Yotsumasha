@@ -1,5 +1,6 @@
 
 import { SlashCommandBuilder } from 'discord.js';
+import { GoogleGenAI } from '@google/genai';
 
 let emoji = ['<:Flapper:1288693937770467409>','<:Flapper:1288693937770467409>','<:Keshitetekusa:1315640091787395113>','<a:GoodGay:1339928519731445852>','<a:Gorouri:1339929066249392221>','<a:Caeru:1339929082615435347>','<a:Shrek:1339929094145703946>','<:Tamazarashi:1340318651227832370>','<a:TNT:1344272756241334385>','<:Kire_gay:1345682703818690650>','<:Kitsu:1346466382283280485>',' <a:NoMB:1346470590697050194>','<:Shine:1348294242862235680>','<:Fashionmodel:1348294448777396355>','<:WhoIsHe:1348294771982078015>','<:Reasoning:1348294788574875699>','<:herpointofview:1348294797600751727>','<a:Furicaeru:1348901406215634995>','<:Foreverlove:1349555062246215680>','<:Aiseki:1349555074774339584>','<:CoolRider:1349555084417171456>','<:GayActor:1349555116797198388>','<:philosophical:1349555227732475994>','<:Genkoku:1349583835733426226>','<:Hikoku:1349583835733426226>','<:1000006731:1349586583807852655>','<:1000006733:1349586874515324989>','<:Imara:1349592318897815622>','<:Comfortable:1349592333175488532>','<:MasterofBilliards:1349592653288701994>','<:FeelAsleep:1349592778639802551>','<:FrontofFace:1349592789578547302>','<:Imara2:1349592796935491584>','<:Obake:1349592808964755467>','<:BeautifulSummer:1349592817722327122>','','']
 
@@ -134,6 +135,10 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option =>
         option.setName('word')
               .setDescription('リアクションする文字列')
+              .setRequired(false))
+    .addBooleanOption(option =>
+        option.setName('ai_auto')
+              .setDescription('AIが自動で最適な絵文字3個を選出してリアクションする')
               .setRequired(false));
 
 
@@ -191,6 +196,7 @@ export async function execute(interaction) {
     const reactContent2 = interaction.options.getString('react_content2');
     const reactContent3 = interaction.options.getString('react_content3');
     const reactContent4 = interaction.options.getString('react_content4');
+    const aiAuto = interaction.options.getBoolean('ai_auto');
     if(reactContent2){
          reactContent = reactContent2
     }else if(reactContent3){
@@ -207,6 +213,49 @@ export async function execute(interaction) {
                 content: '指定されたメッセージが見つかりません。',
                 ephemeral: true,
             });
+            return;
+        }
+
+        // ai_autoオプションが指定されている場合の処理
+        if (aiAuto) {
+            await interaction.deferReply({ ephemeral: true });
+            try {
+                const apiKey = process.env.GOOGLE_API_KEY;
+                if (!apiKey) {
+                    await interaction.editReply('APIキーが設定されていないためAIモードは利用できません。');
+                    return;
+                }
+                const ai = new GoogleGenAI({ apiKey: apiKey });
+                const prompt = `以下のメッセージに対する最適なリアクション絵文字（標準のUnicode絵文字）を厳選して3つ選んでください。他のテキストは一切含めず、絵文字のみをスペース区切りで出力してください。\n\nメッセージ: ${targetMessage.content}`;
+                
+                const response = await ai.models.generateContent({
+                    model: 'gemini-3.1-pro-preview',
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                });
+                
+                const text = response.text?.trim() || '';
+                // 絵文字とみなせるものを抽出 (スペース等で分割)
+                const emojis = text.split(/[\s,、。]+/).filter(e => e.trim().length > 0).slice(0, 3);
+                
+                let reacted = false;
+                for (const emj of emojis) {
+                    try {
+                        await targetMessage.react(emj);
+                        reacted = true;
+                    } catch(e) {
+                        console.error('AI絵文字リアクションエラー:', emj, e);
+                    }
+                }
+                
+                if (reacted) {
+                    await interaction.editReply('AIが自動リアクションしました！');
+                } else {
+                    await interaction.editReply('AIが適切な絵文字を見つけられませんでした。');
+                }
+            } catch (err) {
+                console.error('AI自動リアクションエラー:', err);
+                await interaction.editReply('AI自動リアクションに失敗しました。');
+            }
             return;
         }
 
