@@ -19,23 +19,7 @@ const parser = new Parser();
 
 import { Client as Youtubei, MusicClient } from "youtubei";
 import axios from 'axios';
-
-// Kuroshiro for Romaji/Ruby generation
-import Kuroshiro from "kuroshiro";
-import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
-
-const kuroshiro = new Kuroshiro();
-let kuroshiroInitialized = false;
-
-async function initKuroshiro() {
-  if (!kuroshiroInitialized) {
-    await kuroshiro.init(new KuromojiAnalyzer());
-    kuroshiroInitialized = true;
-    console.log("[Kuroshiro] Initialized for Japanese reading conversion.");
-  }
-}
-// Init in background
-initKuroshiro().catch(console.error);
+//aaaa
 
 // Import routes. 
 import { registerRoutes, performRestoreFromGist } from './server/routes.mjs';
@@ -951,13 +935,6 @@ client.on('messageCreate', async message => {
   if (/ふ？/.test(message.content)) {
     await message.react('😥');
   }
-  if (/うお|うぉ|どわー|教養|落ち着け|必死|冗談ですやん/.test(message.content)) {
-    await message.react('😅');
-  }
-  if (/どぱ|ドパ|どーぱみん|ドーパミン|dopa/i.test(message.content)) {
-    await message.react('<:DOPA:1524262303480938526>');
-    await message.react('<:DOPA_discord:1524263608182243368>');
-  }
   if (/なにこ|ごろり|発射|本当かな/.test(message.content)) {
     await message.react('<a:Gorouri:1339929066249392221>');
   }
@@ -1040,10 +1017,10 @@ async function runai(content, message, aisikibetsu) {
 
     try {
       const discordCulture = "\n\n(注意: Discordで返信するため、####や$$は使用禁止です。見出しは###や**太字**を、数式や強調はコードブロック(```)や太字を使用してください。)";
-      
+
       let textContent = talk;
       if (Array.isArray(content) && content[0].text) {
-          textContent = content[0].text;
+        textContent = content[0].text;
       }
       textContent += discordCulture;
 
@@ -1109,20 +1086,6 @@ async function runai(content, message, aisikibetsu) {
     } catch (e) {
       console.error(e);
     }
-  }
-}
-
-// --- 追加機能用関数 ---
-
-// 日本語テキストをローマ字（またはひらがな/カタカナ）に変換する関数
-// { to: "romaji" } を "hiragana" や "katakana" に変更することも可能です
-async function getJapaneseReading(text) {
-  try {
-    if (!kuroshiroInitialized) await initKuroshiro();
-    return await kuroshiro.convert(text, { to: "romaji" }); // ローマ字出力
-  } catch (err) {
-    console.error("Kuroshiro conversion error:", err);
-    return text;
   }
 }
 
