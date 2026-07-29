@@ -923,6 +923,13 @@ client.on('messageCreate', async message => {
   if (/？？？|ふちる|？る/.test(message.content)) {
     await message.channel.send('そんなコマンドないで');
   }
+if (/どわー|うお|うぉ|冗談ですやん|落ち着け|おちつけ|必死|😅/.test(message.content)) {
+    await message.react('😅');
+  }
+  if (/ドパ|どぱ|ドーパミン|どーぱみん|<:DOPA_discord:1524263608182243368>|<:DOPA:1524262303480938526>/.test(message.content)) {
+    await message.react('<:DOPA_discord:1524263608182243368>');
+    await message.react('<:DOPA:1524262303480938526>');
+  }
   if (/？る？/.test(message.content)) {
     await message.channel.send('る？は田美子やで');
   }
