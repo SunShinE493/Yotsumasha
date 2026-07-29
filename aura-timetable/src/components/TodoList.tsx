@@ -54,7 +54,7 @@ export default function TodoList() {
       // Reload calendar events immediately so they appear as actual events in the grid
       try {
         const calId = state.selectedCalendarId || 'primary';
-        const calRes = await fetch(`/api/calendar?calendarId=${encodeURIComponent(calId)}`);
+        const calRes = await fetch(`/aura/api/calendar?calendarId=${encodeURIComponent(calId)}`);
         if (calRes.ok) {
           const events = await calRes.json();
           const newState = mapEventsToTimetable(events, state);
@@ -321,7 +321,12 @@ export default function TodoList() {
                   } else if (diffDays === 0) {
                     // Calculate remaining hours for today
                     const deadline = new Date(todo.targetDate);
-                    deadline.setHours(23, 59, 59, 999);
+                    if (todo.targetTime) {
+                      const [th, tm] = todo.targetTime.split(':').map(Number);
+                      deadline.setHours(th, tm, 0, 0);
+                    } else {
+                      deadline.setHours(23, 59, 59, 999);
+                    }
                     const diffMs = deadline.getTime() - now.getTime();
                     const diffHours = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60)));
                     

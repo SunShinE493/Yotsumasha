@@ -35,7 +35,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
   // Fetch calendar list
   useEffect(() => {
     if (status === 'authenticated') {
-      fetch('/api/calendar/list')
+      fetch('/aura/api/calendar/list')
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setCalendars(data);
@@ -80,7 +80,7 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
 
     setIsSyncing(true);
     try {
-      const res = await fetch(`/api/calendar?calendarId=${encodeURIComponent(state.selectedCalendarId || 'primary')}`);
+      const res = await fetch(`/aura/api/calendar?calendarId=${encodeURIComponent(state.selectedCalendarId || 'primary')}`);
       const events = await res.json();
       
       if (events.error) throw new Error(events.error);
@@ -103,23 +103,22 @@ export default function SettingsPanel({ onClose }: { onClose: () => void }) {
 
     setIsSyncing(true);
     try {
-      // GAS Web Apps do not support OPTIONS (preflight).
-      // We use 'text/plain' to make it a "simple request" which avoids preflight
-      // but still allows 'cors' mode to follow redirects and read the response.
-      const response = await fetch(state.gasSyncUrl, {
+      const response = await fetch('/api/aura/gas', {
         method: 'POST',
-        mode: 'cors',
         headers: {
-          'Content-Type': 'text/plain',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          semesterStart: state.semesterSettings.start,
-          semesterEnd: state.semesterSettings.end,
-          timetable: state.timetable,
-          courses: state.courses,
-          periods: state.periods,
-          dayOverrides: state.dayOverrides,
-          cellOverrides: state.cellOverrides
+          gasUrl: state.gasSyncUrl,
+          payload: {
+            semesterStart: state.semesterSettings.start,
+            semesterEnd: state.semesterSettings.end,
+            timetable: state.timetable,
+            courses: state.courses,
+            periods: state.periods,
+            dayOverrides: state.dayOverrides,
+            cellOverrides: state.cellOverrides
+          }
         }),
       });
 

@@ -72,6 +72,8 @@
     "framer-motion": "^12.38.0",
     "google-auth-library": "^10.6.2",
     "googleapis": "^171.4.0",
+    "kuroshiro": "^1.2.0",
+    "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "lucide-react": "^0.544.0",
     "memoizee": "^0.4.17",
     "memorystore": "^1.6.7",

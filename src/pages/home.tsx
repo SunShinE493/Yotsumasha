@@ -57,6 +57,37 @@ export default function Home() {
     enabled: !!userId,
   });
 
+  const { data: activeSession, isLoading: isActiveSessionLoading, refetch: refetchActiveSession } = useQuery<StudySessionType | null>({
+    queryKey: ["/api/study/session/active/current", userId],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest(
+          "GET",
+          `/api/study/session/active/current`,
+          null,
+          userId || undefined,
+        );
+        return response.json();
+      } catch (e) {
+        return null;
+      }
+    },
+    enabled: !!userId && !currentSession && !completedSession,
+  });
+
+  const discardActiveSessionMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/study/session/active/current", null, userId || undefined);
+    },
+    onSuccess: () => {
+      refetchActiveSession();
+      toast({
+        title: "セッションを破棄しました",
+        description: "新しく学習を開始できます",
+      });
+    }
+  });
+
   const startSessionMutation = useMutation({
     mutationFn: async (config: StudyConfig) => {
       if (!userId) {
@@ -109,6 +140,7 @@ export default function Home() {
   const handleGoHome = () => {
     setCurrentSession(null);
     setCompletedSession(null);
+    refetchActiveSession();
   };
 
   const handleStartSession = (session: StudySessionType) => {
@@ -279,6 +311,42 @@ export default function Home() {
           />
         ) : (
           <>
+            {activeSession && (
+              <Card className="border-primary/50 shadow-md bg-primary/5">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="space-y-1 text-center md:text-left">
+                      <h3 className="text-lg font-semibold text-primary">中断された学習セッションがあります</h3>
+                      <p className="text-sm text-muted-foreground">
+                        前回 {new Date(activeSession.createdAt).toLocaleString('ja-JP')} に開始した学習の続きから再開できます。
+                      </p>
+                      <div className="text-xs text-muted-foreground flex gap-3 mt-2 justify-center md:justify-start">
+                        <span>全体: {activeSession.totalWords}問</span>
+                        <span className="text-success">覚えた: {activeSession.correctCount || 0}問</span>
+                        <span className="text-warning">覚えていない: {activeSession.incorrectCount || 0}問</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 w-full md:w-auto">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => discardActiveSessionMutation.mutate()}
+                        className="flex-1 md:flex-none"
+                        disabled={discardActiveSessionMutation.isPending}
+                      >
+                        破棄する
+                      </Button>
+                      <Button 
+                        variant="default" 
+                        onClick={() => handleStartSession(activeSession)}
+                        className="flex-1 md:flex-none bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        <i className="fas fa-play mr-2"></i>再開する
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             <FileUpload onUploadSuccess={handleUploadSuccess} />
             <RangeSelector
               selectedJson={selectedJson}

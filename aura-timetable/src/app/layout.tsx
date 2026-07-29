@@ -8,7 +8,7 @@ import AutoSync from "@/components/AutoSync";
 export const metadata: Metadata = {
   title: "Aura Timetable — 時間割管理",
   description: "美しく軽量な時間割管理PWA。Google Calendar連携とAIスナップショット機能搭載。",
-  manifest: "/manifest.json",
+  manifest: "/aura/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/aura/icon-192.png" />
       </head>
       <body>
         <ServiceWorkerRegistrar />

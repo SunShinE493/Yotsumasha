@@ -426,6 +426,33 @@ export async function registerRoutes(app) {
     }
   });
 
+  // Proxy to Google Apps Script to bypass CORS
+  app.post('/api/aura/gas', optionalAuthentication, async (req, res) => {
+    try {
+      const { gasUrl, payload } = req.body || {};
+      if (!gasUrl) {
+        return res.status(400).json({ message: "GAS URL is required" });
+      }
+
+      const fetchRes = await fetch(gasUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!fetchRes.ok) {
+        const text = await fetchRes.text();
+        return res.status(fetchRes.status).json({ message: `GAS returned status ${fetchRes.status}: ${text}` });
+      }
+
+      const data = await fetchRes.json();
+      res.json(data);
+    } catch (e) {
+      console.error('GAS Proxy Error:', e);
+      res.status(500).json({ message: "Failed to communicate with GAS", error: e.message });
+    }
+  });
+
   // Aura AI Schedule Optimization Route
   app.post('/api/aura/ai/schedule', optionalAuthentication, async (req, res) => {
     try {
@@ -909,7 +936,7 @@ Generate a motivating 2-3 sentence message in Japanese based on the student's st
 
       // Persist the actual totalWords to keep session metadata consistent
       try {
-        await storage.updateStudySession(userId, session.id, { totalWords: words.length, selectedDifficulties: config.selectedDifficulties });
+        await storage.updateStudySession(userId, session.id, { totalWords: words.length, selectedDifficulties: config.selectedDifficulties, words });
       } catch { }
 
       const sessionWithWords = {
@@ -940,6 +967,54 @@ Generate a motivating 2-3 sentence message in Japanese based on the student's st
       res.json(session);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch study session" });
+    }
+  });
+
+  // Get active (incomplete) study session
+  app.get("/api/study/session/active/current", optionalAuthentication, async (req, res) => {
+    try {
+      const userId = req.userId;
+      const userSessions = storage.studySessions.get(userId) || new Map();
+      const sessions = Array.from(userSessions.values());
+      const activeSessions = sessions.filter(s => !s.isCompleted);
+      if (activeSessions.length === 0) {
+        return res.status(404).json({ message: "No active session" });
+      }
+      activeSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const activeSession = activeSessions[0];
+
+      // get progress
+      const progress = await storage.getWordProgressBySession(userId, activeSession.id);
+      
+      const correctCount = progress.filter(p => p.isRemembered).length;
+      const incorrectCount = progress.filter(p => !p.isRemembered).length;
+
+      res.json({
+        ...activeSession,
+        progress,
+        correctCount,
+        incorrectCount,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch active session" });
+    }
+  });
+
+  // Delete/Discard active study sessions
+  app.delete("/api/study/session/active/current", optionalAuthentication, async (req, res) => {
+    try {
+      const userId = req.userId;
+      const userSessions = storage.studySessions.get(userId);
+      if (!userSessions) return res.json({ ok: true });
+      const sessions = Array.from(userSessions.values());
+      const activeSessions = sessions.filter(s => !s.isCompleted);
+      for (const s of activeSessions) {
+         userSessions.delete(s.id);
+      }
+      storage._scheduleSave();
+      res.json({ ok: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear active session" });
     }
   });
 

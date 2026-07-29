@@ -55,6 +55,49 @@ function getColorIdFromString(colorStr) {
   return map[colorStr] || CalendarApp.EventColor.PALE_BLUE;
 }
 
+/**
+ * 予定を取得する (アプリの表示用)
+ */
+function getEventsForApp(data) {
+  const parseDayStart = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d, 0, 0, 0);
+  };
+  const parseDayEnd = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d, 23, 59, 59);
+  };
+
+  const fetchStart = parseDayStart(data.startDate);
+  const fetchEnd = parseDayEnd(data.endDate);
+
+  const resultEvents = [];
+  const seenIds = new Set();
+  try {
+    const allCalendars = CalendarApp.getAllCalendars();
+    for (const cal of allCalendars) {
+      if (cal.getId().includes('holiday')) continue;
+      const calEvents = cal.getEvents(fetchStart, fetchEnd);
+      for (const ev of calEvents) {
+        if (!seenIds.has(ev.getId())) {
+          seenIds.add(ev.getId());
+          resultEvents.push({
+            id: ev.getId(),
+            summary: ev.getTitle(),
+            location: ev.getLocation(),
+            description: ev.getDescription(),
+            start: ev.isAllDayEvent() ? { date: Utilities.formatDate(ev.getStartTime(), "JST", "yyyy-MM-dd") } : { dateTime: ev.getStartTime().toISOString() },
+            end: ev.isAllDayEvent() ? { date: Utilities.formatDate(ev.getEndTime(), "JST", "yyyy-MM-dd") } : { dateTime: ev.getEndTime().toISOString() }
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("getAllCalendars 失敗: " + e);
+  }
+  return resultEvents;
+}
+
 function doPost(e) {
   try {
     const contents = e.postData.contents;
@@ -67,6 +110,10 @@ function doPost(e) {
     } else if (data.action === "writeTasks") {
       console.log("=== タスク書き込みアクション開始 ===");
       const result = writeTasks(data);
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    } else if (data.action === "getEvents") {
+      console.log("=== 予定取得アクション開始 ===");
+      const result = getEventsForApp(data);
       return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
     }
     

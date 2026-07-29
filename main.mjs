@@ -20,6 +20,23 @@ const parser = new Parser();
 import { Client as Youtubei, MusicClient } from "youtubei";
 import axios from 'axios';
 
+// Kuroshiro for Romaji/Ruby generation
+import Kuroshiro from "kuroshiro";
+import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
+
+const kuroshiro = new Kuroshiro();
+let kuroshiroInitialized = false;
+
+async function initKuroshiro() {
+  if (!kuroshiroInitialized) {
+    await kuroshiro.init(new KuromojiAnalyzer());
+    kuroshiroInitialized = true;
+    console.log("[Kuroshiro] Initialized for Japanese reading conversion.");
+  }
+}
+// Init in background
+initKuroshiro().catch(console.error);
+
 // Import routes. 
 import { registerRoutes, performRestoreFromGist } from './server/routes.mjs';
 
@@ -934,6 +951,13 @@ client.on('messageCreate', async message => {
   if (/ふ？/.test(message.content)) {
     await message.react('😥');
   }
+  if (/うお|うぉ|どわー|教養|落ち着け|必死|冗談ですやん/.test(message.content)) {
+    await message.react('😅');
+  }
+  if (/どぱ|ドパ|どーぱみん|ドーパミン|dopa/i.test(message.content)) {
+    await message.react('<:DOPA:1524262303480938526>');
+    await message.react('<:DOPA_discord:1524263608182243368>');
+  }
   if (/なにこ|ごろり|発射|本当かな/.test(message.content)) {
     await message.react('<a:Gorouri:1339929066249392221>');
   }
@@ -954,21 +978,21 @@ client.on('messageCreate', async message => {
   }
 });
 
-// --- AI設定 (OpenAI / DeepSeek) ---
-const D_API_KEY = process.env.Deepseek_API;
-if (D_API_KEY === undefined) {
-  console.log("APIキーなし");
+// --- AI設定 (OpenAI / Groq) ---
+const G_API_KEY = process.env.GroqApi;
+if (G_API_KEY === undefined) {
+  console.log("Groq APIキーなし");
 }
 
 let ai;
-let lai
-if (D_API_KEY) {
+let lai;
+if (G_API_KEY) {
   lai = new OpenAI({
     baseURL: 'https://api.groq.com/openai/v1',
-    apiKey: D_API_KEY
+    apiKey: G_API_KEY
   });
 } else {
-  console.log("API Key missing, AI features disabled.");
+  console.log("API Key missing, Groq AI features disabled.");
 }
 
 // --- AI実行関数 ---
@@ -1005,25 +1029,23 @@ async function runai(content, message, aisikibetsu) {
       await message.channel.send("エラーが発生しました");
     }
 
-    // --- パターン1: 思考/長文生成 (DeepSeek R1相当) ---
+    // --- パターン1: 思考/長文生成 ---
   }
-  /**
-  
-  
-  
   else if (aisikibetsu === 1) {
     if (!lai) {
-      await message.channel.send("APIキーが設定されていないため、AI機能は利用できません。");
+      await message.channel.send("Groq APIキーが設定されていないため、AI機能は利用できません。");
       return;
     }
     message.channel.send('考え中です...');
 
     try {
-      // partsオブジェクトが来ている場合の処理が必要ならここで変換
+      const discordCulture = "\n\n(注意: Discordで返信するため、####や$$は使用禁止です。見出しは###や**太字**を、数式や強調はコードブロック(```)や太字を使用してください。)";
+      
       let textContent = talk;
       if (Array.isArray(content) && content[0].text) {
           textContent = content[0].text;
       }
+      textContent += discordCulture;
 
       const stream = await lai.chat.completions.create({
         model: "llama-3.3-70b-versatile",
@@ -1057,89 +1079,14 @@ async function runai(content, message, aisikibetsu) {
       console.error('APIからの応答中にエラーが発生しました:', error);
       message.reply('APIからの応答中にエラーが発生しました。');
     }
-
-    // --- パターン2: 既存メッセージの編集 ---
   }
-  
-  **/
-
-
-  else if (aisikibetsu === 1) {
-    if (!ai) {
-      await message.channel.send("gAPIキーが設定されていないため、AI機能は利用できません。");
-      return;
-    }
-    message.channel.send('考え中です。これには数分かかる場合もあります。');
-
-    try {
-      // Discord向けのフォーマット指示を追加
-      const discordCulture = "\n\n(注意: Discordで返信するため、####や$$は使用禁止です。見出しは###や**太字**を、数式や強調はコードブロック(```)や太字を使用してください。)";
-      let finalContent = content;
-      if (typeof content === 'string') {
-        finalContent = content + discordCulture;
-      } else if (Array.isArray(content)) {
-        finalContent = [...content, { text: discordCulture }];
-      }
-
-      let result = await ai.models.generateContentStream({
-        model: "gemma-4-31b-it",
-        contents: finalContent,
-        config: { // 前回確認した通り、configで問題ないならこれでOK
-          temperature: 0.7, // 応答のランダム性を調整 (0.0 - 1.0)
-          topP: 0.9, // サンプリング時の確率閾値を調整
-          topK: 40, // サンプリング時の上位K個のトークンに限定
-        },
-      });
-
-      let fullResponse = '';
-      let lastSentMessage = null; // 最後に送信したDiscordメッセージオブジェクト
-      const MAX_DISCORD_MESSAGE_LENGTH = 2000; // Discordのメッセージ最大文字数
-
-      // ストリーム応答を逐次処理
-      for await (const chunk of result) {
-        const chunkText = chunk.text || "";
-        if (!chunkText) continue;
-        fullResponse += chunkText;
-
-
-        // 2000文字を超えたら、その部分を送信し、fullResponseをクリア
-        // ただし、最後のチャンクでない限り、既存メッセージの編集は行わない
-        if (fullResponse.length >= MAX_DISCORD_MESSAGE_LENGTH) {
-          const partToSend = fullResponse.substring(0, MAX_DISCORD_MESSAGE_LENGTH);
-
-          // 2000文字に達したら常に新しいメッセージとして送信
-          // lastSentMessage = null の場合でも新規送信になる
-          lastSentMessage = await message.channel.send(partToSend);
-
-          fullResponse = fullResponse.substring(MAX_DISCORD_MESSAGE_LENGTH); // 送信した部分をfullResponseから削除
-        }
-      }
-
-      // ストリームが完全に終了した後、fullResponseに残っているテキストを処理
-      if (fullResponse.length > 0) {
-        // 残りがある場合、まだ送信されたメッセージがなければ新規で、
-        // 既にメッセージが送信されていれば、それが最後の部分なのでそのメッセージを編集
-        if (lastSentMessage) {
-          // 最後のメッセージが存在する場合、そのメッセージに追記する形で編集
-          // ただし、Discord APIの文字数制限があるので、実際には新しいメッセージとして送る方が安全
-          // ここは新規メッセージとして送るロジックに統一します
-          await message.channel.send(fullResponse);
-        } else {
-          // まだメッセージが一つも送信されていない（応答が2000文字未満だった）場合
-          await message.channel.send(fullResponse);
-        }
-      }
-    } catch (error) {
-      console.error('Gemini APIからの応答中にエラーが発生しました:', error);
-      message.reply('Gemini APIからの応答中にエラーが発生しました。');
-    }
-  }
+  // --- パターン2: 既存メッセージの編集 ---
   else if (aisikibetsu === 2) {
-    if (!ai) return;
+    if (!lai) return;
 
     try {
-      const stream = await ai.chat.completions.create({
-        model: "deepseek-chat", // または適切なモデル
+      const stream = await lai.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
         messages: [{ role: 'user', content: talk }],
         stream: true
       });
@@ -1166,6 +1113,18 @@ async function runai(content, message, aisikibetsu) {
 }
 
 // --- 追加機能用関数 ---
+
+// 日本語テキストをローマ字（またはひらがな/カタカナ）に変換する関数
+// { to: "romaji" } を "hiragana" や "katakana" に変更することも可能です
+async function getJapaneseReading(text) {
+  try {
+    if (!kuroshiroInitialized) await initKuroshiro();
+    return await kuroshiro.convert(text, { to: "romaji" }); // ローマ字出力
+  } catch (err) {
+    console.error("Kuroshiro conversion error:", err);
+    return text;
+  }
+}
 
 // 1. AIを使ってテキストから単語リストJSONを抽出する関数
 async function extractWordListJson(text) {

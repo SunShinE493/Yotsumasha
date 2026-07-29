@@ -41,6 +41,7 @@ export interface Todo {
   targetDayOfWeek?: number; // 0:Mon, 1:Tue, ... (Legacy)
   originalDay?: number;     // 0:Mon, 1:Tue, ... (For display)
   courseId?: string;        // ID of the linked course
+  targetTime?: string;      // Specific time "HH:MM"
 }
 
 export interface SemesterSettings {

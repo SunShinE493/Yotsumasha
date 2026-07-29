@@ -115,15 +115,15 @@ export function setupAuth(app) {
   const csrfMiddleware = csurf(csrfSecret, ["POST", "PUT", "PATCH", "DELETE"]);
   // Allow basic-dev-auth bypass for admin export/import and profile/backup updates (stability)
   app.use((req, res, next) => {
-    const bypassPaths = new Set(['/api/admin/export', '/api/admin/import', '/api/profile', '/api/admin/backup/gist', '/api/admin/backup/gist/fetch', '/api/admin/files/builtin', '/api/admin/files/builtin/read']);
+    const bypassPaths = new Set(['/api/admin/export', '/api/admin/import', '/api/profile', '/api/admin/backup/gist', '/api/admin/backup/gist/fetch', '/api/admin/files/builtin', '/api/admin/files/builtin/read', '/api/aura/gas']);
     if (bypassPaths.has(req.path)) {
       const envUser = process.env.BACKUP_ADMIN_EMAIL;
       const envPass = process.env.BACKUP_ADMIN_PASSWORD;
       const bodyEmail = req.body?.email;
       const bodyPassword = req.body?.password;
       const isDevFlag = req.user?.isDev === true;
-      if (req.path === '/api/profile' || isDevFlag || (envUser && envPass && bodyEmail === envUser && bodyPassword === envPass)) {
-        return next(); // skip CSRF for dev admin
+      if (req.path === '/api/profile' || req.path === '/api/aura/gas' || isDevFlag || (envUser && envPass && bodyEmail === envUser && bodyPassword === envPass)) {
+        return next(); // skip CSRF for dev admin and safe proxies
       }
     }
     return csrfMiddleware(req, res, next);

@@ -7,7 +7,7 @@ import SettingsPanel from '@/components/SettingsPanel';
 import TodoList from '@/components/TodoList';
 import { useTimetable } from '@/lib/store';
 import { getContrastYIQ } from '@/lib/types';
-import { Menu, X, Settings, Sparkles, Edit3, Eye, Calendar, Home as HomeIcon, Loader2 } from 'lucide-react';
+import { Menu, X, Settings, Sparkles, Edit3, Eye, Calendar, Home as HomeIcon, Loader2, RefreshCw } from 'lucide-react';
 
 export default function Home() {
   const { state, setAppMode, setAiPlan } = useTimetable();
@@ -145,6 +145,10 @@ export default function Home() {
             </button>
           </div>
           <nav className="app-drawer__nav">
+             <button className="drawer-item" onClick={() => { setShowMenu(false); window.location.reload(); }}>
+               <RefreshCw size={18} /> 最新の予定を同期する
+             </button>
+             <hr />
              <button className="drawer-item" onClick={() => { setShowMenu(false); setAppMode('view'); }}>
                <Eye size={18} /> 予定ビュー（普段用）
              </button>
@@ -290,7 +294,7 @@ export default function Home() {
         }
         .floating-ai-btn {
           position: fixed;
-          bottom: 24px;
+          top: 80px;
           right: 24px;
           width: 56px;
           height: 56px;

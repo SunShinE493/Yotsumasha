@@ -1,12 +1,12 @@
 // Service Worker for Aura Timetable PWA
 const CACHE_NAME = 'aura-timetable-v1';
-const OFFLINE_URL = '/';
+const OFFLINE_URL = '/aura';
 
 const PRECACHE_URLS = [
-  '/',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/aura',
+  '/aura/manifest.json',
+  '/aura/icon-192.svg',
+  '/aura/icon-512.svg',
 ];
 
 self.addEventListener('install', (event) => {

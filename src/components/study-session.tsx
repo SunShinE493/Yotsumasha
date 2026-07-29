@@ -88,7 +88,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
           description: "読み込みに時間がかかっているため、セッションを中断しました。",
           variant: "destructive",
         });
-        hookHandleEarlyFinish();
+        hookHandleEarlyFinish(false);
       }, 5000);
     }
     return () => {
@@ -166,7 +166,7 @@ export function StudySession({ session, onComplete, onBack }: StudySessionProps)
 
   const handleBackConfirm = () => {
     // 現在の進捗を保存してから戻る
-    hookHandleEarlyFinish();
+    hookHandleEarlyFinish(false);
     toast({
       title: "学習を中断しました",
       description: "進捗が保存されました。",

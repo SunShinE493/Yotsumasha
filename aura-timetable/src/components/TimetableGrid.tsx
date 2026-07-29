@@ -54,7 +54,7 @@ export default function TimetableGrid() {
 
       try {
         const calId = state.selectedCalendarId || 'primary';
-        const calRes = await fetch(`/api/calendar?calendarId=${encodeURIComponent(calId)}`);
+        const calRes = await fetch(`/aura/api/calendar?calendarId=${encodeURIComponent(calId)}`);
         if (calRes.ok) {
           const events = await calRes.json();
           const newState = mapEventsToTimetable(events, state);
@@ -94,7 +94,7 @@ export default function TimetableGrid() {
   const [viewMode, setViewMode] = useState<'today' | 'weekly'>('today');
   const [activeDayOffset, setActiveDayOffset] = useState(0);
   const [editTarget, setEditTarget] = useState<{ day: number; period: number; course?: Course; dateStr?: string } | null>(null);
-  const [detailTarget, setDetailTarget] = useState<{ course: Course, lessonCount: number, dayIndex: number } | null>(null);
+  const [detailTarget, setDetailTarget] = useState<{ course: Course, lessonCount: number, dayIndex: number, periodIndex: number } | null>(null);
   const [now, setNow] = useState(new Date());
   const [todayEvents, setTodayEvents] = useState<any[]>([]);
 
@@ -104,19 +104,50 @@ export default function TimetableGrid() {
     return () => clearInterval(timer);
   }, []);
 
+  // Fetch calendar events from Google API or GAS
   useEffect(() => {
-    if (viewMode === 'today' && session) {
-      const calId = state.selectedCalendarId || 'primary';
-      fetch(`/api/calendar?calendarId=${encodeURIComponent(calId)}`)
-        .then(res => res.json())
-        .then(data => {
+    const fetchEvents = async () => {
+      if (session) {
+        const calId = state.selectedCalendarId || 'primary';
+        fetch(`/aura/api/calendar?calendarId=${encodeURIComponent(calId)}`)
+          .then(res => res.json())
+          .then(data => {
+            console.log("=== [DEBUG] Fetched Google Calendar Events via API ===", data);
+            if (Array.isArray(data)) {
+              setTodayEvents(data);
+            }
+          })
+          .catch(console.error);
+      } else if (state.gasSyncUrl) {
+        try {
+          const now = new Date();
+          const start = new Date(now); start.setDate(start.getDate() - 7);
+          const end = new Date(now); end.setDate(end.getDate() + 14);
+          
+          const res = await fetch('/api/aura/gas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              gasUrl: state.gasSyncUrl,
+              payload: {
+                action: 'getEvents',
+                startDate: formatDateYMD(start),
+                endDate: formatDateYMD(end)
+              }
+            })
+          });
+          const data = await res.json();
+          console.log("=== [DEBUG] Fetched Google Calendar Events via GAS ===", data);
           if (Array.isArray(data)) {
             setTodayEvents(data);
           }
-        })
-        .catch(console.error);
-    }
-  }, [viewMode, session, state.selectedCalendarId]);
+        } catch (e) {
+          console.error("GAS events fetch error:", e);
+        }
+      }
+    };
+    fetchEvents();
+  }, [session, state.selectedCalendarId, state.gasSyncUrl]);
 
   // Transition to Tomorrow logic
   const todayIndexRaw = useMemo(() => getTodayIndex(), []);
@@ -155,7 +186,7 @@ export default function TimetableGrid() {
     } else if (course) {
       const date = targetDate ?? getDateForDay(isToday ? (todayIndex + activeDayOffset) : dayIdx, todayIndexRaw);
       const lessonCount = getLessonCount(date, finalDay, state);
-      setDetailTarget({ course, lessonCount, dayIndex: finalDay });
+      setDetailTarget({ course, lessonCount, dayIndex: finalDay, periodIndex: periodIdx });
     }
   };
 
@@ -265,147 +296,158 @@ export default function TimetableGrid() {
                     onClick={() => handleCellClick(di, pi, targetDate, effectiveDayIndex)}
                   >
                     {!isHoliday || hasOverride ? (
-                      course ? (
-                        <div
-                          className={`course-card ${effectiveEntry?.slotOffset ? `course-card--${effectiveEntry.slotOffset}` : ''}`}
-                          style={{
-                            '--course-color': course.color,
-                            background: course.color,
-                            color: getContrastYIQ(course.color),
-                            opacity: isOutsideSemester ? 0.4 : 1
-                          } as React.CSSProperties}
-                        >
-                          {isOutsideSemester && <div className="outside-label">期間外</div>}
-                          {hasOverride && !state.cellOverrides[cellKey(dateStr, pi)] && <div className="override-badge">振替</div>}
-                          {state.cellOverrides[cellKey(dateStr, pi)] && <div className="override-badge" style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>特別</div>}
-                          <span className="course-card__name">{course.name}</span>
-                          {course.room && <span className="course-card__room" style={{ color: getContrastYIQ(course.color), opacity: 0.95 }}>📍 {course.room}</span>}
-                          {(state.syllabusDisplayEnabled && course.syllabus && course.syllabus[lessonCount - 1]) && (
-                            <div className="course-card__syllabus">
-                              <span className="syllabus-idx">第{lessonCount}回</span>
-                              <p className="syllabus-text">{course.syllabus[lessonCount - 1]}</p>
-                            </div>
-                          )}
-                          {isToday && (
-                            <div className="course-card__tasks">
-                              {state.todos
-                                .filter(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr))
-                                .map(t => {
-                                  const isDueToday = t.targetDate === dateStr;
-                                  let hoursLeft: number | null = null;
-                                  if (isDueToday && t.targetDate) {
-                                    const deadline = new Date(t.targetDate);
-                                    deadline.setHours(23, 59, 59, 999);
-                                    hoursLeft = Math.max(0, Math.floor((deadline.getTime() - now.getTime()) / (1000 * 60 * 60)));
-                                  }
+                      <>
+                        {course && (
+                          <div
+                            className={`course-card ${effectiveEntry?.slotOffset ? `course-card--${effectiveEntry.slotOffset}` : ''}`}
+                            style={{
+                              '--course-color': course.color,
+                              background: course.color,
+                              color: getContrastYIQ(course.color),
+                              opacity: isOutsideSemester ? 0.4 : 1
+                            } as React.CSSProperties}
+                          >
+                            {isOutsideSemester && <div className="outside-label">期間外</div>}
+                            {hasOverride && !state.cellOverrides[cellKey(dateStr, pi)] && <div className="override-badge">振替</div>}
+                            {state.cellOverrides[cellKey(dateStr, pi)] && <div className="override-badge" style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)' }}>特別</div>}
+                            <span className="course-card__name">{course.name}</span>
+                            {course.room && <span className="course-card__room" style={{ color: getContrastYIQ(course.color), opacity: 0.95 }}>📍 {course.room}</span>}
+                            {(state.syllabusDisplayEnabled && course.syllabus && course.syllabus[lessonCount - 1]) && (
+                              <div className="course-card__syllabus">
+                                <span className="syllabus-idx">第{lessonCount}回</span>
+                                <p className="syllabus-text">{course.syllabus[lessonCount - 1]}</p>
+                              </div>
+                            )}
+                            {isToday && (
+                              <div className="course-card__tasks">
+                                {state.todos
+                                  .filter(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr))
+                                  .map(t => {
+                                    const isDueToday = t.targetDate === dateStr;
+                                    let hoursLeft: number | null = null;
+                                    if (isDueToday && t.targetDate) {
+                                      const deadline = new Date(t.targetDate);
+                                      if (t.targetTime) {
+                                        const [th, tm] = t.targetTime.split(':').map(Number);
+                                        deadline.setHours(th, tm, 0, 0);
+                                      } else {
+                                        deadline.setHours(23, 59, 59, 999);
+                                      }
+                                      hoursLeft = Math.max(0, Math.floor((deadline.getTime() - now.getTime()) / (1000 * 60 * 60)));
+                                    }
 
+                                    return (
+                                      <div key={t.id} className="task-mini-item" style={{ color: getContrastYIQ(course.color) }}>
+                                        <div className="task-dot" />
+                                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.text}</span>
+                                        {hoursLeft !== null && (
+                                          <span style={{ fontSize: '0.6rem', opacity: 0.8, marginLeft: '4px', whiteSpace: 'nowrap' }}>({hoursLeft}h)</span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            )}
+                            {!isToday && state.showGridTodoBadges && state.todos.some(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr)) && (
+                              <div className="course-todo-badge" />
+                            )}
+                          </div>
+                        )}
+
+                        {!course && (() => {
+                          const proposedTask = state.aiPlan?.scheduledTasks?.find(t => t.date === dateStr && t.period === pi);
+                          if (proposedTask && state.appMode === 'view') {
+                            const linkedTodo = state.todos.find(t => t.id === proposedTask.todoId);
+                            const linkedCourse = linkedTodo && linkedTodo.courseId ? state.courses.find(c => c.id === linkedTodo.courseId) : null;
+                            const displayText = linkedCourse ? `[${linkedCourse.name}] ${proposedTask.text}` : proposedTask.text;
+
+                            return (
+                              <div
+                                className="course-card course-card--proposed animate-pulse"
+                                style={{
+                                  border: '1.5px dashed rgba(167, 139, 250, 0.6)',
+                                  background: 'rgba(124, 58, 237, 0.08)',
+                                  color: '#e9d5ff',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  padding: '10px 8px',
+                                  gap: '4px',
+                                  height: '100%',
+                                  borderRadius: '12px',
+                                  boxShadow: '0 4px 12px rgba(124, 58, 237, 0.05)',
+                                  transition: 'all 0.2s',
+                                  position: 'relative'
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setProposedTaskMenu({ task: proposedTask, rect });
+                                }}
+                              >
+                                <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(124, 58, 237, 0.15)', padding: '2px 4px', borderRadius: '4px' }}>
+                                  <Sparkles size={10} style={{ color: '#c084fc' }} />
+                                  <span style={{ fontSize: '0.45rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI提案</span>
+                                </div>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.2' }}>{displayText}</span>
+                                <span style={{ fontSize: '0.55rem', opacity: 0.7, marginTop: '2px', color: '#c084fc' }}>タップで選択</span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        {(() => {
+                          const periodMatchedEvents = todayEvents.filter(ev => {
+                            const evStartStr = ev.start?.dateTime || ev.start?.date;
+                            if (!evStartStr) return false;
+                            const evDate = new Date(evStartStr);
+                            if (formatDateYMD(evDate) !== dateStr) return false;
+                            
+                            if (!ev.start?.dateTime) return pi === 0; // Full day event -> show in period 1 only
+                            
+                            const [sH, sM] = state.periods[pi].start.split(':').map(Number);
+                            const [eH, eM] = state.periods[pi].end.split(':').map(Number);
+                            const pStart = sH * 60 + sM;
+                            const pEnd = eH * 60 + eM;
+                            
+                            const evEndStr = ev.end?.dateTime || ev.end?.date;
+                            const evEndDate = evEndStr ? new Date(evEndStr) : evDate;
+                            
+                            const eStart = evDate.getHours() * 60 + evDate.getMinutes();
+                            const eEnd = evEndDate.getHours() * 60 + evEndDate.getMinutes();
+                            
+                            return eStart < pEnd && eEnd > pStart;
+                          });
+
+                          if (periodMatchedEvents.length > 0) {
+                            return (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: course ? '6px' : '0', height: course ? 'auto' : '100%' }}>
+                                {periodMatchedEvents.map((ev, idx) => {
+                                  const st = new Date(ev.start?.dateTime || ev.start?.date);
+                                  const en = new Date(ev.end?.dateTime || ev.end?.date);
+                                  const timeStr = ev.start?.dateTime ? `${st.getHours()}:${String(st.getMinutes()).padStart(2, '0')} - ${en.getHours()}:${String(en.getMinutes()).padStart(2, '0')}` : '終日';
                                   return (
-                                    <div key={t.id} className="task-mini-item" style={{ color: getContrastYIQ(course.color) }}>
-                                      <div className="task-dot" />
-                                      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.text}</span>
-                                      {hoursLeft !== null && (
-                                        <span style={{ fontSize: '0.6rem', opacity: 0.8, marginLeft: '4px', whiteSpace: 'nowrap' }}>({hoursLeft}h)</span>
-                                      )}
+                                    <div key={idx} className="course-card" style={{ border: '1.5px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', padding: '8px', borderRadius: '12px' }}>
+                                      <div style={{ fontSize: '0.6rem', color: 'var(--accent-blue)', fontWeight: 'bold', marginBottom: '2px' }}>{timeStr}</div>
+                                      <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>📅 {ev.summary}</div>
+                                      {ev.location && <div style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '2px' }}>📍 {ev.location}</div>}
                                     </div>
                                   );
                                 })}
-                            </div>
-                          )}
-                          {!isToday && state.showGridTodoBadges && state.todos.some(t => t.courseId === course.id && !t.completed && (!t.targetDate || t.targetDate === dateStr)) && (
-                            <div className="course-todo-badge" />
-                          )}
-                        </div>
-                      ) : (() => {
-                        const proposedTask = state.aiPlan?.scheduledTasks?.find(t => t.date === dateStr && t.period === pi);
-                        if (proposedTask && state.appMode === 'view') {
-                          const linkedTodo = state.todos.find(t => t.id === proposedTask.todoId);
-                          const linkedCourse = linkedTodo && linkedTodo.courseId ? state.courses.find(c => c.id === linkedTodo.courseId) : null;
-                          const displayText = linkedCourse ? `[${linkedCourse.name}] ${proposedTask.text}` : proposedTask.text;
-
-                          return (
-                            <div
-                              className="course-card course-card--proposed animate-pulse"
-                              style={{
-                                border: '1.5px dashed rgba(167, 139, 250, 0.6)',
-                                background: 'rgba(124, 58, 237, 0.08)',
-                                color: '#e9d5ff',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                padding: '10px 8px',
-                                gap: '4px',
-                                height: '100%',
-                                borderRadius: '12px',
-                                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.05)',
-                                transition: 'all 0.2s',
-                                position: 'relative'
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                setProposedTaskMenu({ task: proposedTask, rect });
-                              }}
-                            >
-                              <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', alignItems: 'center', gap: '2px', background: 'rgba(124, 58, 237, 0.15)', padding: '2px 4px', borderRadius: '4px' }}>
-                                <Sparkles size={10} style={{ color: '#c084fc' }} />
-                                <span style={{ fontSize: '0.45rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI提案</span>
                               </div>
-                              <span style={{ fontSize: '0.75rem', fontWeight: 600, textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: '1.2' }}>{displayText}</span>
-                              <span style={{ fontSize: '0.55rem', opacity: 0.7, marginTop: '2px', color: '#c084fc' }}>タップで選択</span>
-                            </div>
-                          );
-                        }
+                            );
+                          }
 
-                        const matchedEvents = todayEvents.filter(ev => {
-                          const evStartStr = ev.start?.dateTime || ev.start?.date;
-                          if (!evStartStr) return false;
-                          const evDate = new Date(evStartStr);
-                          if (formatDateYMD(evDate) !== dateStr) return false;
-                          
-                          const evMins = evDate.getHours() * 60 + evDate.getMinutes();
-                          const [ph, pm] = p.start.split(':').map(Number);
-                          const pMins = ph * 60 + pm;
-                          return Math.abs(evMins - pMins) <= 45;
-                        });
+                          if (!course && state.appMode === 'edit') {
+                            return <div className="timetable__add-btn">+</div>;
+                          }
 
-                        if (matchedEvents.length > 0 && state.appMode === 'view') {
-                          return (
-                            <div
-                              className="course-card"
-                              style={{
-                                border: '1.5px solid rgba(255, 255, 255, 0.15)',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                color: 'var(--text-primary)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '4px',
-                                padding: '8px',
-                                borderRadius: '12px',
-                                height: '100%',
-                              }}
-                            >
-                              {matchedEvents.map((ev, idx) => {
-                                const st = new Date(ev.start?.dateTime || ev.start?.date);
-                                const en = new Date(ev.end?.dateTime || ev.end?.date);
-                                const timeStr = ev.start?.dateTime ? `${st.getHours()}:${String(st.getMinutes()).padStart(2, '0')} - ${en.getHours()}:${String(en.getMinutes()).padStart(2, '0')}` : '終日';
-                                return (
-                                  <div key={idx} style={{ fontSize: '0.75rem', marginBottom: '4px' }}>
-                                    <div style={{ fontSize: '0.6rem', color: 'var(--accent-blue)', fontWeight: 'bold' }}>{timeStr}</div>
-                                    <div style={{ fontWeight: 600, marginTop: '2px' }}>📅 {ev.summary}</div>
-                                    {ev.location && <div style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '2px' }}>📍 {ev.location}</div>}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          );
-                        }
-
-                        return state.appMode === 'edit' ? (
-                          <div className="timetable__add-btn">+</div>
-                        ) : null;
-                      })()
+                          return null;
+                        })()}
+                      </>
                     ) : null}
                   </div>
                 );
@@ -430,6 +472,7 @@ export default function TimetableGrid() {
           course={detailTarget.course}
           currentLessonCount={detailTarget.lessonCount}
           dayIndex={detailTarget.dayIndex}
+          periodIndex={detailTarget.periodIndex}
           onClose={() => setDetailTarget(null)}
         />
       )}

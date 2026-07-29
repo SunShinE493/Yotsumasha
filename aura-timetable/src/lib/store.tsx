@@ -31,7 +31,7 @@ interface TimetableContextValue {
   mergeState: (data: Partial<TimetableState>) => void;
   resetAll: () => void;
   // New features
-  addTodo: (text: string, targetDate?: string, targetDayOfWeek?: number, courseId?: string) => void;
+  addTodo: (text: string, targetDate?: string, targetDayOfWeek?: number, courseId?: string, targetTime?: string) => void;
   toggleTodo: (id: string) => void;
   deleteTodo: (id: string) => void;
   updateTodo: (todo: Todo) => void;
@@ -242,7 +242,7 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Todo features
-  const addTodo = useCallback((text: string, targetDate?: string, targetDayOfWeek?: number, courseId?: string) => {
+  const addTodo = useCallback((text: string, targetDate?: string, targetDayOfWeek?: number, courseId?: string, targetTime?: string) => {
     let finalDate = targetDate;
     let originalDay = targetDayOfWeek;
     
@@ -258,7 +258,8 @@ export function TimetableProvider({ children }: { children: ReactNode }) {
         completed: false, 
         targetDate: finalDate, 
         originalDay,
-        courseId
+        courseId,
+        targetTime
       }],
     }));
   }, []);

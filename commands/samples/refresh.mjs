@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import request from 'requests';
+import axios from 'axios';
 
 export const data = new SlashCommandBuilder()
   .setName('rateLimit')
@@ -13,11 +13,12 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
   // パスワードを取得
   const pass = interaction.options.getInteger('password');
-  const respons = request.get('https://github.com')
+  
   // パスワードの検証
   if (pass === 4649) {
+    const respons = await axios.get('https://api.github.com/rate_limit');
     console.log('rateLimitが使用されました。'); // ログをここに移動
-    await interaction.reply(respons.json);
+    await interaction.reply("```json\n" + JSON.stringify(respons.data, null, 2).slice(0, 1980) + "\n```");
     process.exit(); // プロセスを終了し、Glitchが再起動するのを待ちます
   } else {
     await interaction.reply('パスワードが違います');

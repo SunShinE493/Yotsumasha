@@ -19,22 +19,16 @@ export async function GET(req: NextRequest) {
   const calendar = google.calendar({ version: "v3", auth });
 
   try {
+    const timeMin = new Date();
+    timeMin.setDate(timeMin.getDate() - 7);
+    
+    const timeMax = new Date();
+    timeMax.setDate(timeMax.getDate() + 30);
+
     const response = await calendar.events.list({
       calendarId: calendarId,
-      timeMin: (() => {
-        const now = new Date();
-        const jstDate = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-        jstDate.setDate(jstDate.getDate() - 7);
-        jstDate.setHours(0, 0, 0, 0);
-        return new Date(jstDate.getTime() - 9 * 60 * 60 * 1000).toISOString();
-      })(),
-      timeMax: (() => {
-        const now = new Date();
-        const jstDate = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-        jstDate.setDate(jstDate.getDate() + 30);
-        jstDate.setHours(23, 59, 59, 999);
-        return new Date(jstDate.getTime() - 9 * 60 * 60 * 1000).toISOString();
-      })(),
+      timeMin: timeMin.toISOString(),
+      timeMax: timeMax.toISOString(),
       maxResults: 250,
       singleEvents: true,
       orderBy: 'startTime',
@@ -42,6 +36,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(response.data.items || []);
   } catch (error: any) {
+    console.error("Calendar API Error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

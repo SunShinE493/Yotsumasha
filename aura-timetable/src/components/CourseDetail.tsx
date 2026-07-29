@@ -13,6 +13,7 @@ interface CourseDetailProps {
   course: Course;
   currentLessonCount: number;
   dayIndex: number;
+  periodIndex: number;
   onClose: () => void;
 }
 
@@ -116,7 +117,7 @@ function DriveFilesSection({ course }: { course: Course }) {
       // 1. Init root folder if missing
       let rootId = state.rootFolderId;
       if (!rootId) {
-        const res = await fetch('/api/drive/init', { method: 'POST' });
+        const res = await fetch('/aura/api/drive/init', { method: 'POST' });
         const data = await res.json();
         if (data.folderId) {
           rootId = data.folderId;
@@ -129,7 +130,7 @@ function DriveFilesSection({ course }: { course: Course }) {
       // 2. Init course folder if missing
       let courseFolderId = course.driveFolderId;
       if (!courseFolderId) {
-        const res = await fetch('/api/drive/course', {
+        const res = await fetch('/aura/api/drive/course', {
           method: 'POST',
           body: JSON.stringify({ parentFolderId: rootId, courseName: course.name }),
         });
@@ -142,7 +143,7 @@ function DriveFilesSection({ course }: { course: Course }) {
 
       // 3. Fetch files
       if (courseFolderId) {
-        const res = await fetch(`/api/drive/files?folderId=${courseFolderId}`);
+        const res = await fetch(`/aura/api/drive/files?folderId=${courseFolderId}`);
         const data = await res.json();
         setFiles(data.files || []);
       }
@@ -167,7 +168,7 @@ function DriveFilesSection({ course }: { course: Course }) {
     formData.append('parentFolderId', course.driveFolderId);
 
     try {
-      const res = await fetch('/api/drive/upload', {
+      const res = await fetch('/aura/api/drive/upload', {
         method: 'POST',
         body: formData,
       });
@@ -254,8 +255,8 @@ function DriveFilesSection({ course }: { course: Course }) {
   );
 }
 
-export default function CourseDetail({ course, currentLessonCount, dayIndex, onClose }: CourseDetailProps) {
-  const { addTodo } = useTimetable();
+export default function CourseDetail({ course, currentLessonCount, dayIndex, periodIndex, onClose }: CourseDetailProps) {
+  const { state, addTodo } = useTimetable();
   const [todoText, setTodoText] = useState('');
   const [deadlineMode, setDeadlineMode] = useState<'next' | '2weeks' | 'custom'>('next');
   const [customDate, setCustomDate] = useState(formatDateYMD(new Date()));
@@ -279,7 +280,9 @@ export default function CourseDetail({ course, currentLessonCount, dayIndex, onC
     else if (deadlineMode === '2weeks') targetDate = getWeeklyDate(dayIndex, 2);
     else targetDate = customDate;
 
-    addTodo(todoText.trim(), targetDate, undefined, course.id);
+    const targetTime = state.periods[periodIndex]?.start;
+
+    addTodo(todoText.trim(), targetDate, undefined, course.id, targetTime);
     setTodoText('');
   };
   return (
@@ -341,24 +344,24 @@ export default function CourseDetail({ course, currentLessonCount, dayIndex, onC
 
             <div className="deadline-selector" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>期限の設定</label>
-              <div style={{ display: 'flex', gap: '4px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                 <button 
                   className={`btn btn-xs ${deadlineMode === 'next' ? 'btn-primary' : 'btn-ghost'}`}
-                  style={{ flex: 1, fontSize: '0.7rem' }}
+                  style={{ flex: '1 1 auto', fontSize: '0.7rem', whiteSpace: 'nowrap' }}
                   onClick={() => setDeadlineMode('next')}
                 >
                   次回 ({getWeeklyDate(dayIndex, 1)})
                 </button>
                 <button 
                   className={`btn btn-xs ${deadlineMode === '2weeks' ? 'btn-primary' : 'btn-ghost'}`}
-                  style={{ flex: 1, fontSize: '0.7rem' }}
+                  style={{ flex: '1 1 auto', fontSize: '0.7rem', whiteSpace: 'nowrap' }}
                   onClick={() => setDeadlineMode('2weeks')}
                 >
                   2週間後 ({getWeeklyDate(dayIndex, 2)})
                 </button>
                 <button 
                   className={`btn btn-xs ${deadlineMode === 'custom' ? 'btn-primary' : 'btn-ghost'}`}
-                  style={{ flex: 1, fontSize: '0.7rem' }}
+                  style={{ flex: '1 1 auto', fontSize: '0.7rem', whiteSpace: 'nowrap' }}
                   onClick={() => setDeadlineMode('custom')}
                 >
                   日付指定

@@ -11,7 +11,9 @@ interface UseStudySessionProps {
 
 export function useStudySession({ initialSession, onComplete }: UseStudySessionProps) {
   const userId = useUserId();
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(
+    initialSession.progress ? initialSession.progress.length : 0
+  );
   const [correctCount, setCorrectCount] = useState(initialSession.correctCount || 0);
   const [incorrectCount, setIncorrectCount] = useState(initialSession.incorrectCount || 0);
   const [studyWords, setStudyWords] = useState<VocabularyWord[]>([]);
@@ -44,16 +46,25 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
     }
 
     const initialCorrect: VocabularyWord[] = [];
+    const initialIncorrect: VocabularyWord[] = initialSession.id.startsWith('review-') ? (initialSession.incorrectWords || []) : [];
+    
     if (initialSession.progress) {
       for (const progress of initialSession.progress) {
         const word = filteredWords.find(w => w.id === progress.wordId);
-        if (word && progress.isRemembered) {
-          initialCorrect.push(word);
+        if (word) {
+          if (progress.isRemembered) {
+            initialCorrect.push(word);
+          } else if (!initialIncorrect.some(w => w.id === word.id)) {
+            initialIncorrect.push(word);
+          }
         }
       }
     }
     setCorrectWords(initialCorrect);
     setCorrectCount(initialCorrect.length);
+    if (!initialSession.id.startsWith('review-')) {
+      setIncorrectWords(initialIncorrect);
+    }
 
     setIsSessionLoading(false);
   }, [initialSession]);
@@ -98,19 +109,21 @@ export function useStudySession({ initialSession, onComplete }: UseStudySessionP
     setCurrentWordIndex(prev => prev + 1);
   };
 
-  const handleEarlyFinish = () => {
+  const handleEarlyFinish = (completeSession: boolean = true) => {
     const completedSessionData = {
       ...initialSession,
       correctCount,
       incorrectCount,
-      isCompleted: true,
+      isCompleted: completeSession,
       words: studyWords,
       incorrectWords,
     };
     if (!initialSession.id.startsWith('review-')) {
       updateSessionMutation.mutate(completedSessionData);
     } else {
-      onComplete(completedSessionData);
+      if (completeSession) {
+        onComplete(completedSessionData);
+      }
     }
   };
 
