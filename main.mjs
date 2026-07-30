@@ -963,7 +963,7 @@ if (/どわー|うお|うぉ|冗談ですやん|落ち着け|おちつけ|必死
 });
 
 // --- AI設定 (OpenAI / Groq) ---
-const G_API_KEY = process.env.GroqApi;
+const G_API_KEY = process.env.G_API_KEY;
 if (G_API_KEY === undefined) {
   console.log("Groq APIキーなし");
 }

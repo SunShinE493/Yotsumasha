@@ -127,7 +127,7 @@ async function callAI(prompt, systemInstruction, preferOllama = false) {
   }
 
   // Google Gemini APIをフォールバックまたはメインエンジンとして使用
-  const googleApiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+  const googleApiKey = process.env.GOOGLE_API_KEY;
   if (googleApiKey) {
     try {
       console.log("[Aura AI] Using Google Gen AI (Gemini)...");
@@ -155,7 +155,7 @@ async function callAI(prompt, systemInstruction, preferOllama = false) {
   }
 
   // DeepSeek / Groq を最終フォールバックとして使用
-  const groqApiKey = process.env.Deepseek_API;
+  const groqApiKey = process.env.G_API_KEY;
   if (groqApiKey) {
     try {
       console.log("[Aura AI] Using Groq (DeepSeek/Llama)...");
