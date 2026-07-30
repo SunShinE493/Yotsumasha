@@ -236,9 +236,19 @@ export async function execute(interaction) {
                     messages: [{ role: 'user', content: prompt }],
                 });
                 
-                const text = response.choices[0]?.message?.content?.trim() || '';
-                // 絵文字とみなせるものを抽出 (スペース等で分割)
-                const emojis = text.split(/[\s,、。]+/).filter(e => e.trim().length > 0).slice(0, 3);
+                // カスタム絵文字を抽出
+                const customEmojis = text.match(/<a?:[a-zA-Z0-9_]+:\d+>/g) || [];
+                const remainingText = text.replace(/<a?:[a-zA-Z0-9_]+:\d+>/g, '');
+                
+                // Intl.Segmenterを使って文字列を1文字（書記素）ずつ分割し、連続した絵文字も分離する
+                const segmenter = new Intl.Segmenter('ja', { granularity: 'grapheme' });
+                const graphemes = Array.from(segmenter.segment(remainingText)).map(s => s.segment);
+                
+                // 絵文字の性質を持つ書記素のみをフィルタリング
+                const unicodeEmojis = graphemes.filter(g => /\p{Emoji_Presentation}|\p{Extended_Pictographic}|\p{Emoji}\uFE0F/u.test(g));
+                
+                // 重複を除外して最大3つ取得
+                const emojis = Array.from(new Set([...customEmojis, ...unicodeEmojis])).slice(0, 3);
                 
                 let reacted = false;
                 for (const emj of emojis) {
