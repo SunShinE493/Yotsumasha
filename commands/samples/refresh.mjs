@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import axios from 'axios';
 
 export const data = new SlashCommandBuilder()
-  .setName('rateLimit')
+  .setName('ratelimit')
   .setDescription('GitRateLimit')
   .addIntegerOption(option =>
     option.setName('password')
