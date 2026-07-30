@@ -253,8 +253,10 @@ export async function execute(interaction) {
                 const emojis = Array.from(new Set([...customEmojis, ...unicodeEmojis])).slice(0, 3);
 
                 let reacted = false;
-                for (const emj of emojis) {
+                for (let emj of emojis) {
                     try {
+                        // Discord APIは本来不要な異体字セレクタ(U+FE0F)がついているとエラーを返すため削除する
+                        emj = emj.replace(/\uFE0F/g, '');
                         await targetMessage.react(emj);
                         reacted = true;
                     } catch (e) {
