@@ -236,6 +236,8 @@ export async function execute(interaction) {
                     messages: [{ role: 'user', content: prompt }],
                 });
                 
+                const text = response.choices[0]?.message?.content?.trim() || '';
+                
                 // カスタム絵文字を抽出
                 const customEmojis = text.match(/<a?:[a-zA-Z0-9_]+:\d+>/g) || [];
                 const remainingText = text.replace(/<a?:[a-zA-Z0-9_]+:\d+>/g, '');
