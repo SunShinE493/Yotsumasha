@@ -992,7 +992,7 @@ async function runai(content, message, aisikibetsu) {
 
     try {
       const completion = await lai.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "qwen/qwen3.6-27b",
         messages: [
           { role: "user", content: talk + "（##回答の内容は短く簡潔に。）" }
         ],
@@ -1032,7 +1032,7 @@ async function runai(content, message, aisikibetsu) {
       textContent += discordCulture;
 
       const stream = await lai.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "qwen/qwen3.6-27b",
         messages: [
           { role: "user", content: textContent }
         ],
@@ -1116,7 +1116,7 @@ async function extractWordListJson(text) {
     `;
 
     const completion = await lai.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "qwen/qwen3.6-27b",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.1, // 確実性を高める
       stream: false,
@@ -1212,7 +1212,7 @@ async function extractScheduleJson(text, message) {
     `;
 
     const completion = await lai.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "qwen/qwen3.6-27b",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.1,
       stream: false,
