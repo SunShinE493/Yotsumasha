@@ -34,7 +34,7 @@ export async function execute(interaction) {
         const prompt = `以下のメッセージに対する最適なリアクション絵文字（標準のUnicode絵文字）を厳選して3つ選んでください。他のテキストは一切含めず、絵文字のみをスペース区切りで出力してください。\n\nメッセージ: ${targetMessage.content}`;
         
         const response = await ai.chat.completions.create({
-            model: 'llama-3.3-70b-versatile',
+            model: 'gpt-oss-20b',
             messages: [{ role: 'user', content: prompt }],
         });
         
