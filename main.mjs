@@ -992,7 +992,7 @@ async function runai(content, message, aisikibetsu) {
 
     try {
       const completion = await lai.chat.completions.create({
-        model: "qwen/qwen3.6-27b",
+        model: "gpt-oss-20b",
         messages: [
           { role: "user", content: talk + "（##回答の内容は短く簡潔に。）" }
         ],
