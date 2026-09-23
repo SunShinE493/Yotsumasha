@@ -1255,19 +1255,25 @@ async function runai(content, message, aisikibetsu) {
     }
     max = 1000;
 
-    const chat = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
-      contents: talk + "（##回答の内容は短く簡潔に。）",
-      config: {
-        maxOutputTokens: 1800,
-      },
-    })
-    console.log(chat.text);
-    if (chat.text !== undefined) {
-      await message.channel.send(chat.text);
-    } else {
-      await message.channel.send("字数エラー");
-      console.log("字数エラー");
+    try {
+      const chat = await ai.models.generateContent({
+        model: "gemini-2.0-flash-exp",
+        contents: talk + "（##回答の内容は短く簡潔に。）",
+        config: {
+          maxOutputTokens: 1800,
+        },
+      })
+      console.log(chat.text);
+      if (chat.text !== undefined) {
+        await message.channel.send(chat.text);
+      } else {
+        await message.channel.send("字数エラー");
+        console.log("字数エラー");
+      }
+    } catch (error) {
+      console.error('Gemini APIからの応答中にエラーが発生しました:', error);
+      const errorMessageFirstLine = String(error).split('\n')[0];
+      await message.channel.send(`Gemini APIからの応答中にエラーが発生しました。\n\`${errorMessageFirstLine}\``);
     }
   } else if (aisikibetsu === 1) {
     if (!ai) {
@@ -1328,26 +1334,30 @@ async function runai(content, message, aisikibetsu) {
       }
     } catch (error) {
       console.error('Gemini APIからの応答中にエラーが発生しました:', error);
-      message.reply('Gemini APIからの応答中にエラーが発生しました。');
+      const errorMessageFirstLine = String(error).split('\n')[0];
+      message.reply(`Gemini APIからの応答中にエラーが発生しました。\n\`${errorMessageFirstLine}\``);
     }
   } else if (aisikibetsu === 2) {
 
 
 
-    // Gemini APIにストリーミングリクエストを送信
-    const result = await model.generateContentStream({ contents: [{ role: 'user', parts }] });
+    try {
+      // Gemini APIにストリーミングリクエストを送信
+      const result = await model.generateContentStream({ contents: [{ role: 'user', parts }] });
 
-    let fullText = '';
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      fullText += chunkText;
+      let fullText = '';
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        fullText += chunkText;
 
-      // 最初のメッセージを編集して、回答を追記
-      await message.edit(fullText);
+        // 最初のメッセージを編集して、回答を追記
+        await message.edit(fullText);
+      }
+    } catch (error) {
+      console.error('Gemini APIからの応答中にエラーが発生しました:', error);
+      const errorMessageFirstLine = String(error).split('\n')[0];
+      await message.channel.send(`Gemini APIからの応答中にエラーが発生しました。\n\`${errorMessageFirstLine}\``);
     }
-
-
-  }
 }
 
 */
