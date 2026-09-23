@@ -248,7 +248,7 @@ export async function execute(interaction) {
 
                 // 絵文字の性質を持つ書記素のみをフィルタリング
                 const unicodeEmojis = graphemes.filter(g => /\p{Emoji_Presentation}|\p{Extended_Pictographic}|\p{Emoji}\uFE0F/u.test(g));
-
+s
                 // 重複を除外して最大3つ取得
                 const emojis = Array.from(new Set([...customEmojis, ...unicodeEmojis])).slice(0, 3);
 
